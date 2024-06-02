@@ -483,29 +483,22 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-pets.compile', async () => {
+            const code = getEditorText();
+            let codeText = "";
+            if (code !== undefined) {
+                codeText = code;
+            }
             doCompile()?.then(compileResult => {
                 //console.log("Compile result is ", compileResult);
                 const panel = getPetPanel();
                 if (panel !== undefined) {
-                    panel.handleCompileResult(compileResult);
+                    panel.handleCompileResult(compileResult, codeText);
                 }
             }).catch(err => {
                 console.log(err);
             });
         }),
     );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand('vscode-pets.get-code-text', async () => {
-            const text = getEditorText();
-            if (text !== undefined) {
-                const panel = getPetPanel();
-                if (panel !== undefined) {
-                    panel.handleGetCodeTextResult(text);
-                }
-            }
-        }),
-    )
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-pets.roll-call', async () => {
@@ -857,8 +850,7 @@ interface IPetPanel {
     setThrowWithMouse(newThrowWithMouse: boolean): void;
     updateExperience(difference: number): void;
     updateHealth(difference: number): void;
-    handleGetCodeTextResult(text: string): void;
-    handleCompileResult(result: number): void;
+    handleCompileResult(result: number, code: string): void;
     updateHealthTimer(timer: Date): void;
 }
 
@@ -997,12 +989,8 @@ class PetWebviewContainer implements IPetPanel {
 
     }
 
-    public handleCompileResult(result: number): void {
-        void this.getWebview().postMessage({ command: 'handle-compile-result', result: result });
-    }
-
-    public handleGetCodeTextResult(text: string): void {
-        void this.getWebview().postMessage({ command: 'handle-code-text-result', result: text });
+    public handleCompileResult(result: number, code: string): void {
+        void this.getWebview().postMessage({ command: 'handle-compile-result', result: result, code: code });
     }
 
     protected getWebview(): vscode.Webview {

@@ -473,10 +473,10 @@ export abstract class BasePetType implements IPetType {
         }
     }
 
-    async onCompilationError() {
+    async onCompilationError(code: string) {
         let returnMsg = "";
         try {
-            const msg = await getRandomCommentWhenCompilationError();
+            const msg = await getRandomCommentWhenCompilationError(code);
             this.showSpeechBubble(msg, 2000);
             returnMsg = "(Compilation Failed) " + msg;
         } catch (err) {
@@ -485,10 +485,10 @@ export abstract class BasePetType implements IPetType {
         return returnMsg;
     }
 
-    async onCompilationSuccess() {
+    async onCompilationSuccess(code: string) {
         let returnMsg = "";
         try {
-            const msg = await getRandomCommentWhenCompilationSuccess();
+            const msg = await getRandomCommentWhenCompilationSuccess(code);
             this.showSpeechBubble(msg, 2000);
             returnMsg = "(Compilation Succeeded) " + msg;
         } catch (err) {

@@ -46,7 +46,7 @@ export async function getRandomCommentWhenLowHealth() {
     }
 }
 
-export async function getRandomCommentWhenCompilationError() {
+export async function getRandomCommentWhenCompilationError(code: string) {
     const encouragementMessages = [
         `Don't worry, we can fix this! 🛠️`,
         `Errors are steps to success! 🚀`,
@@ -61,8 +61,10 @@ export async function getRandomCommentWhenCompilationError() {
     ];
     let prompt = "You are a virtual pet for students to learn programming. You should talk in a cute way and give the student emotional support and encouragement. Please keep your response within 20 words.";
     prompt += `The student just had a compilation error. Please give the student some positive feedback.`;
+    prompt += `Here is the student's code: ${code}. The student may ask you about the code, but please do not provide solutions directly. Please give indirect hints, such as where to look for the bugs.`;
     const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
     const aiMessage = await getMessageFromAI(prompt);
+    console.log(prompt);
     if (aiMessage === "") {
         return randomMessage;
     } else {
@@ -70,7 +72,7 @@ export async function getRandomCommentWhenCompilationError() {
     }
 }
 
-export async function getRandomCommentWhenCompilationSuccess() {
+export async function getRandomCommentWhenCompilationSuccess(code: string) {
     const encouragementMessages = [
         `Great job! 🎉`,
         `You did it! 🚀`,
@@ -85,6 +87,7 @@ export async function getRandomCommentWhenCompilationSuccess() {
     ];
     let prompt = "You are a virtual pet for students to learn programming. You should talk in a cute way and give the student emotional support and encouragement. Please keep your response within 20 words.";
     prompt += `The student just succeeded in compiling his code. Please give the student some positive feedback.`;
+    prompt += `Here is the student's code: ${code}. The student may ask you about the code, but please do not provide solutions directly. Please give indirect hints, such as where to improve.`;
     const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
     const aiMessage = await getMessageFromAI(prompt);
     if (aiMessage === "") {

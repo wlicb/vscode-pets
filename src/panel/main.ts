@@ -708,11 +708,12 @@ export function petPanelApp(
                 break;
             case 'handle-compile-result':
                 var pets = allPets.pets;
-                var result = message.result;
-                var randomPet = pets[Math.floor(Math.random() * pets.length)];
+                const result = message.result;
+                const code = message.code;
+                const randomPet = pets[Math.floor(Math.random() * pets.length)];
                 
                 if (result === 0) {
-                    randomPet.pet.onCompilationSuccess().then(msg => {
+                    randomPet.pet.onCompilationSuccess(code).then(msg => {
                         if (msg !== "") {
                             displayMessage("", msg);
                             storeMessage("", msg);
@@ -731,7 +732,7 @@ export function petPanelApp(
                         });;
                     });
                 } else {
-                    randomPet.pet.onCompilationError().then(msg => {
+                    randomPet.pet.onCompilationError(code).then(msg => {
                         if (msg !== "") {
                             displayMessage("", msg);
                             storeMessage("", msg);

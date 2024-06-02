@@ -46,8 +46,8 @@ export interface IPetType {
     setExperience(value: number, showMessage: boolean): Promise<string>;
     setLevel(value: number): void;
 
-    onCompilationError(): Promise<string>;
-    onCompilationSuccess(): Promise<string>;
+    onCompilationError(code: string): Promise<string>;
+    onCompilationSuccess(code: string): Promise<string>;
 
 
     showSpeechBubble(message: string, duration: number): void;
