@@ -52,6 +52,7 @@ function countLinesInEditor() {
     }
 }
 
+
 function sumLineCounts(lineCounts: { [key: string]: number }): number {
     return Object.values(lineCounts).reduce((sum, count) => sum + count, 0);
 }
@@ -82,4 +83,9 @@ export function updateCount() {
     } else {
         return 0;
     }
+}
+
+export function getEditorText() {
+    const editor = vscode.window.activeTextEditor;
+    return editor?.document.getText();
 }

@@ -15,7 +15,7 @@ import {
 import { randomName } from '../common/names';
 import * as localize from '../common/localize';
 import { availableColors, normalizeColor } from '../panel/pets';
-import { updateCount } from '../common/codeLine';
+import { updateCount, getEditorText } from '../common/codeLine';
 import { updateTimer, computeTimeDifference } from '../common/healthTimer';
 import { doCompile } from '../common/compile';
 
@@ -27,13 +27,13 @@ const EXTRA_PETS_KEY_XPS = EXTRA_PETS_KEY + '.experiences';
 const EXTRA_PETS_KEY_HPS = EXTRA_PETS_KEY + '.healths';
 const EXTRA_PETS_KEY_TARS = EXTRA_PETS_KEY + '.next-targets';
 const EXTRA_PETS_KEY_LEVELS = EXTRA_PETS_KEY + '.levels';
-const DEFAULT_PET_SCALE = PetSize.nano;
-const DEFAULT_COLOR = PetColor.brown;
-const DEFAULT_PET_TYPE = PetType.cat;
+const DEFAULT_PET_SCALE = PetSize.medium;
+const DEFAULT_COLOR = PetColor.akita;
+const DEFAULT_PET_TYPE = PetType.dog;
 const DEFAULT_POSITION = ExtPosition.panel;
 const DEFAULT_THEME = Theme.none;
 
-const UPDATE_HEALTH_THRES = 1;
+const UPDATE_HEALTH_THRES = 45;
 
 class PetQuickPickItem implements vscode.QuickPickItem {
     constructor(
@@ -460,10 +460,11 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-pets.update-health-timer', async () => {
-            updateTimer();
+            const timer = updateTimer();
             const panel = getPetPanel();
                 if (panel !== undefined) {
                     panel.updateHealth(2);
+                    panel.updateHealthTimer(timer);
                 }
         }),
     );
@@ -482,11 +483,16 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-pets.compile', async () => {
+            const code = getEditorText();
+            let codeText = "";
+            if (code !== undefined) {
+                codeText = code;
+            }
             doCompile()?.then(compileResult => {
                 //console.log("Compile result is ", compileResult);
                 const panel = getPetPanel();
                 if (panel !== undefined) {
-                    panel.handleCompileResult(compileResult);
+                    panel.handleCompileResult(compileResult, codeText);
                 }
             }).catch(err => {
                 console.log(err);
@@ -774,12 +780,6 @@ export function activate(context: vscode.ExtensionContext) {
             },
         });
     }
-    // Try to send the message here.
-    const diff = computeTimeDifference();
-    // console.log("Making initial update now ", diff, -diff / UPDATE_HEALTH_THRES);
-    setTimeout(() => {
-        getPetPanel()?.updateHealth(-diff / UPDATE_HEALTH_THRES);
-    }, 500);
 
 
     setInterval(async () => {
@@ -790,8 +790,9 @@ export function activate(context: vscode.ExtensionContext) {
         await vscode.commands.executeCommand('vscode-pets.update-health');
     }, UPDATE_HEALTH_THRES * 60000);
 
+
     let canExecute = true;
-    const TIME_INTERVAL = 10 * 1000; // 15 minutes in milliseconds
+    const TIME_INTERVAL = 3 * 10 * 1000; // 3 minutes in milliseconds
     
     vscode.workspace.onDidChangeTextDocument(async event => {
         if (canExecute && event.contentChanges.length > 0) {
@@ -849,7 +850,8 @@ interface IPetPanel {
     setThrowWithMouse(newThrowWithMouse: boolean): void;
     updateExperience(difference: number): void;
     updateHealth(difference: number): void;
-    handleCompileResult(result: number): void;
+    handleCompileResult(result: number, code: string): void;
+    updateHealthTimer(timer: Date): void;
 }
 
 class PetWebviewContainer implements IPetPanel {
@@ -947,6 +949,10 @@ class PetWebviewContainer implements IPetPanel {
             type: spec.type,
             color: spec.color,
             name: spec.name,
+            experience: spec.experience,
+            nextTarget: spec.nextTarget,
+            level: spec.level,
+            health: spec.health,
         });
         void this.getWebview().postMessage({
             command: 'set-size',
@@ -974,11 +980,17 @@ class PetWebviewContainer implements IPetPanel {
     }
 
     public updateHealth(difference: number): void {
+        console.log("updating health");
         void this.getWebview().postMessage({ command: 'update-health', diff: difference });
     }
 
-    public handleCompileResult(result: number): void {
-        void this.getWebview().postMessage({ command: 'handle-compile-result', result: result });
+    public updateHealthTimer(timer: Date): void {
+        void this.getWebview().postMessage({ command: 'update-health-timer', timer: timer });
+
+    }
+
+    public handleCompileResult(result: number, code: string): void {
+        void this.getWebview().postMessage({ command: 'handle-compile-result', result: result, code: code });
     }
 
     protected getWebview(): vscode.Webview {
@@ -1054,7 +1066,7 @@ class PetWebviewContainer implements IPetPanel {
             webview.cspSource
         } https:; script-src 'nonce-${nonce}';
                 font-src ${webview.cspSource};
-                connect-src 'self' https://api.openai.com;">
+                connect-src 'self' https://api.openai.com https://generativelanguage.googleapis.com">
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 				<link href="${stylesResetUri}" rel="stylesheet" nonce="${nonce}">
 				<link href="${stylesMainUri}" rel="stylesheet" nonce="${nonce}">
@@ -1073,7 +1085,10 @@ class PetWebviewContainer implements IPetPanel {
                 <div id="foreground">                
                     <div id="control-container">
                         <button id="compile-button">Compile!</button>
-                        <button id="chat-button" disabled>Chat!</button>
+                        <div id="chat-button-container">
+                            <button id="chat-button">💬</button>
+                            <span id="notification-badge">0</span>
+                        </div>
                     </div>
                     <div id="status-container">
                         <div id="name-level" class="bar-container">
@@ -1087,7 +1102,7 @@ class PetWebviewContainer implements IPetPanel {
                             </div>
                             <div id="health-value" class="status-text">100/100</div>
                         </div>
-                        <div id="health-container" class="bar-container">
+                        <div id="experience-container" class="bar-container">
                             <div id="experience-title" class="status-text">Experience</div>
                             <div id="experience" class="bar-box">
                                 <div id="experience-bar" class="bar"></div>
@@ -1104,6 +1119,7 @@ class PetWebviewContainer implements IPetPanel {
                         </div>
                     </div>	
                 </div>
+
                 <script nonce="${nonce}" src="${scriptUri}"></script>
                 <script nonce="${nonce}">petApp.petPanelApp("${basePetUri}", "${this.theme()}", ${this.themeKind()}, "${this.petColor()}", "${this.petSize()}", "${this.petType()}", ${this.throwBallWithMouse()});</script>
             </body>
@@ -1122,6 +1138,8 @@ function handleWebviewMessage(message: WebviewMessage) {
         case 'run-compile':
             void vscode.commands.executeCommand('vscode-pets.compile');
             return;
+        case 'get-code-text':
+            void vscode.commands.executeCommand('vscode-pets.get-code-text');
     }
 }
 

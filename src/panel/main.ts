@@ -18,8 +18,9 @@ import {
     InvalidPetException,
 } from './pets';
 import { BallState, PetElementState, PetPanelState } from './states';
-import { checkVisiblityAndName, hideBar, showBar, updateBar } from './bar';
-import { hideChatbox, showChatbox, checkChatboxVisiblityAndName } from './chat';
+import { showBar, hideBar, updateBar } from './bar';
+import { hideChatbox, showChatbox, displayMessage, storeMessage, setBadge } from './chat';
+// import { computeTimeDifference } from '../common/healthTimer';
 
 /* This is how the VS Code API can be invoked from the panel */
 declare global {
@@ -31,8 +32,11 @@ declare global {
     function acquireVsCodeApi(): VscodeStateApi;
 }
 
+const UPDATE_HEALTH_THRES = 45;
+
 export var allPets: IPetCollection = new PetCollection();
 var petCounter: number;
+var currentTimer: Date;
 
 function calculateBallRadius(size: PetSize): number {
     if (size === PetSize.nano) {
@@ -107,30 +111,6 @@ function handleMouseLeave() {
     //hideBar();
 }
 
-function handleClick(e: MouseEvent) {
-    var el = e.currentTarget as HTMLDivElement;
-    let isPetClicked = false;
-    const chatButton = document.getElementById("chat-button") as HTMLButtonElement;
-    allPets.pets.forEach((element) => {
-        if (element.collision === el) {
-            isPetClicked = true;
-            showBar(
-                element.pet.name, 
-                element.getLevel(), 
-                element.getExperience(), 
-                element.getNextTarget(), 
-                element.getHealth()
-            );
-            if (chatButton) {
-                chatButton.disabled = false;
-            }
-        }
-    });
-
-    if (!isPetClicked) {
-        hideBar(); 
-    }
-}
 
 
 function startAnimations(
@@ -144,7 +124,6 @@ function startAnimations(
 
     collision.addEventListener('mouseover', handleMouseOver);
     collision.addEventListener('mouseleave', handleMouseLeave);
-    collision.addEventListener("click", handleClick);
 
 
     document.addEventListener('click', function(e) {
@@ -171,17 +150,13 @@ function startAnimations(
                 } else if (e.target === chatButton) {
                     const nameEm = document.getElementById("name");
                     if (nameEm) {
-                        showChatbox(nameEm.innerHTML);
+                        showChatbox(nameEm.innerHTML, findPetType(nameEm.innerHTML));
+                        setBadge(-1);
                     }
                 } else {
                     const target = e.target as Node;
                     if (chatbox === null || !chatbox.contains(target)) {
-                        hideBar();
-                        hideChatbox();                        
-                        const chatButton = document.getElementById("chat-button") as HTMLButtonElement;
-                        if (chatButton) {
-                            chatButton.disabled = true;
-                        }
+                        hideChatbox();
                     }
                 }
             } else {
@@ -203,6 +178,16 @@ function startAnimations(
     }, 100);
 }
 
+// Find the pet type based on its name
+function findPetType(name: string) {
+    for (let i = 0; i < allPets.pets.length; i++) {
+        if (allPets.pets[i].pet.name === name) {
+            return allPets.pets[i].type;
+        }
+    }
+    return "";
+}
+
 function addPetToPanel(
     petType: PetType,
     basePetUri: string,
@@ -213,9 +198,9 @@ function addPetToPanel(
     floor: number,
     name: string,
     experience: number,
-    health: number,
     nextTarget: number,
     level: number,
+    health: number,
     stateApi?: VscodeStateApi,
 ): PetElement {
     var petSpriteElement: HTMLImageElement = document.createElement('img');
@@ -254,6 +239,10 @@ function addPetToPanel(
             root,
             floor,
             name,
+            experience,
+            nextTarget,
+            level,
+            health
         );
         petCounter++;
         startAnimations(collisionElement, newPet, stateApi);
@@ -271,11 +260,7 @@ function addPetToPanel(
         speechBubbleElement,
         newPet,
         petColor,
-        petType,
-        experience,
-        health,
-        nextTarget,
-        level
+        petType
     );
 
     return petEm;
@@ -288,6 +273,7 @@ export function saveState(stateApi?: VscodeStateApi) {
     var state = new PetPanelState();
     state.petStates = new Array();
 
+
     allPets.pets.forEach((petItem) => {
         state.petStates?.push({
             petName: petItem.pet.name,
@@ -297,13 +283,14 @@ export function saveState(stateApi?: VscodeStateApi) {
             petFriend: petItem.pet.friend?.name ?? undefined,
             elLeft: petItem.el.style.left,
             elBottom: petItem.el.style.bottom,
-            petExperience: petItem.getExperience(),
-            petHealth: petItem.getHealth(),
-            petNextTarget: petItem.getNextTarget(),
-            petLevel: petItem.getLevel(),
+            petExperience: petItem.pet.getExperience(),
+            petNextTarget: petItem.pet.getNextTarget(),
+            petLevel: petItem.pet.getLevel(),
+            petHealth: petItem.pet.getHealth(),
         });
     });
     state.petCounter = petCounter;
+    state.healthTimer = currentTimer;
     stateApi?.setState(state);
 }
 
@@ -325,31 +312,45 @@ function recoverState(
         } else {
             petCounter = state.petCounter ?? 1;
         }
+        if (state.healthTimer !== undefined) {
+            currentTimer = new Date(state.healthTimer);
+        } else {
+            currentTimer = new Date();
+        }
     }
-
     var recoveryMap: Map<IPetType, PetElementState> = new Map();
     state?.petStates?.forEach((p) => {
         // Fixes a bug related to duck animations
         if ((p.petType as string) === 'rubber duck') {
             (p.petType as string) = 'rubber-duck';
         }
-
+        const now = new Date();
+        console.log(typeof(currentTimer));
+        const differenceInMilliseconds = now.getTime() - currentTimer.getTime();
+        const diff = Math.floor(differenceInMilliseconds / (1000 * 60));
+        const healthUpdateValue = -Math.floor(diff / UPDATE_HEALTH_THRES);
+        console.log(healthUpdateValue);
         try {
             var newPet = addPetToPanel(
-                p.petType ?? PetType.cat,
+                p.petType ?? PetType.dog,
                 basePetUri,
-                p.petColor ?? PetColor.brown,
+                p.petColor ?? PetColor.akita,
                 petSize,
                 parseInt(p.elLeft ?? '0'),
                 parseInt(p.elBottom ?? '0'),
                 floor,
-                p.petName ?? randomName(p.petType ?? PetType.cat),
-                p.petExperience,
-                p.petHealth,
-                p.petNextTarget,
-                p.petLevel,
+                p.petName ?? randomName(p.petType ?? PetType.dog),
+                p.petExperience, p.petNextTarget, p.petLevel, p.petHealth,
                 stateApi,
             );
+            newPet.pet.setHealth(newPet.pet.getHealth() + healthUpdateValue, true).then(msg => {
+                if (msg !== "") {
+                    displayMessage("", msg);
+                    storeMessage("", msg);
+                }
+            }).catch(err => {
+                console.log(err);
+            });;
             allPets.push(newPet);
             recoveryMap.set(newPet.pet, p);
         } catch (InvalidPetException) {
@@ -404,10 +405,6 @@ export function petPanelApp(
     petColor: PetColor,
     petSize: PetSize,
     petType: PetType,
-    petExperience: number,
-    petHealth: number,
-    petNextTarget: number,
-    petLevel: number,
     throwBallWithMouse: boolean,
     stateApi?: VscodeStateApi,
 ) {
@@ -481,11 +478,6 @@ export function petPanelApp(
             startMouseY = e.clientY;
             ballState = new BallState(e.clientX, e.clientY, 0, 0);
 
-            allPets.pets.forEach((petEl) => {
-                if (petEl.pet.canChase) {
-                    petEl.pet.chase(ballState, canvas);
-                }
-            });
             ballState.paused = true;
 
             drawBall();
@@ -513,11 +505,6 @@ export function petPanelApp(
                     endMouseX - startMouseX,
                     endMouseY - startMouseY,
                 );
-                allPets.pets.forEach((petEl) => {
-                    if (petEl.pet.canChase) {
-                        petEl.pet.chase(ballState, canvas);
-                    }
-                });
                 throwBall();
             };
         };
@@ -589,6 +576,8 @@ export function petPanelApp(
     // New session
     var state = stateApi?.getState();
 
+    
+
     // Handle messages sent from the extension to the webview
     window.addEventListener('message', (event): void => {
         const message = event.data; // The json data that the extension sent
@@ -603,26 +592,27 @@ export function petPanelApp(
             case 'throw-ball':
                 resetBall();
                 throwBall();
-                allPets.pets.forEach((petEl) => {
-                    if (petEl.pet.canChase) {
-                        petEl.pet.chase(ballState, canvas);
-                    }
-                });
                 break;
             case 'spawn-pet':
+                const newPet = addPetToPanel(
+                    message.type,
+                    basePetUri,
+                    message.color,
+                    petSize,
+                    randomStartPosition(),
+                    floor,
+                    floor,
+                    message.name ?? randomName(message.type),
+                    message.experience,
+                    message.nextTarget,
+                    message.level,
+                    message.health,
+                    stateApi,
+                );
+                console.log(JSON.stringify(message));
+                showBar(newPet.pet.name, newPet.pet.getLevel(), newPet.pet.getExperience(), newPet.pet.getNextTarget(), newPet.pet.getHealth());
                 allPets.push(
-                    addPetToPanel(
-                        message.type,
-                        basePetUri,
-                        message.color,
-                        petSize,
-                        randomStartPosition(),
-                        floor,
-                        floor,
-                        message.name ?? randomName(message.type),
-                        0, 100, 100, 1,
-                        stateApi,
-                    ),
+                    newPet
                 );
                 saveState(stateApi);
                 break;
@@ -633,7 +623,7 @@ export function petPanelApp(
                     command: 'list-pets',
                     text: pets
                         .map(
-                            (pet) => `${pet.type},${pet.pet.name},${pet.color},${pet.getExperience()},${pet.getHealth()},${pet.getNextTarget()},${pet.getLevel()}`,
+                            (pet) => `${pet.type},${pet.pet.name},${pet.color},${pet.pet.getExperience()},${pet.pet.getHealth()},${pet.pet.getNextTarget()},${pet.pet.getLevel()}`,
                         )
                         .join('\n'),
                 });
@@ -659,23 +649,15 @@ export function petPanelApp(
                         text: '👋 Removed pet ' + message.name,
                     });
 
-                    // Hide the bar if it is being shown for the removed pet
-                    if (checkVisiblityAndName(message.name)) {
-                        hideBar();
-                    }
-                    if (checkChatboxVisiblityAndName(message.name)) {
-                        hideChatbox();
-                        const chatButton = document.getElementById("chat-button") as HTMLButtonElement;
-                        if (chatButton) {
-                            chatButton.disabled = true;
-                        }
-                    }
+                    // Hide the chat box if it is being shown for the removed pet
+                    hideChatbox();
                 } else {
                     stateApi?.postMessage({
                         command: 'error',
                         text: `Could not find pet ${message.name}`,
                     });
                 }
+                hideBar();
                 break;
             case 'reset-pet':
                 allPets.reset();
@@ -690,33 +672,78 @@ export function petPanelApp(
                 var pets = allPets.pets;
                 var diff = message.diff;
                 pets.forEach((pet) => {
-                    pet.setExperience(pet.getExperience() + diff, true);
-                    updateBar(pet.pet.name, pet.getLevel(), pet.getExperience(), pet.getNextTarget(), pet.getHealth());
+                    pet.pet.setExperience(pet.pet.getExperience() + diff, true).then(msg => {
+                        if (msg !== "") {
+                            displayMessage("", msg);
+                            storeMessage("", msg);
+                        }
+                    }).catch(err => {
+                        console.log(err);
+                    });
+                    updateBar(pet.pet.name, pet.pet.getLevel(), pet.pet.getExperience(), pet.pet.getNextTarget(), pet.pet.getHealth());
                 });
+                saveState(stateApi);
                 break;
             case 'update-health':
                 var pets = allPets.pets;
                 var diff = message.diff;
                 pets.forEach((pet) => {
-                    pet.setHealth(pet.getHealth() + diff);
-                    updateBar(pet.pet.name, pet.getLevel(), pet.getExperience(), pet.getNextTarget(), pet.getHealth());
+                    pet.pet.setHealth(pet.pet.getHealth() + diff, false).then(msg => {
+                        if (msg !== "") {
+                            displayMessage("", msg);
+                            storeMessage("", msg);
+                        }
+                    }).catch(err => {
+                        console.log(err);
+                    });;
+                    updateBar(pet.pet.name, pet.pet.getLevel(), pet.pet.getExperience(), pet.pet.getNextTarget(), pet.pet.getHealth());
                 });
+                saveState(stateApi);
                 //console.log("Updating health");
                 break;
             case 'handle-compile-result':
                 var pets = allPets.pets;
-                var result = message.result;
-                var randomPet = pets[Math.floor(Math.random() * pets.length)];
+                const result = message.result;
+                const code = message.code;
+                const randomPet = pets[Math.floor(Math.random() * pets.length)];
                 
                 if (result === 0) {
-                    randomPet.onCompilationSuccess();
+                    randomPet.pet.onCompilationSuccess(code).then(msg => {
+                        if (msg !== "") {
+                            displayMessage("", msg);
+                            storeMessage("", msg);
+                        }
+                    }).catch(err => {
+                        console.log(err);
+                    });
                     allPets.pets.forEach(pet => {
-                        pet.setExperience(pet.getExperience() + 5, false);
-                    })
+                        pet.pet.setExperience(pet.pet.getExperience() + 5, false).then(msg => {
+                            if (msg !== "") {
+                                displayMessage("", msg);
+                                storeMessage("", msg);
+                            }
+                        }).catch(err => {
+                            console.log(err);
+                        });;
+                    });
                 } else {
-                    randomPet.onCompilationError();
+                    randomPet.pet.onCompilationError(code).then(msg => {
+                        if (msg !== "") {
+                            displayMessage("", msg);
+                            storeMessage("", msg);
+                        }
+                    }).catch(err => {
+                        console.log(err);
+                    });
                 }
                 break;
+            case 'handle-code-text-result':
+                break;
+            case 'update-health-timer':
+                const timer = message.timer;
+                currentTimer = timer;
+                saveState(stateApi);
+
         }
     });
 
@@ -733,10 +760,7 @@ export function petPanelApp(
                 floor,
                 floor,
                 randomName(petType),
-                petExperience,
-                petHealth,
-                petNextTarget,
-                petLevel,
+                0, 100, 1, 100,
                 stateApi,
             ),
         );
@@ -744,6 +768,10 @@ export function petPanelApp(
     } else {
         console.log('Recovering state - ', state);
         recoverState(basePetUri, petSize, floor, stateApi);
+        const currentPet = allPets.pets[0];
+        console.log(allPets);
+        showBar(currentPet.pet.name, currentPet.pet.getLevel(), currentPet.pet.getExperience(), currentPet.pet.getNextTarget(), currentPet.pet.getHealth());
+
     }
 
     initCanvas();
@@ -758,4 +786,3 @@ export function petPanelApp(
 window.addEventListener('resize', function () {
     initCanvas();
 });
-

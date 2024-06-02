@@ -31,8 +31,9 @@ img {
 
 #control-container {
 	display: flex;
-    gap: 10px;
-    width: 100%;
+  gap: 10px;
+  width: 100%;
+  justify-content: flex-end;
 }
 
 button {
@@ -43,6 +44,17 @@ button {
     padding: 10px 20px;
     border-radius: 5px;
     transition: background-color 0.3s, border-color 0.3s;
+}
+
+#chat-button {
+  width: 30px;
+  height: 30px;
+  
+}
+
+#compile-button {
+  width: 85px;
+  height: 30px;
 }
 
 button:hover:not(:disabled) {
@@ -56,6 +68,22 @@ button[disabled] {
     color: #666666;
     cursor: not-allowed;
     pointer-events: none;
+}
+
+#notification-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: red;
+  color: white;
+  border-radius: 50%;
+  padding: 5px;
+  font-size: 12px;
+  width: 20px;
+  height: 20px;
+  display: none; /* flex */
+  justify-content: center;
+  align-items: center;
 }
 
 #chatbox {

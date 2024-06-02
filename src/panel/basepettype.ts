@@ -7,11 +7,14 @@ import {
     resolveState,
     PetInstanceState,
     isStateAboveGround,
-    BallState,
-    ChaseState,
     HorizontalDirection,
     FrameResult,
 } from './states';
+
+import { getRandomCommentWhenLevelUp, getRandomCommentWhenLowHealth, 
+    getRandomCommentWhenCompilationError, getRandomCommentWhenCompilationSuccess,
+    getRandomCommentWhenHealthDecrease, getRandomCommentWhenSessionStarted } from '../common/comments';
+
 
 export class InvalidStateError extends Error {
     fromState: States;
@@ -24,11 +27,15 @@ export class InvalidStateError extends Error {
     }
 }
 
+const LOW_LEVEL_CUT_OFF = 3;
+const MID_LEVEL_CUT_OFF = 7;
+const LOW_HEALTH_CUT_OFF = 10;
+
 export abstract class BasePetType implements IPetType {
     label: string = 'base';
     static count: number = 0;
     sequence: ISequenceTree = {
-        startingState: States.sitIdle,
+        startingState: States.sitIdleL,
         sequenceStates: [],
     };
     static possibleColors: PetColor[];
@@ -47,6 +54,10 @@ export abstract class BasePetType implements IPetType {
     private _name: string;
     private _speed: number;
     private _size: PetSize;
+    experience: number;
+    level: number;
+    nextTarget: number;
+    health: number;
 
     constructor(
         spriteElement: HTMLImageElement,
@@ -58,6 +69,10 @@ export abstract class BasePetType implements IPetType {
         petRoot: string,
         floor: number,
         name: string,
+        experience: number,
+        nextTarget: number,
+        level: number,
+        health: number,
         speed: number,
     ) {
         this.el = spriteElement;
@@ -74,6 +89,11 @@ export abstract class BasePetType implements IPetType {
         this._name = name;
         this._size = size;
         this._speed = this.randomizeSpeed(speed);
+
+        this.experience = experience;
+        this.nextTarget = nextTarget;
+        this.level = level;
+        this.health = health;
 
         // Increment the static count of the Pet class that the constructor belongs to
         (this.constructor as any).count += 1;
@@ -180,7 +200,7 @@ export abstract class BasePetType implements IPetType {
     recoverState(state: PetInstanceState) {
         // TODO : Resolve a bug where if it was swiping before, it would fail
         // because holdState is no longer valid.
-        this.currentStateEnum = state.currentStateEnum ?? States.sitIdle;
+        this.currentStateEnum = state.currentStateEnum ?? States.sitIdleL;
         this.currentState = resolveState(this.currentStateEnum, this);
 
         if (!isStateAboveGround(this.currentStateEnum)) {
@@ -211,19 +231,37 @@ export abstract class BasePetType implements IPetType {
     }
 
     swipe() {
-        if (this.currentStateEnum === States.swipe) {
+        if (this.health <= LOW_HEALTH_CUT_OFF) {
             return;
         }
-        this.holdState = this.currentState;
-        this.holdStateEnum = this.currentStateEnum;
-        this.currentStateEnum = States.swipe;
-        this.currentState = resolveState(this.currentStateEnum, this);
-        this.showSpeechBubble('👋');
-    }
-
-    chase(ballState: BallState, canvas: HTMLCanvasElement) {
-        this.currentStateEnum = States.chase;
-        this.currentState = new ChaseState(this, ballState, canvas);
+        if (this.level <= LOW_HEALTH_CUT_OFF) {
+            if (this.currentStateEnum === States.swipeL) {
+                return;
+            }
+            this.holdState = this.currentState;
+            this.holdStateEnum = this.currentStateEnum;
+            this.currentStateEnum = States.swipeL;
+            this.currentState = resolveState(this.currentStateEnum, this);
+            this.showSpeechBubble('👋');
+        } else if (this.level <= MID_LEVEL_CUT_OFF) {
+            if (this.currentStateEnum === States.swipeM) {
+                return;
+            }
+            this.holdState = this.currentState;
+            this.holdStateEnum = this.currentStateEnum;
+            this.currentStateEnum = States.swipeM;
+            this.currentState = resolveState(this.currentStateEnum, this);
+            this.showSpeechBubble('👋');
+        } else {
+            if (this.currentStateEnum === States.swipeH) {
+                return;
+            }
+            this.holdState = this.currentState;
+            this.holdStateEnum = this.currentStateEnum;
+            this.currentStateEnum = States.swipeH;
+            this.currentState = resolveState(this.currentStateEnum, this);
+            this.showSpeechBubble('👋');
+        }
     }
 
     faceLeft() {
@@ -270,22 +308,6 @@ export abstract class BasePetType implements IPetType {
         }
         this.setAnimation(this.currentState.spriteLabel);
 
-        // What's my buddy doing?
-        if (
-            this.hasFriend &&
-            this.currentStateEnum !== States.chaseFriend &&
-            this.isMoving
-        ) {
-            if (
-                this.friend?.isPlaying &&
-                !isStateAboveGround(this.currentStateEnum)
-            ) {
-                this.currentState = resolveState(States.chaseFriend, this);
-                this.currentStateEnum = States.chaseFriend;
-                return;
-            }
-        }
-
         var frameResult = this.currentState.nextFrame();
         if (frameResult === FrameResult.stateComplete) {
             // If recovering from swipe..
@@ -300,16 +322,6 @@ export abstract class BasePetType implements IPetType {
             var nextState = this.chooseNextState(this.currentStateEnum);
             this.currentState = resolveState(nextState, this);
             this.currentStateEnum = nextState;
-        } else if (frameResult === FrameResult.stateCancel) {
-            if (this.currentStateEnum === States.chase) {
-                var nextState = this.chooseNextState(States.idleWithBall);
-                this.currentState = resolveState(nextState, this);
-                this.currentStateEnum = nextState;
-            } else if (this.currentStateEnum === States.chaseFriend) {
-                var nextState = this.chooseNextState(States.idleWithBall);
-                this.currentState = resolveState(nextState, this);
-                this.currentStateEnum = nextState;
-            }
         }
     }
 
@@ -334,12 +346,153 @@ export abstract class BasePetType implements IPetType {
     get isPlaying(): boolean {
         return (
             this.isMoving &&
-            (this.currentStateEnum === States.runRight ||
-                this.currentStateEnum === States.runLeft)
-        );
+            (this.currentStateEnum === States.runRightL ||
+                this.currentStateEnum === States.runLeftL || this.currentStateEnum === States.runRightM ||
+                this.currentStateEnum === States.runLeftM || this.currentStateEnum === States.runRightH ||
+                this.currentStateEnum === States.runLeftH));
     }
 
     get emoji(): string {
         return '🐶';
+    }
+
+    getHealth() {
+        return this.health;
+    }
+
+    getExperience() {
+        return this.experience;
+    }
+
+    getLevel() {
+        return this.level;
+    }
+
+    getNextTarget() {
+        return this.nextTarget;
+    }
+
+    async setHealth(value: number, initial: boolean) {
+        let returnMsg = "";
+        const prev = this.health;
+        this.health = value;
+        if (this.health < 0) {
+            this.health = 0;
+        } else if (this.health > 100) {
+            this.health = 100;
+        }
+        const diff = prev - this.health;
+        if (initial) {
+            try {
+                const msg = await getRandomCommentWhenSessionStarted(diff);
+                this.showSpeechBubble(msg, 2000);
+                returnMsg = "(Booted Up) " + msg;
+            } catch (err) {
+                console.log("Failed to show speech bubble. ", err);
+            }
+        }
+        else if (diff > 0) {
+            try {
+                const msg = await getRandomCommentWhenHealthDecrease(diff);
+                this.showSpeechBubble(msg, 2000);
+                returnMsg = "(Health Decreased) " + msg;
+            } catch (err) {
+                console.log("Failed to show speech bubble. ", err);
+            }
+        }
+        if (prev > LOW_HEALTH_CUT_OFF && this.health <= LOW_HEALTH_CUT_OFF) {
+            if (this.level <= LOW_LEVEL_CUT_OFF) {
+                this.currentStateEnum = States.sitIdleLL;
+                this.currentState = resolveState(this.currentStateEnum, this);
+            } else if (this.level <= MID_LEVEL_CUT_OFF) {
+                this.currentStateEnum = States.sitIdleLM;
+                this.currentState = resolveState(this.currentStateEnum, this);
+            } else {
+                this.currentStateEnum = States.sitIdleLH;
+                this.currentState = resolveState(this.currentStateEnum, this);
+            }
+        } else if (prev <= LOW_HEALTH_CUT_OFF && this.health > LOW_HEALTH_CUT_OFF) {
+            if (this.level <= LOW_LEVEL_CUT_OFF) {
+                this.currentStateEnum = States.sitIdleL;
+                this.currentState = resolveState(this.currentStateEnum, this);
+            } else if (this.level <= MID_LEVEL_CUT_OFF) {
+                this.currentStateEnum = States.sitIdleM;
+                this.currentState = resolveState(this.currentStateEnum, this);
+            } else {
+                this.currentStateEnum = States.sitIdleH;
+                this.currentState = resolveState(this.currentStateEnum, this);
+            }
+        }
+        return returnMsg;
+    }
+
+    async setExperience(value: number, showMessage: boolean) {
+        let returnMsg = "";
+        const prev = this.experience;
+        this.experience = value;
+        if (this.experience >= this.nextTarget) {
+            if (this.health >= LOW_HEALTH_CUT_OFF) {
+                this.setLevel(this.level + 1);
+                if (showMessage) {
+                    try {
+                        const msg = await getRandomCommentWhenLevelUp(this.level);
+                        this.showSpeechBubble(msg, 2000);
+                        returnMsg = "(Level Up) " + msg;
+                    } catch (err) {
+                        console.log("Failed to show speech bubble. ", err);
+                    }
+                }
+            } else {
+                this.experience = this.nextTarget;
+                if (prev < this.nextTarget) {
+                    if (showMessage) {
+                        try {
+                            const msg = await getRandomCommentWhenLowHealth();
+                            this.showSpeechBubble(msg, 2000);
+                            returnMsg = "(Low Health Value) " + msg;
+                        } catch (err) {
+                            console.log("Failed to show speech bubble. ", err);
+                        }
+                    }
+                }
+            }
+        }
+        return returnMsg;
+    }
+
+    setLevel(value: number) {
+        this.level = value;
+        this.nextTarget += 100 * this.level;
+        if (this.level > LOW_LEVEL_CUT_OFF) {
+            this.currentStateEnum = States.sitIdleM;
+            this.currentState = resolveState(this.currentStateEnum, this);
+        } else if (this.level > MID_LEVEL_CUT_OFF) {
+            this.currentStateEnum = States.sitIdleH;
+            this.currentState = resolveState(this.currentStateEnum, this);
+        }
+    }
+
+    async onCompilationError(code: string) {
+        let returnMsg = "";
+        try {
+            const msg = await getRandomCommentWhenCompilationError(code);
+            this.showSpeechBubble(msg, 2000);
+            returnMsg = "(Compilation Failed) " + msg;
+        } catch (err) {
+            console.log("Failed to show speech bubble. ", err);
+        }
+        return returnMsg;
+    }
+
+    async onCompilationSuccess(code: string) {
+        let returnMsg = "";
+        try {
+            const msg = await getRandomCommentWhenCompilationSuccess(code);
+            this.showSpeechBubble(msg, 2000);
+            returnMsg = "(Compilation Succeeded) " + msg;
+        } catch (err) {
+            console.log("Failed to show speech bubble. ", err);
+        }
+        return returnMsg;
     }
 }
