@@ -95,7 +95,7 @@ document.getElementById('send-button')?.addEventListener('click', async () => {
 
 
     try {
-        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=123', {
+        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -121,7 +121,13 @@ document.getElementById('send-button')?.addEventListener('click', async () => {
 });
 
 
-function displayMessage(sender: string, message: string) {
+export function displayMessage(senderOp: string, message: string) {
+    let sender: string;
+    if (senderOp === "") {
+        sender = currentName;
+    } else {
+        sender = senderOp;
+    }
     const messageContainer = document.createElement('div');
     messageContainer.classList.add('message-container');
     
@@ -140,7 +146,7 @@ function displayMessage(sender: string, message: string) {
     messageContainer.scrollIntoView({ behavior: 'smooth' });
 }
 
-function storeMessage(sender: string, message: string) {
+export function storeMessage(sender: string, message: string) {
     if (sender === "You") {
         chatHistory.push(["user", message]);
     } else {

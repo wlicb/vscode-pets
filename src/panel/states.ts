@@ -43,11 +43,11 @@ export interface IPetType {
     getLevel(): number;
     
     setHealth(value: number): void;
-    setExperience(value: number, showMessage: boolean): void;
+    setExperience(value: number, showMessage: boolean): string;
     setLevel(value: number): void;
 
-    onCompilationError(): void;
-    onCompilationSuccess(): void;
+    onCompilationError(): string;
+    onCompilationSuccess(): string;
 
 
     showSpeechBubble(message: string, duration: number): void;

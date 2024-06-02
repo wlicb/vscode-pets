@@ -19,7 +19,7 @@ import {
 } from './pets';
 import { BallState, PetElementState, PetPanelState } from './states';
 import { showBar, hideBar, updateBar } from './bar';
-import { hideChatbox, showChatbox } from './chat';
+import { hideChatbox, showChatbox, displayMessage, storeMessage } from './chat';
 // import { computeTimeDifference } from '../common/healthTimer';
 
 /* This is how the VS Code API can be invoked from the panel */
@@ -670,7 +670,11 @@ export function petPanelApp(
                 var pets = allPets.pets;
                 var diff = message.diff;
                 pets.forEach((pet) => {
-                    pet.pet.setExperience(pet.pet.getExperience() + diff, true);
+                    const msg = pet.pet.setExperience(pet.pet.getExperience() + diff, true);
+                    if (msg !== "") {
+                        displayMessage("", msg);
+                        storeMessage("", msg);
+                    }
                     updateBar(pet.pet.name, pet.pet.getLevel(), pet.pet.getExperience(), pet.pet.getNextTarget(), pet.pet.getHealth());
                 });
                 saveState(stateApi);
@@ -691,12 +695,24 @@ export function petPanelApp(
                 var randomPet = pets[Math.floor(Math.random() * pets.length)];
                 
                 if (result === 0) {
-                    randomPet.pet.onCompilationSuccess();
+                    const msg = randomPet.pet.onCompilationSuccess();
+                    if (msg !== "") {
+                        displayMessage("", msg);
+                        storeMessage("", msg);
+                    }
                     allPets.pets.forEach(pet => {
-                        pet.pet.setExperience(pet.pet.getExperience() + 5, false);
+                        const msg = pet.pet.setExperience(pet.pet.getExperience() + 5, false);
+                        if (msg !== "") {
+                            displayMessage("", msg);
+                            storeMessage("", msg);
+                        }
                     });
                 } else {
-                    randomPet.pet.onCompilationError();
+                    const msg = randomPet.pet.onCompilationError();
+                    if (msg !== "") {
+                        displayMessage("", msg);
+                        storeMessage("", msg);
+                    }
                 }
                 break;
             case 'handle-code-text-result':

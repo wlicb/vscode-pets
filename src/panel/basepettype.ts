@@ -14,6 +14,7 @@ import {
 import { getRandomCommentWhenLevelUp, getRandomCommentWhenLowHealth, 
     getRandomCommentWhenCompilationError, getRandomCommentWhenCompilationSuccess } from '../common/comments';
 
+
 export class InvalidStateError extends Error {
     fromState: States;
     petType: string;
@@ -403,7 +404,8 @@ export abstract class BasePetType implements IPetType {
         }
     }
 
-    setExperience(value: number, showMessage: boolean) {
+    setExperience(value: number, showMessage: boolean): string {
+        let returnMsg = "";
         const prev = this.experience;
         this.experience = value;
         if (this.experience >= this.nextTarget) {
@@ -412,6 +414,7 @@ export abstract class BasePetType implements IPetType {
                 if (showMessage) {
                     getRandomCommentWhenLevelUp(this.level).then(msg => {
                         this.showSpeechBubble(msg, 2000);
+                        returnMsg = "(Level Up) " + msg;
                     }).catch(err => {
                         console.log("Failed to show sppech bubble. ", err);
                     });
@@ -422,6 +425,7 @@ export abstract class BasePetType implements IPetType {
                     if (showMessage) {
                         getRandomCommentWhenLowHealth().then(msg => {
                             this.showSpeechBubble(msg, 2000);
+                            returnMsg = "(Low Health Value) " + msg;
                         }).catch(err => {
                             console.log("Failed to show sppech bubble. ", err);
                         });
@@ -429,6 +433,7 @@ export abstract class BasePetType implements IPetType {
                 }
             }
         }
+        return returnMsg;
     }
 
     setLevel(value: number) {
@@ -443,19 +448,25 @@ export abstract class BasePetType implements IPetType {
         }
     }
 
-    onCompilationError() {
+    onCompilationError(): string {
+        let returnMsg = "";
         getRandomCommentWhenCompilationError().then(msg => {
             this.showSpeechBubble(msg, 5000);
+            returnMsg = "(Compilation Failed) " + msg;
         }).catch(err => {
             console.log("Failed to show sppech bubble. ", err);
         });
+        return returnMsg;
     }
 
-    onCompilationSuccess() {
+    onCompilationSuccess(): string {
+        let returnMsg = "";
         getRandomCommentWhenCompilationSuccess().then(msg => {
             this.showSpeechBubble(msg, 5000);
+            returnMsg = "(Compilation Succeeded) " + msg;
         }).catch(err => {
             console.log("Failed to show sppech bubble. ", err);
         });
+        return returnMsg;
     }
 }
