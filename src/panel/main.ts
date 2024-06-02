@@ -32,11 +32,11 @@ declare global {
     function acquireVsCodeApi(): VscodeStateApi;
 }
 
-// const UPDATE_HEALTH_THRES = 1;
-
+const UPDATE_HEALTH_THRES = 1;
 
 export var allPets: IPetCollection = new PetCollection();
 var petCounter: number;
+var currentTimer: Date;
 
 function calculateBallRadius(size: PetSize): number {
     if (size === PetSize.nano) {
@@ -140,7 +140,13 @@ function startAnimations(
             const compileButton = document.getElementById("compile-button");
             const chatButton = document.getElementById("chat-button");
             const chatbox = document.getElementById("chatbox");
-            if (compileButton && chatButton) {
+            const sendButton = document.getElementById("send-button");
+            if (sendButton && e.target === sendButton) {
+                stateApi?.postMessage({
+                    text: "",
+                    command: 'get-code-text',
+                });
+            } else if (compileButton && chatButton) {
                 // console.log(e.target);
                 if (e.target === compileButton) {
                     stateApi?.postMessage({
@@ -289,6 +295,7 @@ export function saveState(stateApi?: VscodeStateApi) {
         });
     });
     state.petCounter = petCounter;
+    state.healthTimer = currentTimer;
     stateApi?.setState(state);
 }
 
@@ -310,18 +317,25 @@ function recoverState(
         } else {
             petCounter = state.petCounter ?? 1;
         }
+        if (state.healthTimer !== undefined) {
+            currentTimer = new Date(state.healthTimer);
+        } else {
+            currentTimer = new Date();
+        }
     }
-
     var recoveryMap: Map<IPetType, PetElementState> = new Map();
     state?.petStates?.forEach((p) => {
         // Fixes a bug related to duck animations
         if ((p.petType as string) === 'rubber duck') {
             (p.petType as string) = 'rubber-duck';
         }
-
+        const now = new Date();
+        console.log(typeof(currentTimer));
+        const differenceInMilliseconds = now.getTime() - currentTimer.getTime();
+        const diff = Math.floor(differenceInMilliseconds / (1000 * 60));
+        const healthUpdateValue = -Math.floor(diff / UPDATE_HEALTH_THRES);
+        console.log(healthUpdateValue);
         try {
-            // const diff = computeTimeDifference();
-            // const healthUpdateValue = -Math.floor(diff / UPDATE_HEALTH_THRES);
             var newPet = addPetToPanel(
                 p.petType ?? PetType.dog,
                 basePetUri,
@@ -334,6 +348,7 @@ function recoverState(
                 p.petExperience, p.petNextTarget, p.petLevel, p.petHealth,
                 stateApi,
             );
+            newPet.pet.setHealth(healthUpdateValue);
             allPets.push(newPet);
             recoveryMap.set(newPet.pet, p);
         } catch (InvalidPetException) {
@@ -684,6 +699,13 @@ export function petPanelApp(
                     randomPet.pet.onCompilationError();
                 }
                 break;
+            case 'handle-code-text-result':
+                break;
+            case 'update-health-timer':
+                const timer = message.timer;
+                currentTimer = timer;
+                saveState(stateApi);
+
         }
     });
 

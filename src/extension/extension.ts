@@ -15,7 +15,7 @@ import {
 import { randomName } from '../common/names';
 import * as localize from '../common/localize';
 import { availableColors, normalizeColor } from '../panel/pets';
-import { updateCount } from '../common/codeLine';
+import { updateCount, getEditorText } from '../common/codeLine';
 import { updateTimer, computeTimeDifference } from '../common/healthTimer';
 import { doCompile } from '../common/compile';
 
@@ -460,10 +460,11 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-pets.update-health-timer', async () => {
-            updateTimer();
+            const timer = updateTimer();
             const panel = getPetPanel();
                 if (panel !== undefined) {
                     panel.updateHealth(2);
+                    panel.updateHealthTimer(timer);
                 }
         }),
     );
@@ -493,6 +494,18 @@ export function activate(context: vscode.ExtensionContext) {
             });
         }),
     );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-pets.get-code-text', async () => {
+            const text = getEditorText();
+            if (text !== undefined) {
+                const panel = getPetPanel();
+                if (panel !== undefined) {
+                    panel.handleGetCodeTextResult(text);
+                }
+            }
+        }),
+    )
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-pets.roll-call', async () => {
@@ -850,7 +863,9 @@ interface IPetPanel {
     setThrowWithMouse(newThrowWithMouse: boolean): void;
     updateExperience(difference: number): void;
     updateHealth(difference: number): void;
+    handleGetCodeTextResult(text: string): void;
     handleCompileResult(result: number): void;
+    updateHealthTimer(timer: Date): void;
 }
 
 class PetWebviewContainer implements IPetPanel {
@@ -983,8 +998,17 @@ class PetWebviewContainer implements IPetPanel {
         void this.getWebview().postMessage({ command: 'update-health', diff: difference });
     }
 
+    public updateHealthTimer(timer: Date): void {
+        void this.getWebview().postMessage({ command: 'update-health-timer', timer: timer });
+
+    }
+
     public handleCompileResult(result: number): void {
         void this.getWebview().postMessage({ command: 'handle-compile-result', result: result });
+    }
+
+    public handleGetCodeTextResult(text: string): void {
+        void this.getWebview().postMessage({ command: 'handle-code-text-result', result: text });
     }
 
     protected getWebview(): vscode.Webview {
@@ -1128,6 +1152,8 @@ function handleWebviewMessage(message: WebviewMessage) {
         case 'run-compile':
             void vscode.commands.executeCommand('vscode-pets.compile');
             return;
+        case 'get-code-text':
+            void vscode.commands.executeCommand('vscode-pets.get-code-text');
     }
 }
 

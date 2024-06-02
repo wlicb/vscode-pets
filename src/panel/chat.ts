@@ -1,5 +1,4 @@
 // import * as dotenv from '../node_modules/dotenv/lib/main';
-
 // dotenv.config();
 
 // Handle the UI
