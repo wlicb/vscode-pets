@@ -33,7 +33,7 @@ const DEFAULT_PET_TYPE = PetType.dog;
 const DEFAULT_POSITION = ExtPosition.panel;
 const DEFAULT_THEME = Theme.none;
 
-const UPDATE_HEALTH_THRES = 1;
+const UPDATE_HEALTH_THRES = 45;
 
 class PetQuickPickItem implements vscode.QuickPickItem {
     constructor(
@@ -1085,7 +1085,10 @@ class PetWebviewContainer implements IPetPanel {
                 <div id="foreground">                
                     <div id="control-container">
                         <button id="compile-button">Compile!</button>
-                        <button id="chat-button">Chat!</button>
+                        <div id="chat-button-container">
+                            <button id="chat-button">💬</button>
+                            <span id="notification-badge">0</span>
+                        </div>
                     </div>
                     <div id="status-container">
                         <div id="name-level" class="bar-container">
@@ -1099,7 +1102,7 @@ class PetWebviewContainer implements IPetPanel {
                             </div>
                             <div id="health-value" class="status-text">100/100</div>
                         </div>
-                        <div id="health-container" class="bar-container">
+                        <div id="experience-container" class="bar-container">
                             <div id="experience-title" class="status-text">Experience</div>
                             <div id="experience" class="bar-box">
                                 <div id="experience-bar" class="bar"></div>
@@ -1116,6 +1119,7 @@ class PetWebviewContainer implements IPetPanel {
                         </div>
                     </div>	
                 </div>
+
                 <script nonce="${nonce}" src="${scriptUri}"></script>
                 <script nonce="${nonce}">petApp.petPanelApp("${basePetUri}", "${this.theme()}", ${this.themeKind()}, "${this.petColor()}", "${this.petSize()}", "${this.petType()}", ${this.throwBallWithMouse()});</script>
             </body>

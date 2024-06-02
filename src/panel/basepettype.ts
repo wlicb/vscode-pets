@@ -382,23 +382,22 @@ export abstract class BasePetType implements IPetType {
             this.health = 100;
         }
         const diff = prev - this.health;
-        if (diff > 0) {
-            if (initial) {
-                try {
-                    const msg = await getRandomCommentWhenSessionStarted(diff);
-                    this.showSpeechBubble(msg, 2000);
-                    returnMsg = "(Booted Up) " + msg;
-                } catch (err) {
-                    console.log("Failed to show speech bubble. ", err);
-                }
-            } else {
-                try {
-                    const msg = await getRandomCommentWhenHealthDecrease(diff);
-                    this.showSpeechBubble(msg, 2000);
-                    returnMsg = "(Health Decreased) " + msg;
-                } catch (err) {
-                    console.log("Failed to show speech bubble. ", err);
-                }
+        if (initial) {
+            try {
+                const msg = await getRandomCommentWhenSessionStarted(diff);
+                this.showSpeechBubble(msg, 2000);
+                returnMsg = "(Booted Up) " + msg;
+            } catch (err) {
+                console.log("Failed to show speech bubble. ", err);
+            }
+        }
+        else if (diff > 0) {
+            try {
+                const msg = await getRandomCommentWhenHealthDecrease(diff);
+                this.showSpeechBubble(msg, 2000);
+                returnMsg = "(Health Decreased) " + msg;
+            } catch (err) {
+                console.log("Failed to show speech bubble. ", err);
             }
         }
         if (prev > LOW_HEALTH_CUT_OFF && this.health <= LOW_HEALTH_CUT_OFF) {

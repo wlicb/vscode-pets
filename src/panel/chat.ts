@@ -48,7 +48,7 @@ export function checkChatboxVisiblityAndName(name: string) {
     } else if (chatbox.style.display === "none") {
         return 0;
     } else if (currentName !== name) {
-        return 0;
+        return -1;
     } else {
         return 1;
     }
@@ -128,22 +128,31 @@ export function displayMessage(senderOp: string, message: string) {
     } else {
         sender = senderOp;
     }
-    const messageContainer = document.createElement('div');
-    messageContainer.classList.add('message-container');
-    
-    const messageSender = document.createElement('div');
-    messageSender.classList.add('message-sender');
-    messageSender.textContent = sender;
-    
-    const messageContent = document.createElement('div');
-    messageContent.classList.add('message-content');
-    messageContent.textContent = message;
-    
-    messageContainer.appendChild(messageSender);
-    messageContainer.appendChild(messageContent);
-    
-    document.getElementById('chatbox-messages')?.appendChild(messageContainer);
-    messageContainer.scrollIntoView({ behavior: 'smooth' });
+    const chatbox = document.getElementById('chatbox');
+    // console.log(chatbox);
+    if (chatbox && window.getComputedStyle(chatbox).display !== "none") {
+        const messageContainer = document.createElement('div');
+        messageContainer.classList.add('message-container');
+        
+        const messageSender = document.createElement('div');
+        messageSender.classList.add('message-sender');
+        messageSender.textContent = sender;
+        
+        const messageContent = document.createElement('div');
+        messageContent.classList.add('message-content');
+        messageContent.textContent = message;
+        
+        messageContainer.appendChild(messageSender);
+        messageContainer.appendChild(messageContent);
+        
+        document.getElementById('chatbox-messages')?.appendChild(messageContainer);
+        messageContainer.scrollIntoView({ behavior: 'smooth' });
+    //     setBadge(1);
+    // }
+    } else {
+        setBadge(1);
+    }
+
 }
 
 export function storeMessage(sender: string, message: string) {
@@ -153,6 +162,34 @@ export function storeMessage(sender: string, message: string) {
         chatHistory.push(["model", message]);
     }
 }
+
+export function setBadge(val: number) {
+    console.log("Setting badge: ", val);
+    const chatbox = document.getElementById("chatbox");
+    if (chatbox && window.getComputedStyle(chatbox).display !== "none") {
+        const badge = document.getElementById("notification-badge");
+        if (badge) {
+            badge.innerHTML = "0";
+            badge.style.display = "none";
+            console.log("Hiding badge");
+        }
+    } else {
+        const badge = document.getElementById("notification-badge");
+        if (badge) {
+            if (val > 0) {
+                const preVal = badge.innerHTML ? parseInt(badge.innerHTML) : 0;
+                badge.innerHTML = (preVal + val).toString();
+                badge.style.display = "flex";
+                console.log("Showing badge");
+            } else {
+                badge.innerHTML = "0";
+                badge.style.display = "none";
+                console.log("Hiding badge");
+            }
+        }
+    }
+}
+
 
 function getMemory() {
     return chatHistory.map(item => `${item[0]}: ${item[1]}`).join("    ");

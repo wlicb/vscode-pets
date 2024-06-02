@@ -19,7 +19,7 @@ import {
 } from './pets';
 import { BallState, PetElementState, PetPanelState } from './states';
 import { showBar, hideBar, updateBar } from './bar';
-import { hideChatbox, showChatbox, displayMessage, storeMessage } from './chat';
+import { hideChatbox, showChatbox, displayMessage, storeMessage, setBadge } from './chat';
 // import { computeTimeDifference } from '../common/healthTimer';
 
 /* This is how the VS Code API can be invoked from the panel */
@@ -32,7 +32,7 @@ declare global {
     function acquireVsCodeApi(): VscodeStateApi;
 }
 
-const UPDATE_HEALTH_THRES = 1;
+const UPDATE_HEALTH_THRES = 45;
 
 export var allPets: IPetCollection = new PetCollection();
 var petCounter: number;
@@ -140,13 +140,7 @@ function startAnimations(
             const compileButton = document.getElementById("compile-button");
             const chatButton = document.getElementById("chat-button");
             const chatbox = document.getElementById("chatbox");
-            const sendButton = document.getElementById("send-button");
-            if (sendButton && e.target === sendButton) {
-                stateApi?.postMessage({
-                    text: "",
-                    command: 'get-code-text',
-                });
-            } else if (compileButton && chatButton) {
+            if (compileButton && chatButton) {
                 // console.log(e.target);
                 if (e.target === compileButton) {
                     stateApi?.postMessage({
@@ -157,6 +151,7 @@ function startAnimations(
                     const nameEm = document.getElementById("name");
                     if (nameEm) {
                         showChatbox(nameEm.innerHTML, findPetType(nameEm.innerHTML));
+                        setBadge(-1);
                     }
                 } else {
                     const target = e.target as Node;

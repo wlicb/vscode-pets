@@ -166,7 +166,7 @@ async function getMessageFromAI(prompt: string) {
 
 
     };
-    let aiText = "Initial response";
+    let aiText = "";
     try {
         const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=', {
             method: 'POST',
@@ -184,7 +184,7 @@ async function getMessageFromAI(prompt: string) {
         aiText = responseData.candidates[0].content.parts[0].text;
     } catch (error) {
         // for debug purpose
-        aiText = "Cannot fetch AI response";
+        aiText = "";
         console.error('Error fetching response from Gemini: ', error);
     }
     console.log(aiText);
