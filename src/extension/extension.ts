@@ -797,12 +797,6 @@ export function activate(context: vscode.ExtensionContext) {
         await vscode.commands.executeCommand('vscode-pets.update-health');
     }, UPDATE_HEALTH_THRES * 60000);
 
-    // Try to send the message here.
-    const diff = computeTimeDifference();
-    // console.log("Making initial update now ", diff, -diff / UPDATE_HEALTH_THRES);
-    setTimeout(() => {
-        getPetPanel()?.updateHealth(-diff / UPDATE_HEALTH_THRES);
-    }, 500);
 
     let canExecute = true;
     const TIME_INTERVAL = 3 * 10 * 1000; // 3 minutes in milliseconds
