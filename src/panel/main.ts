@@ -658,6 +658,7 @@ export function petPanelApp(
                     pet.pet.setExperience(pet.pet.getExperience() + diff, true);
                     updateBar(pet.pet.name, pet.pet.getLevel(), pet.pet.getExperience(), pet.pet.getNextTarget(), pet.pet.getHealth());
                 });
+                saveState(stateApi);
                 break;
             case 'update-health':
                 var pets = allPets.pets;
@@ -666,6 +667,7 @@ export function petPanelApp(
                     pet.pet.setHealth(pet.pet.getHealth() + diff);
                     updateBar(pet.pet.name, pet.pet.getLevel(), pet.pet.getExperience(), pet.pet.getNextTarget(), pet.pet.getHealth());
                 });
+                saveState(stateApi);
                 //console.log("Updating health");
                 break;
             case 'handle-compile-result':

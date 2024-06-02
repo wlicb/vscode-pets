@@ -74,6 +74,7 @@ export class PetElementState {
 export class PetPanelState {
     petStates: Array<PetElementState> | undefined;
     petCounter: number | undefined;
+    healthTimer: Date;
 }
 
 export enum HorizontalDirection {

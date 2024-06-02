@@ -14,6 +14,7 @@ export function updateTimer() {
 
     //console.log(jsonString);
     fs.writeFileSync(filePath, jsonString);
+    return now;
 }
 
 export function computeTimeDifference() {
