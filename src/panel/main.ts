@@ -348,7 +348,14 @@ function recoverState(
                 p.petExperience, p.petNextTarget, p.petLevel, p.petHealth,
                 stateApi,
             );
-            newPet.pet.setHealth(newPet.pet.getHealth() + healthUpdateValue);
+            newPet.pet.setHealth(newPet.pet.getHealth() + healthUpdateValue, true).then(msg => {
+                if (msg !== "") {
+                    displayMessage("", msg);
+                    storeMessage("", msg);
+                }
+            }).catch(err => {
+                console.log(err);
+            });;
             allPets.push(newPet);
             recoveryMap.set(newPet.pet, p);
         } catch (InvalidPetException) {
@@ -670,11 +677,14 @@ export function petPanelApp(
                 var pets = allPets.pets;
                 var diff = message.diff;
                 pets.forEach((pet) => {
-                    const msg = pet.pet.setExperience(pet.pet.getExperience() + diff, true);
-                    if (msg !== "") {
-                        displayMessage("", msg);
-                        storeMessage("", msg);
-                    }
+                    pet.pet.setExperience(pet.pet.getExperience() + diff, true).then(msg => {
+                        if (msg !== "") {
+                            displayMessage("", msg);
+                            storeMessage("", msg);
+                        }
+                    }).catch(err => {
+                        console.log(err);
+                    });
                     updateBar(pet.pet.name, pet.pet.getLevel(), pet.pet.getExperience(), pet.pet.getNextTarget(), pet.pet.getHealth());
                 });
                 saveState(stateApi);
@@ -683,7 +693,14 @@ export function petPanelApp(
                 var pets = allPets.pets;
                 var diff = message.diff;
                 pets.forEach((pet) => {
-                    pet.pet.setHealth(pet.pet.getHealth() + diff);
+                    pet.pet.setHealth(pet.pet.getHealth() + diff, false).then(msg => {
+                        if (msg !== "") {
+                            displayMessage("", msg);
+                            storeMessage("", msg);
+                        }
+                    }).catch(err => {
+                        console.log(err);
+                    });;
                     updateBar(pet.pet.name, pet.pet.getLevel(), pet.pet.getExperience(), pet.pet.getNextTarget(), pet.pet.getHealth());
                 });
                 saveState(stateApi);
@@ -695,24 +712,33 @@ export function petPanelApp(
                 var randomPet = pets[Math.floor(Math.random() * pets.length)];
                 
                 if (result === 0) {
-                    const msg = randomPet.pet.onCompilationSuccess();
-                    if (msg !== "") {
-                        displayMessage("", msg);
-                        storeMessage("", msg);
-                    }
-                    allPets.pets.forEach(pet => {
-                        const msg = pet.pet.setExperience(pet.pet.getExperience() + 5, false);
+                    randomPet.pet.onCompilationSuccess().then(msg => {
                         if (msg !== "") {
                             displayMessage("", msg);
                             storeMessage("", msg);
                         }
+                    }).catch(err => {
+                        console.log(err);
+                    });
+                    allPets.pets.forEach(pet => {
+                        pet.pet.setExperience(pet.pet.getExperience() + 5, false).then(msg => {
+                            if (msg !== "") {
+                                displayMessage("", msg);
+                                storeMessage("", msg);
+                            }
+                        }).catch(err => {
+                            console.log(err);
+                        });;
                     });
                 } else {
-                    const msg = randomPet.pet.onCompilationError();
-                    if (msg !== "") {
-                        displayMessage("", msg);
-                        storeMessage("", msg);
-                    }
+                    randomPet.pet.onCompilationError().then(msg => {
+                        if (msg !== "") {
+                            displayMessage("", msg);
+                            storeMessage("", msg);
+                        }
+                    }).catch(err => {
+                        console.log(err);
+                    });
                 }
                 break;
             case 'handle-code-text-result':

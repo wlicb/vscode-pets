@@ -94,6 +94,56 @@ export async function getRandomCommentWhenCompilationSuccess() {
     }
 }
 
+export async function getRandomCommentWhenHealthDecrease(diff: number) {
+    const encouragementMessages = [
+        `It's been a while! Let's take a short break and then get back to coding together! ⏳`,
+        `I need your help! Let's work on some code together! 🐾`,
+        `A quick walk can refresh your mind. Are you ready to continue? 🚶‍♂️`,
+        `Don't give up now! I believe in you! 💖`,
+        `Remember why we started. Let's get back to coding! 🔄`,
+        `I'm feeling a bit down. Some coding time will cheer me up! 🐾`,
+        `A little progress each day adds up to big results. Keep going! 📈`,
+        `Coding break over? Let's get back to it! 💻`,
+        `I miss you! How about starting a new project together? 🧩`,
+        `Just 5 more minutes of coding can make a big difference! ⏰`
+    ];
+      
+    let prompt = "You are a virtual pet for students to learn programming. You should talk in a cute way and give the student emotional support and encouragement. Please keep your response within 20 words.";
+    prompt += `Your health decreased by ${diff} just now, which means the student has been idle for ${45 * diff} mins. Please give the student a friendly reminder and encourage him to keep up.`;
+    const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
+    const aiMessage = await getMessageFromAI(prompt);
+    if (aiMessage === "") {
+        return randomMessage;
+    } else {
+        return aiMessage;
+    }
+}
+
+export async function getRandomCommentWhenSessionStarted(diff: number) {
+    const bootMessages = [
+        `I missed you so much! Ready to get back to coding together? 🐾`,
+        `Welcome back! I've been waiting eagerly for you! Let's code! 🖥️`,
+        `Hello again! I missed you! Time to create some awesome code! 💻`,
+        `I'm so happy to see you! Let's make today a great coding day! 🌟`,
+        `Welcome back! I've been lonely without you. Let's get coding! 🎉`,
+        `Hello! I missed your coding magic! Ready to amaze me again? ✨`,
+        `I'm thrilled to see you! I've missed you so much! Let's code! 🐾`,
+        `Welcome back! I've been eagerly awaiting your return! 🚀`,
+        `I'm excited to see you! I missed your company! Let's dive into code! 💪`,
+        `Hello! I've been counting the minutes until your return! Time to code! 💻`
+    ];
+    
+    let prompt = "You are a virtual pet for students to learn programming. You should talk in a cute way and give the student emotional support and encouragement. Please keep your response within 20 words.";
+    prompt += `Your student just opened the pet program, and your health decreased by ${diff}, which means the student has not come back for ${45 * diff} minutes. Please give me a warm welcome, and state that you miss the student.`;
+    const randomMessage = bootMessages[Math.floor(Math.random() * bootMessages.length)];
+    const aiMessage = await getMessageFromAI(prompt);
+    if (aiMessage === "") {
+        return randomMessage;
+    } else {
+        return aiMessage;
+    }
+}
+
 
 async function getMessageFromAI(prompt: string) {
     const data = {

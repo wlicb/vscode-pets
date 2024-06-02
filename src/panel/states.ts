@@ -42,12 +42,12 @@ export interface IPetType {
     getNextTarget(): number;
     getLevel(): number;
     
-    setHealth(value: number): void;
-    setExperience(value: number, showMessage: boolean): string;
+    setHealth(value: number, initial: boolean): Promise<string>;
+    setExperience(value: number, showMessage: boolean): Promise<string>;
     setLevel(value: number): void;
 
-    onCompilationError(): string;
-    onCompilationSuccess(): string;
+    onCompilationError(): Promise<string>;
+    onCompilationSuccess(): Promise<string>;
 
 
     showSpeechBubble(message: string, duration: number): void;

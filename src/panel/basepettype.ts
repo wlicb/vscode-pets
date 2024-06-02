@@ -12,7 +12,8 @@ import {
 } from './states';
 
 import { getRandomCommentWhenLevelUp, getRandomCommentWhenLowHealth, 
-    getRandomCommentWhenCompilationError, getRandomCommentWhenCompilationSuccess } from '../common/comments';
+    getRandomCommentWhenCompilationError, getRandomCommentWhenCompilationSuccess,
+    getRandomCommentWhenHealthDecrease, getRandomCommentWhenSessionStarted } from '../common/comments';
 
 
 export class InvalidStateError extends Error {
@@ -371,13 +372,34 @@ export abstract class BasePetType implements IPetType {
         return this.nextTarget;
     }
 
-    setHealth(value: number) {
+    async setHealth(value: number, initial: boolean) {
+        let returnMsg = "";
         const prev = this.health;
         this.health = value;
         if (this.health < 0) {
             this.health = 0;
         } else if (this.health > 100) {
             this.health = 100;
+        }
+        const diff = prev - this.health;
+        if (diff > 0) {
+            if (initial) {
+                try {
+                    const msg = await getRandomCommentWhenSessionStarted(diff);
+                    this.showSpeechBubble(msg, 2000);
+                    returnMsg = "(Booted Up) " + msg;
+                } catch (err) {
+                    console.log("Failed to show speech bubble. ", err);
+                }
+            } else {
+                try {
+                    const msg = await getRandomCommentWhenHealthDecrease(diff);
+                    this.showSpeechBubble(msg, 2000);
+                    returnMsg = "(Health Decreased) " + msg;
+                } catch (err) {
+                    console.log("Failed to show speech bubble. ", err);
+                }
+            }
         }
         if (prev > LOW_HEALTH_CUT_OFF && this.health <= LOW_HEALTH_CUT_OFF) {
             if (this.level <= LOW_LEVEL_CUT_OFF) {
@@ -402,9 +424,10 @@ export abstract class BasePetType implements IPetType {
                 this.currentState = resolveState(this.currentStateEnum, this);
             }
         }
+        return returnMsg;
     }
 
-    setExperience(value: number, showMessage: boolean): string {
+    async setExperience(value: number, showMessage: boolean) {
         let returnMsg = "";
         const prev = this.experience;
         this.experience = value;
@@ -412,23 +435,25 @@ export abstract class BasePetType implements IPetType {
             if (this.health >= LOW_HEALTH_CUT_OFF) {
                 this.setLevel(this.level + 1);
                 if (showMessage) {
-                    getRandomCommentWhenLevelUp(this.level).then(msg => {
+                    try {
+                        const msg = await getRandomCommentWhenLevelUp(this.level);
                         this.showSpeechBubble(msg, 2000);
                         returnMsg = "(Level Up) " + msg;
-                    }).catch(err => {
-                        console.log("Failed to show sppech bubble. ", err);
-                    });
+                    } catch (err) {
+                        console.log("Failed to show speech bubble. ", err);
+                    }
                 }
             } else {
                 this.experience = this.nextTarget;
                 if (prev < this.nextTarget) {
                     if (showMessage) {
-                        getRandomCommentWhenLowHealth().then(msg => {
+                        try {
+                            const msg = await getRandomCommentWhenLowHealth();
                             this.showSpeechBubble(msg, 2000);
                             returnMsg = "(Low Health Value) " + msg;
-                        }).catch(err => {
-                            console.log("Failed to show sppech bubble. ", err);
-                        });
+                        } catch (err) {
+                            console.log("Failed to show speech bubble. ", err);
+                        }
                     }
                 }
             }
@@ -448,25 +473,27 @@ export abstract class BasePetType implements IPetType {
         }
     }
 
-    onCompilationError(): string {
+    async onCompilationError() {
         let returnMsg = "";
-        getRandomCommentWhenCompilationError().then(msg => {
-            this.showSpeechBubble(msg, 5000);
+        try {
+            const msg = await getRandomCommentWhenCompilationError();
+            this.showSpeechBubble(msg, 2000);
             returnMsg = "(Compilation Failed) " + msg;
-        }).catch(err => {
-            console.log("Failed to show sppech bubble. ", err);
-        });
+        } catch (err) {
+            console.log("Failed to show speech bubble. ", err);
+        }
         return returnMsg;
     }
 
-    onCompilationSuccess(): string {
+    async onCompilationSuccess() {
         let returnMsg = "";
-        getRandomCommentWhenCompilationSuccess().then(msg => {
-            this.showSpeechBubble(msg, 5000);
+        try {
+            const msg = await getRandomCommentWhenCompilationSuccess();
+            this.showSpeechBubble(msg, 2000);
             returnMsg = "(Compilation Succeeded) " + msg;
-        }).catch(err => {
-            console.log("Failed to show sppech bubble. ", err);
-        });
+        } catch (err) {
+            console.log("Failed to show speech bubble. ", err);
+        }
         return returnMsg;
     }
 }
