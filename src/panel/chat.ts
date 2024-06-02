@@ -4,12 +4,11 @@
 // Handle the UI
 let currentName: string;
 let currentPetType: string;
-let chatHistory: Array<string> = [];
+const chatHistory: Array<Array<string>> = [];
 
 export function showChatbox(name: string, petType: string) {
     currentName = name;
     currentPetType = petType;
-    chatHistory = [];
     const chatbox = document.getElementById("chatbox");
     if (chatbox) {
         chatbox.style.display = "block";
@@ -23,12 +22,18 @@ export function showChatbox(name: string, petType: string) {
                 chatboxMessages.removeChild(chatboxMessages.firstChild);
             }
         }
+        chatHistory.forEach(sentence => {
+            if (sentence[0] === "user") {
+                displayMessage("You", sentence[1]);
+            } else {
+                displayMessage(currentName, sentence[1]);
+            }
+        });
     }
 
 }
 
 export function hideChatbox() {
-    chatHistory = [];
     const chatbox = document.getElementById("chatbox");
     if (chatbox) {
         chatbox.style.display = "none";
@@ -137,12 +142,12 @@ function displayMessage(sender: string, message: string) {
 
 function storeMessage(sender: string, message: string) {
     if (sender === "You") {
-        chatHistory.push("Student: " + message);
+        chatHistory.push(["user", message]);
     } else {
-        chatHistory.push("You: " + message);
+        chatHistory.push(["model", message]);
     }
 }
 
 function getMemory() {
-    return chatHistory.join('  ');
+    return chatHistory.map(item => `${item[0]}: ${item[1]}`).join("    ");
 }
