@@ -27,13 +27,13 @@ const EXTRA_PETS_KEY_XPS = EXTRA_PETS_KEY + '.experiences';
 const EXTRA_PETS_KEY_HPS = EXTRA_PETS_KEY + '.healths';
 const EXTRA_PETS_KEY_TARS = EXTRA_PETS_KEY + '.next-targets';
 const EXTRA_PETS_KEY_LEVELS = EXTRA_PETS_KEY + '.levels';
-const DEFAULT_PET_SCALE = PetSize.nano;
+const DEFAULT_PET_SCALE = PetSize.medium;
 const DEFAULT_COLOR = PetColor.akita;
 const DEFAULT_PET_TYPE = PetType.dog;
 const DEFAULT_POSITION = ExtPosition.panel;
 const DEFAULT_THEME = Theme.none;
 
-const UPDATE_HEALTH_THRES = 45;
+const UPDATE_HEALTH_THRES = 1;
 
 class PetQuickPickItem implements vscode.QuickPickItem {
     constructor(
@@ -774,12 +774,6 @@ export function activate(context: vscode.ExtensionContext) {
             },
         });
     }
-    // Try to send the message here.
-    const diff = computeTimeDifference();
-    // console.log("Making initial update now ", diff, -diff / UPDATE_HEALTH_THRES);
-    setTimeout(() => {
-        getPetPanel()?.updateHealth(-Math.floor(diff / UPDATE_HEALTH_THRES));
-    }, 500);
 
 
     setInterval(async () => {
@@ -789,6 +783,13 @@ export function activate(context: vscode.ExtensionContext) {
     setInterval(async () => {
         await vscode.commands.executeCommand('vscode-pets.update-health');
     }, UPDATE_HEALTH_THRES * 60000);
+
+    // Try to send the message here.
+    const diff = computeTimeDifference();
+    // console.log("Making initial update now ", diff, -diff / UPDATE_HEALTH_THRES);
+    setTimeout(() => {
+        getPetPanel()?.updateHealth(-diff / UPDATE_HEALTH_THRES);
+    }, 500);
 
     let canExecute = true;
     const TIME_INTERVAL = 3 * 10 * 1000; // 3 minutes in milliseconds
@@ -947,6 +948,10 @@ class PetWebviewContainer implements IPetPanel {
             type: spec.type,
             color: spec.color,
             name: spec.name,
+            experience: spec.experience,
+            nextTarget: spec.nextTarget,
+            level: spec.level,
+            health: spec.health,
         });
         void this.getWebview().postMessage({
             command: 'set-size',
@@ -974,6 +979,7 @@ class PetWebviewContainer implements IPetPanel {
     }
 
     public updateHealth(difference: number): void {
+        console.log("updating health");
         void this.getWebview().postMessage({ command: 'update-health', diff: difference });
     }
 
@@ -1073,7 +1079,7 @@ class PetWebviewContainer implements IPetPanel {
                 <div id="foreground">                
                     <div id="control-container">
                         <button id="compile-button">Compile!</button>
-                        <button id="chat-button" disabled>Chat!</button>
+                        <button id="chat-button">Chat!</button>
                     </div>
                     <div id="status-container">
                         <div id="name-level" class="bar-container">

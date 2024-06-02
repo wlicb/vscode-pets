@@ -67,6 +67,10 @@ export abstract class BasePetType implements IPetType {
         petRoot: string,
         floor: number,
         name: string,
+        experience: number,
+        nextTarget: number,
+        level: number,
+        health: number,
         speed: number,
     ) {
         this.el = spriteElement;
@@ -84,10 +88,10 @@ export abstract class BasePetType implements IPetType {
         this._size = size;
         this._speed = this.randomizeSpeed(speed);
 
-        this.experience = 0;
-        this.nextTarget = 100;
-        this.level = 1;
-        this.health = 100;
+        this.experience = experience;
+        this.nextTarget = nextTarget;
+        this.level = level;
+        this.health = health;
 
         // Increment the static count of the Pet class that the constructor belongs to
         (this.constructor as any).count += 1;

@@ -146,6 +146,10 @@ export function createPet(
     petRoot: string,
     floor: number,
     name: string,
+    experience: number,
+    nextTarget: number,
+    level: number,
+    health: number,
 ): IPetType {
     if (name === undefined || name === null || name === '') {
         throw new InvalidPetException('name is undefined');
@@ -161,7 +165,11 @@ export function createPet(
         string,
         number,
         string,
-    ] = [el, collision, speech, size, left, bottom, petRoot, floor, name];
+        number,
+        number,
+        number,
+        number,
+    ] = [el, collision, speech, size, left, bottom, petRoot, floor, name, experience, nextTarget, level, health];
 
     switch (petType) {
         case PetType.dog:

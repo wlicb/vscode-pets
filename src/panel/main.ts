@@ -18,8 +18,9 @@ import {
     InvalidPetException,
 } from './pets';
 import { BallState, PetElementState, PetPanelState } from './states';
-import { checkVisiblityAndName, hideBar, showBar, updateBar } from './bar';
-import { hideChatbox, showChatbox, checkChatboxVisiblityAndName } from './chat';
+import { showBar, hideBar, updateBar } from './bar';
+import { hideChatbox, showChatbox } from './chat';
+// import { computeTimeDifference } from '../common/healthTimer';
 
 /* This is how the VS Code API can be invoked from the panel */
 declare global {
@@ -30,6 +31,8 @@ declare global {
     }
     function acquireVsCodeApi(): VscodeStateApi;
 }
+
+// const UPDATE_HEALTH_THRES = 1;
 
 
 export var allPets: IPetCollection = new PetCollection();
@@ -108,30 +111,6 @@ function handleMouseLeave() {
     //hideBar();
 }
 
-function handleClick(e: MouseEvent) {
-    var el = e.currentTarget as HTMLDivElement;
-    let isPetClicked = false;
-    const chatButton = document.getElementById("chat-button") as HTMLButtonElement;
-    allPets.pets.forEach((element) => {
-        if (element.collision === el) {
-            isPetClicked = true;
-            showBar(
-                element.pet.name, 
-                element.pet.getLevel(), 
-                element.pet.getExperience(), 
-                element.pet.getNextTarget(), 
-                element.pet.getHealth()
-            );
-            if (chatButton) {
-                chatButton.disabled = false;
-            }
-        }
-    });
-
-    if (!isPetClicked) {
-        hideBar(); 
-    }
-}
 
 
 function startAnimations(
@@ -145,7 +124,6 @@ function startAnimations(
 
     collision.addEventListener('mouseover', handleMouseOver);
     collision.addEventListener('mouseleave', handleMouseLeave);
-    collision.addEventListener("click", handleClick);
 
 
     document.addEventListener('click', function(e) {
@@ -177,12 +155,7 @@ function startAnimations(
                 } else {
                     const target = e.target as Node;
                     if (chatbox === null || !chatbox.contains(target)) {
-                        hideBar();
-                        hideChatbox();                        
-                        const chatButton = document.getElementById("chat-button") as HTMLButtonElement;
-                        if (chatButton) {
-                            chatButton.disabled = true;
-                        }
+                        hideChatbox();
                     }
                 }
             } else {
@@ -224,9 +197,9 @@ function addPetToPanel(
     floor: number,
     name: string,
     experience: number,
-    health: number,
     nextTarget: number,
     level: number,
+    health: number,
     stateApi?: VscodeStateApi,
 ): PetElement {
     var petSpriteElement: HTMLImageElement = document.createElement('img');
@@ -265,6 +238,10 @@ function addPetToPanel(
             root,
             floor,
             name,
+            experience,
+            nextTarget,
+            level,
+            health
         );
         petCounter++;
         startAnimations(collisionElement, newPet, stateApi);
@@ -295,6 +272,7 @@ export function saveState(stateApi?: VscodeStateApi) {
     var state = new PetPanelState();
     state.petStates = new Array();
 
+
     allPets.pets.forEach((petItem) => {
         state.petStates?.push({
             petName: petItem.pet.name,
@@ -305,9 +283,9 @@ export function saveState(stateApi?: VscodeStateApi) {
             elLeft: petItem.el.style.left,
             elBottom: petItem.el.style.bottom,
             petExperience: petItem.pet.getExperience(),
-            petHealth: petItem.pet.getHealth(),
             petNextTarget: petItem.pet.getNextTarget(),
             petLevel: petItem.pet.getLevel(),
+            petHealth: petItem.pet.getHealth(),
         });
     });
     state.petCounter = petCounter;
@@ -342,6 +320,8 @@ function recoverState(
         }
 
         try {
+            // const diff = computeTimeDifference();
+            // const healthUpdateValue = -Math.floor(diff / UPDATE_HEALTH_THRES);
             var newPet = addPetToPanel(
                 p.petType ?? PetType.dog,
                 basePetUri,
@@ -351,10 +331,7 @@ function recoverState(
                 parseInt(p.elBottom ?? '0'),
                 floor,
                 p.petName ?? randomName(p.petType ?? PetType.dog),
-                p.petExperience,
-                p.petHealth,
-                p.petNextTarget,
-                p.petLevel,
+                p.petExperience, p.petNextTarget, p.petLevel, p.petHealth,
                 stateApi,
             );
             allPets.push(newPet);
@@ -411,10 +388,6 @@ export function petPanelApp(
     petColor: PetColor,
     petSize: PetSize,
     petType: PetType,
-    petExperience: number,
-    petHealth: number,
-    petNextTarget: number,
-    petLevel: number,
     throwBallWithMouse: boolean,
     stateApi?: VscodeStateApi,
 ) {
@@ -586,6 +559,8 @@ export function petPanelApp(
     // New session
     var state = stateApi?.getState();
 
+    
+
     // Handle messages sent from the extension to the webview
     window.addEventListener('message', (event): void => {
         const message = event.data; // The json data that the extension sent
@@ -602,19 +577,25 @@ export function petPanelApp(
                 throwBall();
                 break;
             case 'spawn-pet':
+                const newPet = addPetToPanel(
+                    message.type,
+                    basePetUri,
+                    message.color,
+                    petSize,
+                    randomStartPosition(),
+                    floor,
+                    floor,
+                    message.name ?? randomName(message.type),
+                    message.experience,
+                    message.nextTarget,
+                    message.level,
+                    message.health,
+                    stateApi,
+                );
+                console.log(JSON.stringify(message));
+                showBar(newPet.pet.name, newPet.pet.getLevel(), newPet.pet.getExperience(), newPet.pet.getNextTarget(), newPet.pet.getHealth());
                 allPets.push(
-                    addPetToPanel(
-                        message.type,
-                        basePetUri,
-                        message.color,
-                        petSize,
-                        randomStartPosition(),
-                        floor,
-                        floor,
-                        message.name ?? randomName(message.type),
-                        0, 100, 100, 1,
-                        stateApi,
-                    ),
+                    newPet
                 );
                 saveState(stateApi);
                 break;
@@ -651,23 +632,15 @@ export function petPanelApp(
                         text: '👋 Removed pet ' + message.name,
                     });
 
-                    // Hide the bar if it is being shown for the removed pet
-                    if (checkVisiblityAndName(message.name)) {
-                        hideBar();
-                    }
-                    if (checkChatboxVisiblityAndName(message.name)) {
-                        hideChatbox();
-                        const chatButton = document.getElementById("chat-button") as HTMLButtonElement;
-                        if (chatButton) {
-                            chatButton.disabled = true;
-                        }
-                    }
+                    // Hide the chat box if it is being shown for the removed pet
+                    hideChatbox();
                 } else {
                     stateApi?.postMessage({
                         command: 'error',
                         text: `Could not find pet ${message.name}`,
                     });
                 }
+                hideBar();
                 break;
             case 'reset-pet':
                 allPets.reset();
@@ -725,10 +698,7 @@ export function petPanelApp(
                 floor,
                 floor,
                 randomName(petType),
-                petExperience,
-                petHealth,
-                petNextTarget,
-                petLevel,
+                0, 100, 1, 100,
                 stateApi,
             ),
         );
@@ -736,6 +706,10 @@ export function petPanelApp(
     } else {
         console.log('Recovering state - ', state);
         recoverState(basePetUri, petSize, floor, stateApi);
+        const currentPet = allPets.pets[0];
+        console.log(allPets);
+        showBar(currentPet.pet.name, currentPet.pet.getLevel(), currentPet.pet.getExperience(), currentPet.pet.getNextTarget(), currentPet.pet.getHealth());
+
     }
 
     initCanvas();
@@ -750,4 +724,3 @@ export function petPanelApp(
 window.addEventListener('resize', function () {
     initCanvas();
 });
-

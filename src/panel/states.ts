@@ -65,17 +65,10 @@ export class PetElementState {
     elBottom: string | undefined;
     petName: string | undefined;
     petFriend: string | undefined;
-    petExperience: number;
-    petHealth: number;
-    petNextTarget: number;
-    petLevel: number;
-
-    constructor() {
-        this.petExperience = 0;
-        this.petHealth = 100;
-        this.petNextTarget = 100;
-        this.petLevel = 1;
-    }
+    petExperience: number = 0;
+    petNextTarget: number = 100;
+    petHealth: number = 100;
+    petLevel: number = 1;
 }
 
 export class PetPanelState {
@@ -257,21 +250,21 @@ class AbstractStaticState implements IState {
 // sit idle
 export class SitIdleStateLL extends AbstractStaticState {
     label = States.sitIdleLL;
-    spriteLabel = 'idle_low_health_low_level';
+    spriteLabel = 'idle_low_level_low_health';
     horizontalDirection = HorizontalDirection.right;
     holdTime = 50;
 }
 
 export class SitIdleStateLM extends AbstractStaticState {
     label = States.sitIdleLM;
-    spriteLabel = 'idle_low_health_mid_level';
+    spriteLabel = 'idle_mid_level_low_health';
     horizontalDirection = HorizontalDirection.right;
     holdTime = 50;
 }
 
 export class SitIdleStateLH extends AbstractStaticState {
     label = States.sitIdleLH;
-    spriteLabel = 'idle_low_health_high_level';
+    spriteLabel = 'idle_high_level_low_health';
     horizontalDirection = HorizontalDirection.right;
     holdTime = 50;
 }
@@ -301,21 +294,21 @@ export class SitIdleStateH extends AbstractStaticState {
 // lie
 export class LieStateLL extends AbstractStaticState {
     label = States.lieLL;
-    spriteLabel = 'lie_low_health_low_level';
+    spriteLabel = 'lie_low_level_low_health';
     horizontalDirection = HorizontalDirection.right;
     holdTime = 50;
 }
 
 export class LieStateLM extends AbstractStaticState {
     label = States.lieLM;
-    spriteLabel = 'lie_low_health_mid_level';
+    spriteLabel = 'lie_mid_level_low_health';
     horizontalDirection = HorizontalDirection.right;
     holdTime = 50;
 }
 
 export class LieStateLH extends AbstractStaticState {
     label = States.lieLH;
-    spriteLabel = 'lie_low_health_high_level';
+    spriteLabel = 'lie_high_level_low_health';
     horizontalDirection = HorizontalDirection.right;
     holdTime = 50;
 }
