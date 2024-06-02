@@ -348,7 +348,7 @@ function recoverState(
                 p.petExperience, p.petNextTarget, p.petLevel, p.petHealth,
                 stateApi,
             );
-            newPet.pet.setHealth(healthUpdateValue);
+            newPet.pet.setHealth(newPet.pet.getHealth() + healthUpdateValue);
             allPets.push(newPet);
             recoveryMap.set(newPet.pet, p);
         } catch (InvalidPetException) {
