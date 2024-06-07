@@ -1130,11 +1130,15 @@ class PetWebviewContainer implements IPetPanel {
                         </div>
                     </div>
                     <div id="chatbox">
-                        <div id="chatbox-title">Chat with none!</div>
+                        <div id="chatbox-header">
+                            <div id="chatbox-title">Chat with none!</div>
+                            <button id="close-chatbox-button" class="chatbox-buttons">❌</button>
+
+                        </div>
                         <div id="chatbox-messages"></div>
                         <div id="chatbox-input">
                             <input type="text" id="message-input" placeholder="Type a message...">
-                            <button id="send-button">✉️</button>
+                            <button id="send-button" class="chatbox-buttons">✉️</button>
                         </div>
                     </div>	
                 </div>

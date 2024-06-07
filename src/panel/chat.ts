@@ -84,10 +84,10 @@ export function sendMsg() {
 async function fetchResponse(memory: string, inputValue: string, code?: string) {
     let context = `You are a virtual pet ${currentPetType} named ${currentName} for students to learn programming. You should talk in a cute way and give the student emotional support and encouragement. Please keep your response short. `;
     if (memory.length !== 0) {
-        context +=  `You have been talking about these: ${memory}`;
+        context +=  `You have been talking about these: ${memory} `;
     }
     if (code) {
-        context += `Here is the student's code: ${code} The student may ask you about the code, but please do not provide solutions directly. Please give indirect hints, such as where to look for the bugs.`;
+        context += `Here is the student's code: ${code} The student may ask you about the code, but please do not provide solutions directly. Please give indirect hints, such as where to look for the bugs. `;
     }
     context += "Now please reply to this message: " + inputValue;
     const data = {

@@ -153,8 +153,9 @@ function startAnimations(
         if (clickedOutside) {
             const compileButton = document.getElementById("compile-button");
             const chatButton = document.getElementById("chat-button");
-            const chatbox = document.getElementById("chatbox");
+            // const chatbox = document.getElementById("chatbox");
             const sendButton = document.getElementById("send-button");
+            const closeChatButton = document.getElementById('close-chatbox-button');
             if (compileButton && chatButton) {
                 // console.log(e.target);
                 if (e.target === compileButton) {
@@ -168,17 +169,20 @@ function startAnimations(
                         command: 'get-code-text',
                     });
                     sendMsg();
+                } 
+                else if (e.target === closeChatButton) {
+                        hideChatbox();
                 } else if (e.target === chatButton) {
                     const nameEm = document.getElementById("name");
                     if (nameEm) {
                         showChatbox(nameEm.innerHTML, findPetType(nameEm.innerHTML));
                         setBadge(-1);
                     }
-                } else {
-                    const target = e.target as Node;
-                    if (chatbox === null || !chatbox.contains(target)) {
-                        hideChatbox();
-                    }
+                // } else {
+                //     const target = e.target as Node;
+                //     if (chatbox === null || !chatbox.contains(target)) {
+                //         hideChatbox();
+                //     }
                 }
             } else {
                 console.log("cannot find button");
