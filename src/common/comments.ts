@@ -168,7 +168,7 @@ async function getMessageFromAI(prompt: string) {
     };
     let aiText = "";
     try {
-        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=123', {
+        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

@@ -19,7 +19,7 @@ import {
 } from './pets';
 import { BallState, PetElementState, PetPanelState } from './states';
 import { showBar, hideBar, updateBar } from './bar';
-import { hideChatbox, showChatbox, displayMessage, storeMessage, setBadge } from './chat';
+import { hideChatbox, showChatbox, displayMessage, storeMessage, setBadge, sendMsg } from './chat';
 // import { computeTimeDifference } from '../common/healthTimer';
 
 /* This is how the VS Code API can be invoked from the panel */
@@ -125,6 +125,20 @@ function startAnimations(
     collision.addEventListener('mouseover', handleMouseOver);
     collision.addEventListener('mouseleave', handleMouseLeave);
 
+    document.addEventListener('keydown', (event: KeyboardEvent) => {
+        if (event.key === 'Enter') {
+            const chatbox = document.getElementById("chatbox");
+            if (chatbox) {
+                stateApi?.postMessage({
+                    text: "",
+                    command: 'get-code-text',
+                });
+                sendMsg();
+            }
+            event.preventDefault();
+        }
+      });
+      
 
     document.addEventListener('click', function(e) {
         // Check if the click is outside the pets' elements
@@ -153,6 +167,7 @@ function startAnimations(
                         text: "",
                         command: 'get-code-text',
                     });
+                    sendMsg();
                 } else if (e.target === chatButton) {
                     const nameEm = document.getElementById("name");
                     if (nameEm) {

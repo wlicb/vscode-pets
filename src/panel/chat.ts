@@ -57,9 +57,8 @@ export function checkChatboxVisiblityAndName(name: string) {
 }
 
 
-// Send the chat msg
 
-document.getElementById('send-button')?.addEventListener('click', async () => {
+export function sendMsg() {
     const userInput = document.getElementById('message-input') as HTMLInputElement;
     const inputValue = userInput.value;
     displayMessage('You', inputValue);
@@ -79,7 +78,7 @@ document.getElementById('send-button')?.addEventListener('click', async () => {
         void fetchResponse(memory, inputValue);
     });
     
-});
+}
 
 
 async function fetchResponse(memory: string, inputValue: string, code?: string) {
@@ -112,7 +111,7 @@ async function fetchResponse(memory: string, inputValue: string, code?: string) 
 
 
     try {
-        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=123', {
+        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
