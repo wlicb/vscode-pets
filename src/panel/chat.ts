@@ -1,5 +1,7 @@
 // import * as dotenv from '../node_modules/dotenv/lib/main';
 // dotenv.config();
+import { getCodeFromEditor } from "./main";
+
 
 // Handle the UI
 let currentName: string;
@@ -60,19 +62,34 @@ export function checkChatboxVisiblityAndName(name: string) {
 document.getElementById('send-button')?.addEventListener('click', async () => {
     const userInput = document.getElementById('message-input') as HTMLInputElement;
     const inputValue = userInput.value;
-    if (inputValue.trim() === '') {
-        return;
-    }
-    const memory = getMemory();
-    // console.log(memory);
-    let context = `You are a virtual pet ${currentPetType} named ${currentName} for students to learn programming. You should talk in a cute way and give the student emotional support and encouragement. Please keep your response short. `;
-    if (memory.length !== 0) {
-        context +=  `You have been talking about these: ${memory}`;
-    }
     displayMessage('You', inputValue);
     storeMessage('You', inputValue);
     const inputField = document.getElementById('message-input') as HTMLInputElement;
     inputField.value = '';
+    if (inputValue.trim() === '') {
+        return;
+    }
+    const memory = getMemory();
+    getEditorText().then(event => {
+        const e = event as CustomEvent;
+        console.log(e);
+        void fetchResponse(memory, inputValue, e.detail.code);
+    }).catch(err => {
+        console.log(err);
+        void fetchResponse(memory, inputValue);
+    });
+    
+});
+
+
+async function fetchResponse(memory: string, inputValue: string, code?: string) {
+    let context = `You are a virtual pet ${currentPetType} named ${currentName} for students to learn programming. You should talk in a cute way and give the student emotional support and encouragement. Please keep your response short. `;
+    if (memory.length !== 0) {
+        context +=  `You have been talking about these: ${memory}`;
+    }
+    if (code) {
+        context += `Here is the student's code: ${code} The student may ask you about the code, but please do not provide solutions directly. Please give indirect hints, such as where to look for the bugs.`;
+    }
     context += "Now please reply to this message: " + inputValue;
     const data = {
         contents: [{
@@ -95,7 +112,7 @@ document.getElementById('send-button')?.addEventListener('click', async () => {
 
 
     try {
-        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=', {
+        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=123', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -116,9 +133,7 @@ document.getElementById('send-button')?.addEventListener('click', async () => {
         displayMessage(currentName, errText);
         storeMessage(currentName, errText);
     }
-
-    
-});
+}
 
 
 export function displayMessage(senderOp: string, message: string) {
@@ -193,4 +208,9 @@ export function setBadge(val: number) {
 
 function getMemory() {
     return chatHistory.map(item => `${item[0]}: ${item[1]}`).join("    ");
+}
+
+async function getEditorText() {
+    const event = await getCodeFromEditor();
+    return event;
 }

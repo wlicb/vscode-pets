@@ -61,7 +61,7 @@ export async function getRandomCommentWhenCompilationError(code: string) {
     ];
     let prompt = "You are a virtual pet for students to learn programming. You should talk in a cute way and give the student emotional support and encouragement. Please keep your response within 20 words.";
     prompt += `The student just had a compilation error. Please give the student some positive feedback.`;
-    prompt += `Here is the student's code: ${code}. The student may ask you about the code, but please do not provide solutions directly. Please give indirect hints, such as where to look for the bugs.`;
+    prompt += `Here is the student's code: ${code} The student may ask you about the code, but please do not provide solutions directly. Please give indirect hints, such as where to look for the bugs.`;
     const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
     const aiMessage = await getMessageFromAI(prompt);
     console.log(prompt);
@@ -87,7 +87,7 @@ export async function getRandomCommentWhenCompilationSuccess(code: string) {
     ];
     let prompt = "You are a virtual pet for students to learn programming. You should talk in a cute way and give the student emotional support and encouragement. Please keep your response within 20 words.";
     prompt += `The student just succeeded in compiling his code. Please give the student some positive feedback.`;
-    prompt += `Here is the student's code: ${code}. The student may ask you about the code, but please do not provide solutions directly. Please give indirect hints, such as where to improve.`;
+    prompt += `Here is the student's code: ${code} The student may ask you about the code, but please do not provide solutions directly. Please give indirect hints, such as where to improve.`;
     const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
     const aiMessage = await getMessageFromAI(prompt);
     if (aiMessage === "") {
@@ -168,7 +168,7 @@ async function getMessageFromAI(prompt: string) {
     };
     let aiText = "";
     try {
-        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=', {
+        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=123', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

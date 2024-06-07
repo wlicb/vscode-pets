@@ -140,12 +140,18 @@ function startAnimations(
             const compileButton = document.getElementById("compile-button");
             const chatButton = document.getElementById("chat-button");
             const chatbox = document.getElementById("chatbox");
+            const sendButton = document.getElementById("send-button");
             if (compileButton && chatButton) {
                 // console.log(e.target);
                 if (e.target === compileButton) {
                     stateApi?.postMessage({
                         text: "",
                         command: 'run-compile',
+                    });
+                } else if (e.target === sendButton) {
+                    stateApi?.postMessage({
+                        text: "",
+                        command: 'get-code-text',
                     });
                 } else if (e.target === chatButton) {
                     const nameEm = document.getElementById("name");
@@ -737,12 +743,20 @@ export function petPanelApp(
                     });
                 }
                 break;
-            case 'handle-code-text-result':
+            case 'handle-editor-code':
+                const codeText = message.code;
+                const event = new CustomEvent('code-text-result', {
+                    detail: {
+                        code: codeText
+                    }
+                });
+                window.dispatchEvent(event);
                 break;
             case 'update-health-timer':
                 const timer = message.timer;
                 currentTimer = timer;
                 saveState(stateApi);
+                break;
 
         }
     });
@@ -786,3 +800,9 @@ export function petPanelApp(
 window.addEventListener('resize', function () {
     initCanvas();
 });
+
+export async function getCodeFromEditor() {
+    return new Promise((resolve) => {
+        window.addEventListener('code-text-result', resolve, { once: true });
+    });
+}

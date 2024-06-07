@@ -483,12 +483,12 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-pets.compile', async () => {
-            const code = getEditorText();
-            let codeText = "";
-            if (code !== undefined) {
-                codeText = code;
-            }
             doCompile()?.then(compileResult => {
+                const code = getEditorText();
+                let codeText = "";
+                if (code !== undefined) {
+                    codeText = code;
+                }
                 //console.log("Compile result is ", compileResult);
                 const panel = getPetPanel();
                 if (panel !== undefined) {
@@ -498,6 +498,20 @@ export function activate(context: vscode.ExtensionContext) {
                 console.log(err);
             });
         }),
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-pets.get-editor-code', async () => {
+            const code = getEditorText();
+            const panel = getPetPanel();
+            let codeText = "";
+            if (code !== undefined) {
+                codeText = code;
+            }
+            if (panel !== undefined) {
+                panel.handleEditorCodeResult(codeText);
+            }
+        })
     );
 
     context.subscriptions.push(
@@ -851,6 +865,7 @@ interface IPetPanel {
     updateExperience(difference: number): void;
     updateHealth(difference: number): void;
     handleCompileResult(result: number, code: string): void;
+    handleEditorCodeResult(code: string): void;
     updateHealthTimer(timer: Date): void;
 }
 
@@ -991,6 +1006,10 @@ class PetWebviewContainer implements IPetPanel {
 
     public handleCompileResult(result: number, code: string): void {
         void this.getWebview().postMessage({ command: 'handle-compile-result', result: result, code: code });
+    }
+
+    public handleEditorCodeResult(code: string): void {
+        void this.getWebview().postMessage({ command: 'handle-editor-code', code: code });
     }
 
     protected getWebview(): vscode.Webview {
@@ -1139,7 +1158,8 @@ function handleWebviewMessage(message: WebviewMessage) {
             void vscode.commands.executeCommand('vscode-pets.compile');
             return;
         case 'get-code-text':
-            void vscode.commands.executeCommand('vscode-pets.get-code-text');
+            void vscode.commands.executeCommand('vscode-pets.get-editor-code');
+            return;
     }
 }
 
