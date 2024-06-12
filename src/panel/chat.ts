@@ -5,12 +5,10 @@ import { getCodeFromEditor } from "./main";
 
 // Handle the UI
 let currentName: string;
-let currentPetType: string;
 const chatHistory: Array<Array<string>> = [];
 
-export function showChatbox(name: string, petType: string) {
+export function showChatbox(name: string) {
     currentName = name;
-    currentPetType = petType;
     const chatbox = document.getElementById("chatbox");
     if (chatbox) {
         chatbox.style.display = "block";
@@ -69,50 +67,33 @@ export function sendMsg(userID: string) {
     if (inputValue.trim() === '') {
         return;
     }
-    const memory = getMemory();
     getEditorText().then(event => {
         const e = event as CustomEvent;
         console.log(e);
-        void fetchResponse(memory, inputValue, e.detail.code);
+        void fetchResponse("chat", userID, 0, e.detail.code, 0, inputValue, currentName);
     }).catch(err => {
         console.log(err);
-        void fetchResponse(memory, inputValue);
+        void fetchResponse("chat", userID, 0, "", 0, inputValue, currentName);
     });
     
 }
 
 
-async function fetchResponse(memory: string, inputValue: string, code?: string) {
-    let context = `You are a virtual pet ${currentPetType} named ${currentName} for students to learn programming. You should talk in a cute way and give the student emotional support and encouragement. Please keep your response short. `;
-    if (memory.length !== 0) {
-        context +=  `You have been talking about these: ${memory} `;
-    }
-    if (code) {
-        context += `Here is the student's code: ${code} The student may ask you about the code, but please do not provide solutions directly. Please give indirect hints, such as where to look for the bugs. `;
-    }
-    context += "Now please reply to this message: " + inputValue;
+async function fetchResponse(type: string, userID: string, level: number, code: string, diff: number, inputValue: string, name: string) {
     const data = {
-        contents: [{
-                role: "user",
-                parts: [
-                    {
-                        text: context
-                    }
-                ]
-            }
-        ],
-        generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 150
+        type: "user-input",
+        userID: userID,
+        params: {
+            level: level,
+            code: code,
+            diff: diff,
+            inputValue: inputValue,
+            name: name,
         }
-
-
     };
-    console.log("Prompt: " + context);
-
-
+    
     try {
-        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=', {
+        const response = await fetch('http://localhost:3000/post-chat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -122,9 +103,9 @@ async function fetchResponse(memory: string, inputValue: string, code?: string) 
         const responseData = await response.json();
         const resText = JSON.stringify(responseData);
         if (!response.ok) {
-            throw new Error('Failed to fetch AI response' + resText);
+            throw new Error('Failed to fetch AI response: ' + resText);
         }
-        const aiText = responseData.candidates[0].content.parts[0].text;
+        const aiText = responseData.answer;
         displayMessage(currentName, aiText);
         storeMessage(currentName, aiText);
     } catch (error) {
@@ -205,10 +186,6 @@ export function setBadge(val: number) {
     }
 }
 
-
-function getMemory() {
-    return chatHistory.map(item => `${item[0]}: ${item[1]}`).join("    ");
-}
 
 async function getEditorText() {
     const event = await getCodeFromEditor();

@@ -176,7 +176,7 @@ function startAnimations(
                 } else if (e.target === chatButton) {
                     const nameEm = document.getElementById("name");
                     if (nameEm) {
-                        showChatbox(nameEm.innerHTML, findPetType(nameEm.innerHTML));
+                        showChatbox(nameEm.innerHTML);
                         setBadge(-1);
                     }
                 // } else {
@@ -204,15 +204,6 @@ function startAnimations(
     }, 100);
 }
 
-// Find the pet type based on its name
-function findPetType(name: string) {
-    for (let i = 0; i < allPets.pets.length; i++) {
-        if (allPets.pets[i].pet.name === name) {
-            return allPets.pets[i].type;
-        }
-    }
-    return "";
-}
 
 function addPetToPanel(
     petType: PetType,
