@@ -58,7 +58,8 @@ export function checkChatboxVisiblityAndName(name: string) {
 
 
 
-export function sendMsg() {
+export function sendMsg(userID: string) {
+    console.log(userID);
     const userInput = document.getElementById('message-input') as HTMLInputElement;
     const inputValue = userInput.value;
     displayMessage('You', inputValue);

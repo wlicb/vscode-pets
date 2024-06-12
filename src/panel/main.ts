@@ -37,6 +37,7 @@ const UPDATE_HEALTH_THRES = 45;
 export var allPets: IPetCollection = new PetCollection();
 var petCounter: number;
 var currentTimer: Date;
+var userID: string;
 
 function calculateBallRadius(size: PetSize): number {
     if (size === PetSize.nano) {
@@ -133,7 +134,7 @@ function startAnimations(
                     text: "",
                     command: 'get-code-text',
                 });
-                sendMsg();
+                sendMsg(userID);
             }
             event.preventDefault();
         }
@@ -168,7 +169,7 @@ function startAnimations(
                         text: "",
                         command: 'get-code-text',
                     });
-                    sendMsg();
+                    sendMsg(userID);
                 } 
                 else if (e.target === closeChatButton) {
                         hideChatbox();
@@ -316,6 +317,7 @@ export function saveState(stateApi?: VscodeStateApi) {
     });
     state.petCounter = petCounter;
     state.healthTimer = currentTimer;
+    state.userID = userID;
     stateApi?.setState(state);
 }
 
@@ -341,6 +343,11 @@ function recoverState(
             currentTimer = new Date(state.healthTimer);
         } else {
             currentTimer = new Date();
+        }
+        if (state.userID !== undefined) {
+            userID = state.userID;
+        } else {
+            userID = createRandomString(8);
         }
     }
     var recoveryMap: Map<IPetType, PetElementState> = new Map();
@@ -368,7 +375,7 @@ function recoverState(
                 p.petExperience, p.petNextTarget, p.petLevel, p.petHealth,
                 stateApi,
             );
-            newPet.pet.setHealth(newPet.pet.getHealth() + healthUpdateValue, true).then(msg => {
+            newPet.pet.setHealth(newPet.pet.getHealth() + healthUpdateValue, true, userID).then(msg => {
                 if (msg !== "") {
                     displayMessage("", msg);
                     storeMessage("", msg);
@@ -697,7 +704,7 @@ export function petPanelApp(
                 var pets = allPets.pets;
                 var diff = message.diff;
                 pets.forEach((pet) => {
-                    pet.pet.setExperience(pet.pet.getExperience() + diff, true).then(msg => {
+                    pet.pet.setExperience(pet.pet.getExperience() + diff, true, userID).then(msg => {
                         if (msg !== "") {
                             displayMessage("", msg);
                             storeMessage("", msg);
@@ -713,7 +720,7 @@ export function petPanelApp(
                 var pets = allPets.pets;
                 var diff = message.diff;
                 pets.forEach((pet) => {
-                    pet.pet.setHealth(pet.pet.getHealth() + diff, false).then(msg => {
+                    pet.pet.setHealth(pet.pet.getHealth() + diff, false, userID).then(msg => {
                         if (msg !== "") {
                             displayMessage("", msg);
                             storeMessage("", msg);
@@ -733,7 +740,7 @@ export function petPanelApp(
                 const randomPet = pets[Math.floor(Math.random() * pets.length)];
                 
                 if (result === 0) {
-                    randomPet.pet.onCompilationSuccess(code).then(msg => {
+                    randomPet.pet.onCompilationSuccess(code, userID).then(msg => {
                         if (msg !== "") {
                             displayMessage("", msg);
                             storeMessage("", msg);
@@ -742,7 +749,7 @@ export function petPanelApp(
                         console.log(err);
                     });
                     allPets.pets.forEach(pet => {
-                        pet.pet.setExperience(pet.pet.getExperience() + 5, false).then(msg => {
+                        pet.pet.setExperience(pet.pet.getExperience() + 5, false, userID).then(msg => {
                             if (msg !== "") {
                                 displayMessage("", msg);
                                 storeMessage("", msg);
@@ -752,7 +759,7 @@ export function petPanelApp(
                         });;
                     });
                 } else {
-                    randomPet.pet.onCompilationError(code).then(msg => {
+                    randomPet.pet.onCompilationError(code, userID).then(msg => {
                         if (msg !== "") {
                             displayMessage("", msg);
                             storeMessage("", msg);
@@ -825,3 +832,13 @@ export async function getCodeFromEditor() {
         window.addEventListener('code-text-result', resolve, { once: true });
     });
 }
+
+function createRandomString(length: number) {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let result = "";
+    for (let i = 0; i < length; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  }
+  

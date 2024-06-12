@@ -42,12 +42,12 @@ export interface IPetType {
     getNextTarget(): number;
     getLevel(): number;
     
-    setHealth(value: number, initial: boolean): Promise<string>;
-    setExperience(value: number, showMessage: boolean): Promise<string>;
-    setLevel(value: number): void;
+    setHealth(value: number, initial: boolean, userID: string): Promise<string>;
+    setExperience(value: number, showMessage: boolean, userID: string): Promise<string>;
+    setLevel(value: number, userID: string): void;
 
-    onCompilationError(code: string): Promise<string>;
-    onCompilationSuccess(code: string): Promise<string>;
+    onCompilationError(code: string, userID: string): Promise<string>;
+    onCompilationSuccess(code: string, userID: string): Promise<string>;
 
 
     showSpeechBubble(message: string, duration: number): void;
@@ -75,6 +75,7 @@ export class PetPanelState {
     petStates: Array<PetElementState> | undefined;
     petCounter: number | undefined;
     healthTimer: Date | undefined;
+    userID: string | undefined;
 }
 
 export enum HorizontalDirection {

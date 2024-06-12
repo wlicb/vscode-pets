@@ -1,4 +1,4 @@
-export async function getRandomCommentWhenLevelUp(level: number) {
+export async function getRandomCommentWhenLevelUp(level: number, userID: string) {
     const levelUpMessages = [
         `I did it! I'm level ${level} now! 🎉`,
         `Look at me! I've leveled up! 🌟`,
@@ -14,7 +14,7 @@ export async function getRandomCommentWhenLevelUp(level: number) {
     let prompt = "You are a virtual pet for students to learn programming. You should talk in a cute way and give the student emotional support and encouragement. Please keep your response within 20 words. ";
     prompt += `You have just gotten a level up, and your current level is ${level}. Please give the student some encouragement.`;
     const randomMessage = levelUpMessages[Math.floor(Math.random() * levelUpMessages.length)];
-    const aiMessage = await getMessageFromAI(prompt);
+    const aiMessage = await getMessageFromAI(prompt, userID);
     if (aiMessage === "") {
         return randomMessage;
     } else {
@@ -22,7 +22,7 @@ export async function getRandomCommentWhenLevelUp(level: number) {
     }
 }
 
-export async function getRandomCommentWhenLowHealth() {
+export async function getRandomCommentWhenLowHealth(userID: string) {
     const lowHealthMessages = [
         `Oh no! My health is too low to level up. 😢`,
         `I need to recover first. My health is too low. 🛌`,
@@ -38,7 +38,7 @@ export async function getRandomCommentWhenLowHealth() {
     let prompt = "You are a virtual pet for students to learn programming. You should talk in a cute way and give the student emotional support and encouragement. Please keep your response within 20 words. ";
     prompt += `You are about to level up, but your health level is too low (below 10%) which prevents your level up. Please give the student some encouragement.`;
     const randomMessage = lowHealthMessages[Math.floor(Math.random() * lowHealthMessages.length)];
-    const aiMessage = await getMessageFromAI(prompt);
+    const aiMessage = await getMessageFromAI(prompt, userID);
     if (aiMessage === "") {
         return randomMessage;
     } else {
@@ -46,7 +46,7 @@ export async function getRandomCommentWhenLowHealth() {
     }
 }
 
-export async function getRandomCommentWhenCompilationError(code: string) {
+export async function getRandomCommentWhenCompilationError(code: string, userID: string) {
     const encouragementMessages = [
         `Don't worry, we can fix this! 🛠️`,
         `Errors are steps to success! 🚀`,
@@ -63,7 +63,7 @@ export async function getRandomCommentWhenCompilationError(code: string) {
     prompt += `The student just had a compilation error. Please give the student some positive feedback.`;
     prompt += `Here is the student's code: ${code} The student may ask you about the code, but please do not provide solutions directly. Please give indirect hints, such as where to look for the bugs. `;
     const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
-    const aiMessage = await getMessageFromAI(prompt);
+    const aiMessage = await getMessageFromAI(prompt, userID);
     console.log(prompt);
     if (aiMessage === "") {
         return randomMessage;
@@ -72,7 +72,7 @@ export async function getRandomCommentWhenCompilationError(code: string) {
     }
 }
 
-export async function getRandomCommentWhenCompilationSuccess(code: string) {
+export async function getRandomCommentWhenCompilationSuccess(code: string, userID: string) {
     const encouragementMessages = [
         `Great job! 🎉`,
         `You did it! 🚀`,
@@ -89,7 +89,7 @@ export async function getRandomCommentWhenCompilationSuccess(code: string) {
     prompt += `The student just succeeded in compiling his code. Please give the student some positive feedback.`;
     prompt += `Here is the student's code: ${code} The student may ask you about the code, but please do not provide solutions directly. Please give indirect hints, such as where to improve. `;
     const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
-    const aiMessage = await getMessageFromAI(prompt);
+    const aiMessage = await getMessageFromAI(prompt, userID);
     if (aiMessage === "") {
         return randomMessage;
     } else {
@@ -97,7 +97,7 @@ export async function getRandomCommentWhenCompilationSuccess(code: string) {
     }
 }
 
-export async function getRandomCommentWhenHealthDecrease(diff: number) {
+export async function getRandomCommentWhenHealthDecrease(diff: number, userID: string) {
     const encouragementMessages = [
         `It's been a while! Let's take a short break and then get back to coding together! ⏳`,
         `I need your help! Let's work on some code together! 🐾`,
@@ -114,7 +114,7 @@ export async function getRandomCommentWhenHealthDecrease(diff: number) {
     let prompt = "You are a virtual pet for students to learn programming. You should talk in a cute way and give the student emotional support and encouragement. Please keep your response within 20 words. ";
     prompt += `Your health decreased by ${diff} just now, which means the student has been idle for ${45 * diff} mins. Please give the student a friendly reminder and encourage him to keep up. `;
     const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
-    const aiMessage = await getMessageFromAI(prompt);
+    const aiMessage = await getMessageFromAI(prompt, userID);
     if (aiMessage === "") {
         return randomMessage;
     } else {
@@ -122,7 +122,7 @@ export async function getRandomCommentWhenHealthDecrease(diff: number) {
     }
 }
 
-export async function getRandomCommentWhenSessionStarted(diff: number) {
+export async function getRandomCommentWhenSessionStarted(diff: number, userID: string) {
     const bootMessages = [
         `I missed you so much! Ready to get back to coding together? 🐾`,
         `Welcome back! I've been waiting eagerly for you! Let's code! 🖥️`,
@@ -139,7 +139,7 @@ export async function getRandomCommentWhenSessionStarted(diff: number) {
     let prompt = "You are a virtual pet for students to learn programming. You should talk in a cute way and give the student emotional support and encouragement. Please keep your response within 20 words.";
     prompt += `Your student just opened the pet program, and your health decreased by ${diff}, which means the student has not come back for ${45 * diff} minutes. Please give me a warm welcome, and state that you miss the student.`;
     const randomMessage = bootMessages[Math.floor(Math.random() * bootMessages.length)];
-    const aiMessage = await getMessageFromAI(prompt);
+    const aiMessage = await getMessageFromAI(prompt, userID);
     if (aiMessage === "") {
         return randomMessage;
     } else {
@@ -148,7 +148,8 @@ export async function getRandomCommentWhenSessionStarted(diff: number) {
 }
 
 
-async function getMessageFromAI(prompt: string) {
+async function getMessageFromAI(prompt: string, userID: string) {
+    console.log(userID);
     const data = {
         contents: [{
                 role: "user",

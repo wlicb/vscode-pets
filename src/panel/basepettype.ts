@@ -372,7 +372,7 @@ export abstract class BasePetType implements IPetType {
         return this.nextTarget;
     }
 
-    async setHealth(value: number, initial: boolean) {
+    async setHealth(value: number, initial: boolean, userID: string) {
         let returnMsg = "";
         const prev = this.health;
         this.health = value;
@@ -384,7 +384,7 @@ export abstract class BasePetType implements IPetType {
         const diff = prev - this.health;
         if (initial) {
             try {
-                const msg = await getRandomCommentWhenSessionStarted(diff);
+                const msg = await getRandomCommentWhenSessionStarted(diff, userID);
                 this.showSpeechBubble(msg, 2000);
                 returnMsg = "(Booted Up) " + msg;
             } catch (err) {
@@ -393,7 +393,7 @@ export abstract class BasePetType implements IPetType {
         }
         else if (diff > 0) {
             try {
-                const msg = await getRandomCommentWhenHealthDecrease(diff);
+                const msg = await getRandomCommentWhenHealthDecrease(diff, userID);
                 this.showSpeechBubble(msg, 2000);
                 returnMsg = "(Health Decreased) " + msg;
             } catch (err) {
@@ -426,7 +426,7 @@ export abstract class BasePetType implements IPetType {
         return returnMsg;
     }
 
-    async setExperience(value: number, showMessage: boolean) {
+    async setExperience(value: number, showMessage: boolean, userID: string) {
         let returnMsg = "";
         const prev = this.experience;
         this.experience = value;
@@ -435,7 +435,7 @@ export abstract class BasePetType implements IPetType {
                 this.setLevel(this.level + 1);
                 if (showMessage) {
                     try {
-                        const msg = await getRandomCommentWhenLevelUp(this.level);
+                        const msg = await getRandomCommentWhenLevelUp(this.level, userID);
                         this.showSpeechBubble(msg, 2000);
                         returnMsg = "(Level Up) " + msg;
                     } catch (err) {
@@ -447,7 +447,7 @@ export abstract class BasePetType implements IPetType {
                 if (prev < this.nextTarget) {
                     if (showMessage) {
                         try {
-                            const msg = await getRandomCommentWhenLowHealth();
+                            const msg = await getRandomCommentWhenLowHealth(userID);
                             this.showSpeechBubble(msg, 2000);
                             returnMsg = "(Low Health Value) " + msg;
                         } catch (err) {
@@ -472,10 +472,10 @@ export abstract class BasePetType implements IPetType {
         }
     }
 
-    async onCompilationError(code: string) {
+    async onCompilationError(code: string, userID: string) {
         let returnMsg = "";
         try {
-            const msg = await getRandomCommentWhenCompilationError(code);
+            const msg = await getRandomCommentWhenCompilationError(code, userID);
             this.showSpeechBubble(msg, 2000);
             returnMsg = "(Compilation Failed) " + msg;
         } catch (err) {
@@ -484,10 +484,10 @@ export abstract class BasePetType implements IPetType {
         return returnMsg;
     }
 
-    async onCompilationSuccess(code: string) {
+    async onCompilationSuccess(code: string, userID: string) {
         let returnMsg = "";
         try {
-            const msg = await getRandomCommentWhenCompilationSuccess(code);
+            const msg = await getRandomCommentWhenCompilationSuccess(code, userID);
             this.showSpeechBubble(msg, 2000);
             returnMsg = "(Compilation Succeeded) " + msg;
         } catch (err) {
