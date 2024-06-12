@@ -176,7 +176,7 @@ function startAnimations(
                 } else if (e.target === chatButton) {
                     const nameEm = document.getElementById("name");
                     if (nameEm) {
-                        showChatbox(nameEm.innerHTML);
+                        void showChatbox(nameEm.innerHTML, userID);
                         setBadge(-1);
                     }
                 // } else {
@@ -831,5 +831,5 @@ function createRandomString(length: number) {
       result += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return result;
-  }
+}
   

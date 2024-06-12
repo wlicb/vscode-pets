@@ -1,13 +1,20 @@
 // import * as dotenv from '../node_modules/dotenv/lib/main';
 // dotenv.config();
-import { getCodeFromEditor } from "./main";
+import { getCodeFromEditor} from "./main";
 
 
 // Handle the UI
 let currentName: string;
-const chatHistory: Array<Array<string>> = [];
 
-export function showChatbox(name: string) {
+interface ChatMessage {
+    role: 'Student' | 'Pet';
+    message: string;
+}
+
+let chatHistory: ChatMessage[] = [];
+
+
+export async function showChatbox(name: string, userID: string) {
     currentName = name;
     const chatbox = document.getElementById("chatbox");
     if (chatbox) {
@@ -22,11 +29,12 @@ export function showChatbox(name: string) {
                 chatboxMessages.removeChild(chatboxMessages.firstChild);
             }
         }
+        chatHistory = await getChatHistory(userID);
         chatHistory.forEach(sentence => {
-            if (sentence[0] === "user") {
-                displayMessage("You", sentence[1]);
+            if (sentence.role === "Student") {
+                displayMessage("You", sentence.message);
             } else {
-                displayMessage(currentName, sentence[1]);
+                displayMessage(currentName, sentence.message);
             }
         });
     }
@@ -153,9 +161,9 @@ export function displayMessage(senderOp: string, message: string) {
 
 export function storeMessage(sender: string, message: string) {
     if (sender === "You") {
-        chatHistory.push(["user", message]);
+        chatHistory.push({role: 'Student', message: message});
     } else {
-        chatHistory.push(["model", message]);
+        chatHistory.push({role: 'Pet', message: message});
     }
 }
 
@@ -190,4 +198,29 @@ export function setBadge(val: number) {
 async function getEditorText() {
     const event = await getCodeFromEditor();
     return event;
+}
+
+async function getChatHistory(userID: string) {
+    let chatHistory = [];
+    const data = {
+        userID: userID,
+    };
+    try {
+        const response = await fetch('http://localhost:3000/get-chat-history', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        const responseData = await response.json();
+        const resText = JSON.stringify(responseData);
+        if (!response.ok) {
+            throw new Error('Failed to fetch Chat History: ' + resText);
+        }
+        chatHistory = responseData;
+    } catch (error) {
+        console.error('Error fetching chat history: ', error);
+    }
+    return chatHistory;
 }

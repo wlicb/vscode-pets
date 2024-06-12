@@ -386,7 +386,7 @@ export abstract class BasePetType implements IPetType {
             try {
                 const msg = await getRandomCommentWhenSessionStarted(diff, userID, this.name);
                 this.showSpeechBubble(msg, 2000);
-                returnMsg = "(Booted Up) " + msg;
+                returnMsg = msg;
             } catch (err) {
                 console.log("Failed to show speech bubble. ", err);
             }
@@ -395,7 +395,7 @@ export abstract class BasePetType implements IPetType {
             try {
                 const msg = await getRandomCommentWhenHealthDecrease(diff, userID, this.name);
                 this.showSpeechBubble(msg, 2000);
-                returnMsg = "(Health Decreased) " + msg;
+                returnMsg = msg;
             } catch (err) {
                 console.log("Failed to show speech bubble. ", err);
             }
@@ -437,7 +437,7 @@ export abstract class BasePetType implements IPetType {
                     try {
                         const msg = await getRandomCommentWhenLevelUp(this.level, userID, this.name);
                         this.showSpeechBubble(msg, 2000);
-                        returnMsg = "(Level Up) " + msg;
+                        returnMsg = msg;
                     } catch (err) {
                         console.log("Failed to show speech bubble. ", err);
                     }
@@ -449,7 +449,7 @@ export abstract class BasePetType implements IPetType {
                         try {
                             const msg = await getRandomCommentWhenLowHealth(userID, this.name);
                             this.showSpeechBubble(msg, 2000);
-                            returnMsg = "(Low Health Value) " + msg;
+                            returnMsg = msg;
                         } catch (err) {
                             console.log("Failed to show speech bubble. ", err);
                         }
@@ -477,7 +477,7 @@ export abstract class BasePetType implements IPetType {
         try {
             const msg = await getRandomCommentWhenCompilationError(code, userID, this.name);
             this.showSpeechBubble(msg, 2000);
-            returnMsg = "(Compilation Failed) " + msg;
+            returnMsg = msg;
         } catch (err) {
             console.log("Failed to show speech bubble. ", err);
         }
@@ -489,7 +489,7 @@ export abstract class BasePetType implements IPetType {
         try {
             const msg = await getRandomCommentWhenCompilationSuccess(code, userID, this.name);
             this.showSpeechBubble(msg, 2000);
-            returnMsg = "(Compilation Succeeded) " + msg;
+            returnMsg = msg;
         } catch (err) {
             console.log("Failed to show speech bubble. ", err);
         }
