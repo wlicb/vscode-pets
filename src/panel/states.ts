@@ -1,5 +1,10 @@
 import { PetColor, PetType } from '../common/types';
 
+type ReturnMessage = {
+    returnMsg: string;
+    time: string;
+}
+
 export interface IPetType {
     nextFrame(): void;
 
@@ -42,12 +47,12 @@ export interface IPetType {
     getNextTarget(): number;
     getLevel(): number;
     
-    setHealth(value: number, initial: boolean, userID: string): Promise<string>;
-    setExperience(value: number, showMessage: boolean, userID: string): Promise<string>;
+    setHealth(value: number, initial: boolean, userID: string): Promise<ReturnMessage>;
+    setExperience(value: number, showMessage: boolean, userID: string): Promise<ReturnMessage>;
     setLevel(value: number, userID: string): void;
 
-    onCompilationError(code: string, userID: string): Promise<string>;
-    onCompilationSuccess(code: string, userID: string): Promise<string>;
+    onCompilationError(code: string, userID: string): Promise<ReturnMessage>;
+    onCompilationSuccess(code: string, userID: string): Promise<ReturnMessage>;
 
 
     showSpeechBubble(message: string, duration: number): void;

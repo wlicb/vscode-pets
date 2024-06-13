@@ -219,7 +219,8 @@ export abstract class BasePetType implements IPetType {
     }
 
     showSpeechBubble(message: string, duration: number = 3000) {
-        this.speech.innerHTML = message;
+        const processedMessage = message.replace(/\s*\(.*?\)\s*/, '');
+        this.speech.innerHTML = processedMessage;
         this.speech.style.display = 'block';
         setTimeout(() => {
             this.hideSpeechBubble();
@@ -374,6 +375,7 @@ export abstract class BasePetType implements IPetType {
 
     async setHealth(value: number, initial: boolean, userID: string) {
         let returnMsg = "";
+        let time = "";
         const prev = this.health;
         this.health = value;
         if (this.health < 0) {
@@ -384,18 +386,20 @@ export abstract class BasePetType implements IPetType {
         const diff = prev - this.health;
         if (initial) {
             try {
-                const msg = await getRandomCommentWhenSessionStarted(diff, userID, this.name);
-                this.showSpeechBubble(msg, 2000);
-                returnMsg = msg;
+                const { aiText, currentTime } = await getRandomCommentWhenSessionStarted(diff, userID, this.name);
+                this.showSpeechBubble(aiText, 2000);
+                returnMsg = aiText;
+                time = currentTime;
             } catch (err) {
                 console.log("Failed to show speech bubble. ", err);
             }
         }
         else if (diff > 0) {
             try {
-                const msg = await getRandomCommentWhenHealthDecrease(diff, userID, this.name);
-                this.showSpeechBubble(msg, 2000);
-                returnMsg = msg;
+                const { aiText, currentTime } = await getRandomCommentWhenHealthDecrease(diff, userID, this.name);
+                this.showSpeechBubble(aiText, 2000);
+                returnMsg = aiText;
+                time = currentTime;
             } catch (err) {
                 console.log("Failed to show speech bubble. ", err);
             }
@@ -423,11 +427,12 @@ export abstract class BasePetType implements IPetType {
                 this.currentState = resolveState(this.currentStateEnum, this);
             }
         }
-        return returnMsg;
+        return { returnMsg, time };
     }
 
     async setExperience(value: number, showMessage: boolean, userID: string) {
         let returnMsg = "";
+        let time = "";
         const prev = this.experience;
         this.experience = value;
         if (this.experience >= this.nextTarget) {
@@ -435,9 +440,10 @@ export abstract class BasePetType implements IPetType {
                 this.setLevel(this.level + 1);
                 if (showMessage) {
                     try {
-                        const msg = await getRandomCommentWhenLevelUp(this.level, userID, this.name);
-                        this.showSpeechBubble(msg, 2000);
-                        returnMsg = msg;
+                        const { aiText, currentTime } = await getRandomCommentWhenLevelUp(this.level, userID, this.name);
+                        this.showSpeechBubble(aiText, 2000);
+                        returnMsg = aiText;
+                        time = currentTime;
                     } catch (err) {
                         console.log("Failed to show speech bubble. ", err);
                     }
@@ -447,9 +453,10 @@ export abstract class BasePetType implements IPetType {
                 if (prev < this.nextTarget) {
                     if (showMessage) {
                         try {
-                            const msg = await getRandomCommentWhenLowHealth(userID, this.name);
-                            this.showSpeechBubble(msg, 2000);
-                            returnMsg = msg;
+                            const { aiText, currentTime } = await getRandomCommentWhenLowHealth(userID, this.name);
+                            this.showSpeechBubble(aiText, 2000);
+                            returnMsg = aiText;
+                            time = currentTime;
                         } catch (err) {
                             console.log("Failed to show speech bubble. ", err);
                         }
@@ -457,7 +464,7 @@ export abstract class BasePetType implements IPetType {
                 }
             }
         }
-        return returnMsg;
+        return { returnMsg, time };
     }
 
     setLevel(value: number) {
@@ -474,25 +481,29 @@ export abstract class BasePetType implements IPetType {
 
     async onCompilationError(code: string, userID: string) {
         let returnMsg = "";
+        let time = "";
         try {
-            const msg = await getRandomCommentWhenCompilationError(code, userID, this.name);
-            this.showSpeechBubble(msg, 2000);
-            returnMsg = msg;
+            const { aiText, currentTime } = await getRandomCommentWhenCompilationError(code, userID, this.name);
+            this.showSpeechBubble(aiText, 2000);
+            returnMsg = aiText;
+            time = currentTime;
         } catch (err) {
             console.log("Failed to show speech bubble. ", err);
         }
-        return returnMsg;
+        return { returnMsg, time };
     }
 
     async onCompilationSuccess(code: string, userID: string) {
         let returnMsg = "";
+        let time = "";
         try {
-            const msg = await getRandomCommentWhenCompilationSuccess(code, userID, this.name);
-            this.showSpeechBubble(msg, 2000);
-            returnMsg = msg;
+            const { aiText, currentTime } = await getRandomCommentWhenCompilationSuccess(code, userID, this.name);
+            this.showSpeechBubble(aiText, 2000);
+            returnMsg = aiText;
+            time = currentTime;
         } catch (err) {
             console.log("Failed to show speech bubble. ", err);
         }
-        return returnMsg;
+        return { returnMsg, time };
     }
 }

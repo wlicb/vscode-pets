@@ -312,7 +312,7 @@ export function saveState(stateApi?: VscodeStateApi) {
     stateApi?.setState(state);
 }
 
-function recoverState(
+async function recoverState(
     basePetUri: string,
     petSize: PetSize,
     floor: number,
@@ -338,7 +338,7 @@ function recoverState(
         if (state.userID !== undefined) {
             userID = state.userID;
         } else {
-            userID = createRandomString(8);
+            userID = await fetchUserID();
         }
     }
     var recoveryMap: Map<IPetType, PetElementState> = new Map();
@@ -367,9 +367,9 @@ function recoverState(
                 stateApi,
             );
             newPet.pet.setHealth(newPet.pet.getHealth() + healthUpdateValue, true, userID).then(msg => {
-                if (msg !== "") {
-                    displayMessage("", msg);
-                    storeMessage("", msg);
+                if (msg.returnMsg !== "") {
+                    displayMessage("", msg.returnMsg, msg.time);
+                    storeMessage("", msg.returnMsg, msg.time);
                 }
             }).catch(err => {
                 console.log(err);
@@ -385,7 +385,7 @@ function recoverState(
     recoveryMap.forEach((state, pet) => {
         // Recover previous state.
         if (state.petState !== undefined) {
-            pet.recoverState(state.petState);
+            void pet.recoverState(state.petState);
         }
 
         // Resolve friend relationships
@@ -696,9 +696,9 @@ export function petPanelApp(
                 var diff = message.diff;
                 pets.forEach((pet) => {
                     pet.pet.setExperience(pet.pet.getExperience() + diff, true, userID).then(msg => {
-                        if (msg !== "") {
-                            displayMessage("", msg);
-                            storeMessage("", msg);
+                        if (msg.returnMsg !== "") {
+                            displayMessage("", msg.returnMsg, msg.time);
+                            storeMessage("", msg.returnMsg, msg.time);
                         }
                     }).catch(err => {
                         console.log(err);
@@ -712,9 +712,9 @@ export function petPanelApp(
                 var diff = message.diff;
                 pets.forEach((pet) => {
                     pet.pet.setHealth(pet.pet.getHealth() + diff, false, userID).then(msg => {
-                        if (msg !== "") {
-                            displayMessage("", msg);
-                            storeMessage("", msg);
+                        if (msg.returnMsg !== "") {
+                            displayMessage("", msg.returnMsg, msg.time);
+                            storeMessage("", msg.returnMsg, msg.time);
                         }
                     }).catch(err => {
                         console.log(err);
@@ -732,18 +732,18 @@ export function petPanelApp(
                 
                 if (result === 0) {
                     randomPet.pet.onCompilationSuccess(code, userID).then(msg => {
-                        if (msg !== "") {
-                            displayMessage("", msg);
-                            storeMessage("", msg);
+                        if (msg.returnMsg !== "") {
+                            displayMessage("", msg.returnMsg, msg.time);
+                            storeMessage("", msg.returnMsg, msg.time);
                         }
                     }).catch(err => {
                         console.log(err);
                     });
                     allPets.pets.forEach(pet => {
                         pet.pet.setExperience(pet.pet.getExperience() + 5, false, userID).then(msg => {
-                            if (msg !== "") {
-                                displayMessage("", msg);
-                                storeMessage("", msg);
+                            if (msg.returnMsg !== "") {
+                                displayMessage("", msg.returnMsg, msg.time);
+                                storeMessage("", msg.returnMsg, msg.time);
                             }
                         }).catch(err => {
                             console.log(err);
@@ -751,9 +751,9 @@ export function petPanelApp(
                     });
                 } else {
                     randomPet.pet.onCompilationError(code, userID).then(msg => {
-                        if (msg !== "") {
-                            displayMessage("", msg);
-                            storeMessage("", msg);
+                        if (msg.returnMsg !== "") {
+                            displayMessage("", msg.returnMsg, msg.time);
+                            storeMessage("", msg.returnMsg, msg.time);
                         }
                     }).catch(err => {
                         console.log(err);
@@ -798,7 +798,7 @@ export function petPanelApp(
         saveState(stateApi);
     } else {
         console.log('Recovering state - ', state);
-        recoverState(basePetUri, petSize, floor, stateApi);
+        void recoverState(basePetUri, petSize, floor, stateApi);
         const currentPet = allPets.pets[0];
         console.log(allPets);
         showBar(currentPet.pet.name, currentPet.pet.getLevel(), currentPet.pet.getExperience(), currentPet.pet.getNextTarget(), currentPet.pet.getHealth());
@@ -824,12 +824,22 @@ export async function getCodeFromEditor() {
     });
 }
 
-function createRandomString(length: number) {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let result = "";
-    for (let i = 0; i < length; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
+async function fetchUserID() {
+    let userID = "";
+    try {
+        const response = await fetch('http://localhost:3000/create-user', {
+            method: 'GET'
+        });
+        const resText = await response.text();
+        if (!response.ok) {
+            throw new Error('Failed to fetch user ID: ' + resText);
+        } else {
+            userID = resText;
+        }
+    } catch (error) {
+        userID = "";
+        console.error('Error fetching user ID: ', error);
     }
-    return result;
+    console.log(userID);
+    return userID;
 }
-  

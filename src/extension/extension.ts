@@ -351,6 +351,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-pets.start', async () => {
+            // start the extension
             if (
                 getConfigurationPosition() === ExtPosition.explorer &&
                 webviewViewProvider
@@ -1099,6 +1100,7 @@ class PetWebviewContainer implements IPetPanel {
 				<title>VS Code Pets</title>
 			</head>
 			<body>
+                
                 <canvas id="petCanvas"></canvas>
                 <div id="petsContainer"></div>
                 <div id="foreground">                

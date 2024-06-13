@@ -9,6 +9,7 @@ let currentName: string;
 interface ChatMessage {
     role: 'Student' | 'Pet';
     message: string;
+    time: string;
 }
 
 let chatHistory: ChatMessage[] = [];
@@ -32,9 +33,9 @@ export async function showChatbox(name: string, userID: string) {
         chatHistory = await getChatHistory(userID);
         chatHistory.forEach(sentence => {
             if (sentence.role === "Student") {
-                displayMessage("You", sentence.message);
+                displayMessage("You", sentence.message, sentence.time);
             } else {
-                displayMessage(currentName, sentence.message);
+                displayMessage(currentName, sentence.message, sentence.time);
             }
         });
     }
@@ -66,10 +67,11 @@ export function checkChatboxVisiblityAndName(name: string) {
 
 export function sendMsg(userID: string) {
     console.log(userID);
+    const currentTime = getCurrentTime();
     const userInput = document.getElementById('message-input') as HTMLInputElement;
     const inputValue = userInput.value;
-    displayMessage('You', inputValue);
-    storeMessage('You', inputValue);
+    displayMessage('You', inputValue, currentTime);
+    storeMessage('You', inputValue, currentTime);
     const inputField = document.getElementById('message-input') as HTMLInputElement;
     inputField.value = '';
     if (inputValue.trim() === '') {
@@ -78,17 +80,18 @@ export function sendMsg(userID: string) {
     getEditorText().then(event => {
         const e = event as CustomEvent;
         console.log(e);
-        void fetchResponse("chat", userID, 0, e.detail.code, 0, inputValue, currentName);
+        void fetchResponse(currentTime, userID, 0, e.detail.code, 0, inputValue, currentName);
     }).catch(err => {
         console.log(err);
-        void fetchResponse("chat", userID, 0, "", 0, inputValue, currentName);
+        void fetchResponse(currentTime, userID, 0, "", 0, inputValue, currentName);
     });
     
 }
 
 
-async function fetchResponse(type: string, userID: string, level: number, code: string, diff: number, inputValue: string, name: string) {
+async function fetchResponse(time: string, userID: string, level: number, code: string, diff: number, inputValue: string, name: string) {
     const data = {
+        time: time,
         type: "user-input",
         userID: userID,
         params: {
@@ -113,19 +116,19 @@ async function fetchResponse(type: string, userID: string, level: number, code: 
         if (!response.ok) {
             throw new Error('Failed to fetch AI response: ' + resText);
         }
-        const aiText = responseData.answer;
-        displayMessage(currentName, aiText);
-        storeMessage(currentName, aiText);
+        const aiText = responseData.message;
+        const time = responseData.time;
+        displayMessage(currentName, aiText, time);
+        storeMessage(currentName, aiText, time);
     } catch (error) {
         console.error('Error fetching response from Gemini: ', error);
-        const errText = 'Sorry, there was an error processing your request.';
-        displayMessage(currentName, errText);
-        storeMessage(currentName, errText);
+        // displayMessage(currentName, errText);
+        // storeMessage(currentName, errText);
     }
 }
 
 
-export function displayMessage(senderOp: string, message: string) {
+export function displayMessage(senderOp: string, message: string, time: string) {
     let sender: string;
     if (senderOp === "") {
         sender = currentName;
@@ -140,7 +143,7 @@ export function displayMessage(senderOp: string, message: string) {
         
         const messageSender = document.createElement('div');
         messageSender.classList.add('message-sender');
-        messageSender.textContent = sender;
+        messageSender.textContent = sender + "  " + time;
         
         const messageContent = document.createElement('div');
         messageContent.classList.add('message-content');
@@ -159,11 +162,11 @@ export function displayMessage(senderOp: string, message: string) {
 
 }
 
-export function storeMessage(sender: string, message: string) {
+export function storeMessage(sender: string, message: string, currentTime: string) {
     if (sender === "You") {
-        chatHistory.push({role: 'Student', message: message});
+        chatHistory.push({role: 'Student', message: message, time: currentTime});
     } else {
-        chatHistory.push({role: 'Pet', message: message});
+        chatHistory.push({role: 'Pet', message: message, time: currentTime});
     }
 }
 
@@ -223,4 +226,23 @@ async function getChatHistory(userID: string) {
         console.error('Error fetching chat history: ', error);
     }
     return chatHistory;
+}
+
+function getCurrentTime() {
+    const now = new Date();
+
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+
+    let hours = now.getHours();
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'pm' : 'am';
+
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+
+    const formattedTime = `${month}/${day}/${year} ${hours}:${minutes}${ampm}`;
+
+    return formattedTime;
 }
