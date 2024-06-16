@@ -360,10 +360,10 @@ export function activate(context: vscode.ExtensionContext) {
           
             // Check if the user entered the access code
             if (accessCode !== undefined) {
-                console.log(accessCode);
+                // console.log(accessCode);
                 const result = await validateAccessCode(accessCode);
-                if (result === 0) {
-                    void vscode.window.showInformationMessage(`Welcome!`);
+                if (result !== "") {
+                    void vscode.window.showInformationMessage(`Welcome to ${result}!`);
                     currentAccessCode = accessCode;
                     void vscode.commands.executeCommand('vscode-pets.get-access-code');
                     // start the extension
@@ -398,7 +398,7 @@ export function activate(context: vscode.ExtensionContext) {
                     }
 
                 } else {
-                void vscode.window.showWarningMessage(`Invalid access code. Please check with your instructor.`);
+                    void vscode.window.showWarningMessage(`Invalid access code. Please check with your instructor.`);
                 }
             } else {
                 void vscode.window.showWarningMessage('Access code is required to start the extension.');
@@ -1462,7 +1462,7 @@ async function createPetPlayground(context: vscode.ExtensionContext) {
 }
 
 async function validateAccessCode(accessCode: string) {
-    let result = 1;
+    let result = "";
     const data = {
         accessCode: accessCode,
     };
@@ -1478,10 +1478,10 @@ async function validateAccessCode(accessCode: string) {
         if (!response.ok) {
             throw new Error('Failed to validate access code: ' + resText);
         } else {
-            result = parseInt(resText);
+            result = resText;
         }
     } catch (error) {
-        result = 1;
+        result = "";
         console.error('Failed to validate access code: ', error);
     }
     console.log(result);
