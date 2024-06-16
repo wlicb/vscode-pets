@@ -171,14 +171,14 @@ export function storeMessage(sender: string, message: string, currentTime: strin
 }
 
 export function setBadge(val: number) {
-    console.log("Setting badge: ", val);
+    // console.log("Setting badge: ", val);
     const chatbox = document.getElementById("chatbox");
     if (chatbox && window.getComputedStyle(chatbox).display !== "none") {
         const badge = document.getElementById("notification-badge");
         if (badge) {
             badge.innerHTML = "0";
             badge.style.display = "none";
-            console.log("Hiding badge");
+            // console.log("Hiding badge");
         }
     } else {
         const badge = document.getElementById("notification-badge");
@@ -187,11 +187,11 @@ export function setBadge(val: number) {
                 const preVal = badge.innerHTML ? parseInt(badge.innerHTML) : 0;
                 badge.innerHTML = (preVal + val).toString();
                 badge.style.display = "flex";
-                console.log("Showing badge");
+                // console.log("Showing badge");
             } else {
                 badge.innerHTML = "0";
                 badge.style.display = "none";
-                console.log("Hiding badge");
+                // console.log("Hiding badge");
             }
         }
     }

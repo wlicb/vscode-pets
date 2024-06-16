@@ -35,6 +35,8 @@ const DEFAULT_THEME = Theme.none;
 
 const UPDATE_HEALTH_THRES = 45;
 
+let currentAccessCode: string;
+
 class PetQuickPickItem implements vscode.QuickPickItem {
     constructor(
         public readonly name_: string,
@@ -351,38 +353,57 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-pets.start', async () => {
-            // start the extension
-            if (
-                getConfigurationPosition() === ExtPosition.explorer &&
-                webviewViewProvider
-            ) {
-                await vscode.commands.executeCommand('petsView.focus');
-            } else {
-                const spec = PetSpecification.fromConfiguration();
-                PetPanel.createOrShow(
-                    context.extensionUri,
-                    spec.color,
-                    spec.type,
-                    spec.size,
-                    getConfiguredTheme(),
-                    getConfiguredThemeKind(),
-                    getThrowWithMouseConfiguration(),
-                );
+            const accessCode = await vscode.window.showInputBox({
+                prompt: 'Enter the access code',
+                placeHolder: 'Access code',
+              });
+          
+            // Check if the user entered the access code
+            if (accessCode !== undefined) {
+                console.log(accessCode);
+                const result = await validateAccessCode(accessCode);
+                if (result === 0) {
+                    void vscode.window.showInformationMessage(`Welcome!`);
+                    currentAccessCode = accessCode;
+                    void vscode.commands.executeCommand('vscode-pets.get-access-code');
+                    // start the extension
+                    if (
+                        getConfigurationPosition() === ExtPosition.explorer &&
+                        webviewViewProvider
+                    ) {
+                        await vscode.commands.executeCommand('petsView.focus');
+                    } else {
+                        const spec = PetSpecification.fromConfiguration();
+                        PetPanel.createOrShow(
+                            context.extensionUri,
+                            spec.color,
+                            spec.type,
+                            spec.size,
+                            getConfiguredTheme(),
+                            getConfiguredThemeKind(),
+                            getThrowWithMouseConfiguration(),
+                        );
 
-                if (PetPanel.currentPanel) {
-                    var collection = PetSpecification.collectionFromMemento(
-                        context,
-                        getConfiguredSize(),
-                    );
-                    collection.forEach((item) => {
-                        PetPanel.currentPanel?.spawnPet(item);
-                    });
-                    // Store the collection in the memento, incase any of the null values (e.g. name) have been set
-                    await storeCollectionAsMemento(context, collection);
+                        if (PetPanel.currentPanel) {
+                            var collection = PetSpecification.collectionFromMemento(
+                                context,
+                                getConfiguredSize(),
+                            );
+                            collection.forEach((item) => {
+                                PetPanel.currentPanel?.spawnPet(item);
+                            });
+                            // Store the collection in the memento, incase any of the null values (e.g. name) have been set
+                            await storeCollectionAsMemento(context, collection);
+                        }
+                    }
+
+                } else {
+                void vscode.window.showWarningMessage(`Invalid access code. Please check with your instructor.`);
                 }
+            } else {
+                void vscode.window.showWarningMessage('Access code is required to start the extension.');
             }
-        }),
-    );
+        }));
 
     spawnPetStatusBar = vscode.window.createStatusBarItem(
         vscode.StatusBarAlignment.Right,
@@ -430,6 +451,15 @@ export function activate(context: vscode.ExtensionContext) {
             const panel = getPetPanel();
             if (panel !== undefined) {
                 panel.throwBall();
+            }
+        }),
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-pets.get-access-code', () => {
+            const panel = getPetPanel();
+            if (panel !== undefined) {
+                panel.getAccessCode();
             }
         }),
     );
@@ -868,6 +898,7 @@ interface IPetPanel {
     handleCompileResult(result: number, code: string): void;
     handleEditorCodeResult(code: string): void;
     updateHealthTimer(timer: Date): void;
+    getAccessCode(): void;
 }
 
 class PetWebviewContainer implements IPetPanel {
@@ -1011,6 +1042,12 @@ class PetWebviewContainer implements IPetPanel {
 
     public handleEditorCodeResult(code: string): void {
         void this.getWebview().postMessage({ command: 'handle-editor-code', code: code });
+    }
+
+    public getAccessCode(): void {
+        if (currentAccessCode !== undefined) {
+            void this.getWebview().postMessage({ command: 'access-code', accessCode: currentAccessCode });
+        }
     }
 
     protected getWebview(): vscode.Webview {
@@ -1166,6 +1203,8 @@ function handleWebviewMessage(message: WebviewMessage) {
         case 'get-code-text':
             void vscode.commands.executeCommand('vscode-pets.get-editor-code');
             return;
+        case 'get-access-code':
+            void vscode.commands.executeCommand('vscode-pets.get-access-code');
     }
 }
 
@@ -1421,3 +1460,31 @@ async function createPetPlayground(context: vscode.ExtensionContext) {
         await storeCollectionAsMemento(context, collection);
     }
 }
+
+async function validateAccessCode(accessCode: string) {
+    let result = 1;
+    const data = {
+        accessCode: accessCode,
+    };
+    try {
+        const response = await fetch('http://localhost:3100/validate-access-code', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        const resText = await response.text();
+        if (!response.ok) {
+            throw new Error('Failed to validate access code: ' + resText);
+        } else {
+            result = parseInt(resText);
+        }
+    } catch (error) {
+        result = 1;
+        console.error('Failed to validate access code: ', error);
+    }
+    console.log(result);
+    return result;
+}
+

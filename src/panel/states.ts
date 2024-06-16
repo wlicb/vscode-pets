@@ -3,7 +3,7 @@ import { PetColor, PetType } from '../common/types';
 type ReturnMessage = {
     returnMsg: string;
     time: string;
-}
+};
 
 export interface IPetType {
     nextFrame(): void;
@@ -81,6 +81,7 @@ export class PetPanelState {
     petCounter: number | undefined;
     healthTimer: Date | undefined;
     userID: string | undefined;
+    accessCode: string | undefined;
 }
 
 export enum HorizontalDirection {

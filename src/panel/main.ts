@@ -38,6 +38,7 @@ export var allPets: IPetCollection = new PetCollection();
 var petCounter: number;
 var currentTimer: Date;
 var userID: string;
+var currentAccessCode: string;
 
 function calculateBallRadius(size: PetSize): number {
     if (size === PetSize.nano) {
@@ -309,6 +310,7 @@ export function saveState(stateApi?: VscodeStateApi) {
     state.petCounter = petCounter;
     state.healthTimer = currentTimer;
     state.userID = userID;
+    state.accessCode = currentAccessCode;
     stateApi?.setState(state);
 }
 
@@ -340,6 +342,15 @@ async function recoverState(
         } else {
             userID = await fetchUserID();
         }
+        if (state.accessCode !== undefined) {
+            currentAccessCode = state.accessCode;
+        } else {
+            stateApi?.postMessage({
+                text: "",
+                command: 'get-access-code',
+            });
+        }
+        
     }
     var recoveryMap: Map<IPetType, PetElementState> = new Map();
     state?.petStates?.forEach((p) => {
@@ -774,6 +785,13 @@ export function petPanelApp(
                 currentTimer = timer;
                 saveState(stateApi);
                 break;
+            case 'access-code':
+                console.log("receiving access code from the extension.");
+                currentAccessCode = message.accessCode;
+                console.log(currentAccessCode);
+                saveState(stateApi);
+                void bindUserID(userID, currentAccessCode);
+                break;
 
         }
     });
@@ -842,4 +860,36 @@ async function fetchUserID() {
     }
     console.log(userID);
     return userID;
+}
+
+async function bindUserID(userID: string, accessCode: string) {
+    let result = 1;
+    if (currentAccessCode !== undefined && userID !== undefined) {
+        const data = {
+            accessCode: accessCode,
+            userID: userID
+        };
+        try {
+            const response = await fetch('http://localhost:3100/bind-access-code', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            const resText = await response.text();
+            if (!response.ok) {
+                throw new Error('Failed to bind access code: ' + resText);
+            } else {
+                result = parseInt(resText);
+            }
+        } catch (error) {
+            result = 1;
+            console.error('Failed to bind access code: ', error);
+        }
+        console.log(result);
+    }
+    console.log(`Binding the user ID ${userID} with access code ${accessCode} with response ${result}.`);
+    return result;
+    
 }
