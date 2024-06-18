@@ -437,7 +437,9 @@ export abstract class BasePetType implements IPetType {
         const prevLevel = this.getLevel();
         this.experience = value;
         if (this.experience >= this.nextTarget) {
+            // this.experience = this.nextTarget;
             if (this.health >= LOW_HEALTH_CUT_OFF) {
+                console.log(typeof(nextTarget));
                 this.setLevel(this.level + 1, nextTarget);
                 if (showMessage) {
                     try {
@@ -470,9 +472,10 @@ export abstract class BasePetType implements IPetType {
         return { returnMsg, time, levelChange };
     }
 
-    setLevel(value: number, nextTarget: number) {
+    setLevel(value: number, newNextTarget: number) {
         this.level = value;
-        this.nextTarget += nextTarget;
+        console.log(typeof(this.nextTarget));
+        this.nextTarget += newNextTarget;
         if (this.level > LOW_LEVEL_CUT_OFF) {
             this.currentStateEnum = States.sitIdleM;
             this.currentState = resolveState(this.currentStateEnum, this);

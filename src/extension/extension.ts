@@ -372,7 +372,7 @@ export function activate(context: vscode.ExtensionContext) {
                     currentAccessCode = accessCode;
                     void vscode.commands.executeCommand('vscode-pets.get-access-code');
                     const storyLine = await fetchStoryLine(accessCode);
-                    console.log(storyLine);
+                    // console.log(storyLine);
                     storeStoryLine(JSON.stringify(storyLine));
                     UPDATE_HEALTH_THRES = getHealthDropTime(1);
                     INCREASE_HEALTH_THRES = getHealthIncreaseTime(1);
@@ -1507,7 +1507,7 @@ async function validateAccessCode(accessCode: string) {
         result = "";
         console.error('Failed to validate access code: ', error);
     }
-    console.log(result);
+    // console.log(result);
     return result;
 }
 
@@ -1529,12 +1529,12 @@ async function fetchStoryLine(accessCode: string) {
         if (!response.ok) {
             throw new Error('Failed to fetch story line: ' + resText);
         } else {
-            result = resText.storyLine;
+            result = resText;
         }
     } catch (error) {
         result = [];
         console.error('Failed to fetch story line: ', error);
     }
-    console.log(result);
+    // console.log(result);
     return result;
 }

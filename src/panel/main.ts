@@ -366,7 +366,6 @@ async function recoverState(
             (p.petType as string) = 'rubber-duck';
         }
         const now = new Date();
-        console.log(typeof(currentTimer));
         const differenceInMilliseconds = now.getTime() - currentTimer.getTime();
         const diff = Math.floor(differenceInMilliseconds / (1000 * 60));
         const healthUpdateValue = -Math.floor(diff / UPDATE_HEALTH_THRES);
@@ -716,7 +715,7 @@ export function petPanelApp(
                 var pets = allPets.pets;
                 var diff = message.diff;
                 pets.forEach((pet) => {
-                    pet.pet.setExperience(pet.pet.getExperience() + diff, true, userID, getNextTarget(pet.pet.getLevel())).then(msg => {
+                    pet.pet.setExperience(pet.pet.getExperience() + diff, true, userID, getNextTarget(pet.pet.getLevel() + 1)).then(msg => {
                         if (msg.returnMsg !== "") {
                             displayMessage("", msg.returnMsg, msg.time);
                             storeMessage("", msg.returnMsg, msg.time);
@@ -767,7 +766,7 @@ export function petPanelApp(
                         console.log(err);
                     });
                     allPets.pets.forEach(pet => {
-                        pet.pet.setExperience(pet.pet.getExperience() + 5, false, userID, getNextTarget(pet.pet.getLevel())).then(msg => {
+                        pet.pet.setExperience(pet.pet.getExperience() + 5, false, userID, getNextTarget(pet.pet.getLevel() + 1)).then(msg => {
                             if (msg.returnMsg !== "") {
                                 displayMessage("", msg.returnMsg, msg.time);
                                 storeMessage("", msg.returnMsg, msg.time);
@@ -812,6 +811,7 @@ export function petPanelApp(
                         text: JSON.stringify(storyLine)
                     });
                     currentStoryLine = storyLine;
+                    console.log(currentStoryLine);
                     UPDATE_HEALTH_THRES = currentStoryLine[0].health_drop_time;
                 }).catch(err => {
                     console.log(err);
@@ -889,31 +889,29 @@ async function fetchUserID() {
 
 async function bindUserID(userID: string, accessCode: string) {
     let result = [];
-    if (currentAccessCode !== undefined && userID !== undefined) {
-        const data = {
-            accessCode: accessCode,
-            userID: userID
-        };
-        try {
-            const response = await fetch('http://localhost:3100/bind-access-code', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
-            const resText = await response.json();
-            if (!response.ok) {
-                throw new Error('Failed to bind access code: ' + resText);
-            } else {
-                result = resText.storyLine;
-            }
-        } catch (error) {
-            result = [];
-            console.error('Failed to bind access code: ', error);
+    const data = {
+        accessCode: accessCode,
+        userID: userID
+    };
+    try {
+        const response = await fetch('http://localhost:3100/bind-access-code', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        const resText = await response.json();
+        if (!response.ok) {
+            throw new Error('Failed to bind access code: ' + resText);
+        } else {
+            result = resText;
         }
-        console.log(result);
+    } catch (error) {
+        result = [];
+        console.error('Failed to bind access code: ', error);
     }
+        // console.log(result);
     console.log(`Binding the user ID ${userID} with access code ${accessCode} with response ${result}.`);
     return result;
     
@@ -922,6 +920,7 @@ async function bindUserID(userID: string, accessCode: string) {
 function getNextTarget(level: number) {
     if (currentStoryLine !== undefined && currentStoryLine[level-1] !== undefined) {
         return currentStoryLine[level-1].next_target;
+    } else {
+        return -1;
     }
-    return -1;
 }
