@@ -5,6 +5,19 @@ type ReturnMessage = {
     time: string;
 };
 
+type ReturnMessageWithLevelChange = {
+    returnMsg: string;
+    time: string;
+    levelChange: number;
+};
+
+export type Level = {
+    next_target: number;
+    ex_per_line: number;
+    health_drop_time: number;
+    health_increase_time: number;
+};
+
 export interface IPetType {
     nextFrame(): void;
 
@@ -48,8 +61,8 @@ export interface IPetType {
     getLevel(): number;
     
     setHealth(value: number, initial: boolean, userID: string): Promise<ReturnMessage>;
-    setExperience(value: number, showMessage: boolean, userID: string): Promise<ReturnMessage>;
-    setLevel(value: number, userID: string): void;
+    setExperience(value: number, showMessage: boolean, userID: string, nextTarget: number): Promise<ReturnMessageWithLevelChange>;
+    setLevel(value: number, nextTarget: number): void;
 
     onCompilationError(code: string, userID: string): Promise<ReturnMessage>;
     onCompilationSuccess(code: string, userID: string): Promise<ReturnMessage>;
@@ -82,6 +95,7 @@ export class PetPanelState {
     healthTimer: Date | undefined;
     userID: string | undefined;
     accessCode: string | undefined;
+    storyLine: Array<Level> | undefined;
 }
 
 export enum HorizontalDirection {

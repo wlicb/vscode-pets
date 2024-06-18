@@ -20,6 +20,7 @@ import {
 import { BallState, PetElementState, PetPanelState } from './states';
 import { showBar, hideBar, updateBar } from './bar';
 import { hideChatbox, showChatbox, displayMessage, storeMessage, setBadge, sendMsg } from './chat';
+import { Level } from './states';
 // import { computeTimeDifference } from '../common/healthTimer';
 
 /* This is how the VS Code API can be invoked from the panel */
@@ -32,13 +33,14 @@ declare global {
     function acquireVsCodeApi(): VscodeStateApi;
 }
 
-const UPDATE_HEALTH_THRES = 45;
+let UPDATE_HEALTH_THRES: number;
 
 export var allPets: IPetCollection = new PetCollection();
 var petCounter: number;
 var currentTimer: Date;
 var userID: string;
 var currentAccessCode: string;
+var currentStoryLine: Array<Level>;
 
 function calculateBallRadius(size: PetSize): number {
     if (size === PetSize.nano) {
@@ -311,6 +313,7 @@ export function saveState(stateApi?: VscodeStateApi) {
     state.healthTimer = currentTimer;
     state.userID = userID;
     state.accessCode = currentAccessCode;
+    state.storyLine = currentStoryLine;
     stateApi?.setState(state);
 }
 
@@ -350,6 +353,10 @@ async function recoverState(
                 command: 'get-access-code',
             });
         }
+        if (state.storyLine !== undefined) {
+            currentStoryLine = state.storyLine;
+            UPDATE_HEALTH_THRES = currentStoryLine[0].health_drop_time;
+        }
         
     }
     var recoveryMap: Map<IPetType, PetElementState> = new Map();
@@ -363,7 +370,10 @@ async function recoverState(
         const differenceInMilliseconds = now.getTime() - currentTimer.getTime();
         const diff = Math.floor(differenceInMilliseconds / (1000 * 60));
         const healthUpdateValue = -Math.floor(diff / UPDATE_HEALTH_THRES);
-        console.log(healthUpdateValue);
+        // console.log(healthUpdateValue);
+        // console.log(currentStoryLine);
+        // console.log(state?.storyLine);
+        // console.log(UPDATE_HEALTH_THRES);
         try {
             var newPet = addPetToPanel(
                 p.petType ?? PetType.dog,
@@ -706,10 +716,16 @@ export function petPanelApp(
                 var pets = allPets.pets;
                 var diff = message.diff;
                 pets.forEach((pet) => {
-                    pet.pet.setExperience(pet.pet.getExperience() + diff, true, userID).then(msg => {
+                    pet.pet.setExperience(pet.pet.getExperience() + diff, true, userID, getNextTarget(pet.pet.getLevel())).then(msg => {
                         if (msg.returnMsg !== "") {
                             displayMessage("", msg.returnMsg, msg.time);
                             storeMessage("", msg.returnMsg, msg.time);
+                        }
+                        if (msg.levelChange > 0) {
+                            stateApi?.postMessage({
+                                command: 'level-change',
+                                text: pet.pet.getLevel().toString()
+                            });
                         }
                     }).catch(err => {
                         console.log(err);
@@ -751,7 +767,7 @@ export function petPanelApp(
                         console.log(err);
                     });
                     allPets.pets.forEach(pet => {
-                        pet.pet.setExperience(pet.pet.getExperience() + 5, false, userID).then(msg => {
+                        pet.pet.setExperience(pet.pet.getExperience() + 5, false, userID, getNextTarget(pet.pet.getLevel())).then(msg => {
                             if (msg.returnMsg !== "") {
                                 displayMessage("", msg.returnMsg, msg.time);
                                 storeMessage("", msg.returnMsg, msg.time);
@@ -790,7 +806,16 @@ export function petPanelApp(
                 currentAccessCode = message.accessCode;
                 console.log(currentAccessCode);
                 saveState(stateApi);
-                void bindUserID(userID, currentAccessCode);
+                bindUserID(userID, currentAccessCode).then(storyLine => {
+                    stateApi?.postMessage({
+                        command: 'post-story-line',
+                        text: JSON.stringify(storyLine)
+                    });
+                    currentStoryLine = storyLine;
+                    UPDATE_HEALTH_THRES = currentStoryLine[0].health_drop_time;
+                }).catch(err => {
+                    console.log(err);
+                });
                 break;
 
         }
@@ -809,7 +834,7 @@ export function petPanelApp(
                 floor,
                 floor,
                 randomName(petType),
-                0, 100, 1, 100,
+                0, getNextTarget(1), 1, 100,
                 stateApi,
             ),
         );
@@ -863,7 +888,7 @@ async function fetchUserID() {
 }
 
 async function bindUserID(userID: string, accessCode: string) {
-    let result = 1;
+    let result = [];
     if (currentAccessCode !== undefined && userID !== undefined) {
         const data = {
             accessCode: accessCode,
@@ -877,14 +902,14 @@ async function bindUserID(userID: string, accessCode: string) {
                 },
                 body: JSON.stringify(data)
             });
-            const resText = await response.text();
+            const resText = await response.json();
             if (!response.ok) {
                 throw new Error('Failed to bind access code: ' + resText);
             } else {
-                result = parseInt(resText);
+                result = resText.storyLine;
             }
         } catch (error) {
-            result = 1;
+            result = [];
             console.error('Failed to bind access code: ', error);
         }
         console.log(result);
@@ -892,4 +917,11 @@ async function bindUserID(userID: string, accessCode: string) {
     console.log(`Binding the user ID ${userID} with access code ${accessCode} with response ${result}.`);
     return result;
     
+}
+
+function getNextTarget(level: number) {
+    if (currentStoryLine !== undefined && currentStoryLine[level-1] !== undefined) {
+        return currentStoryLine[level-1].next_target;
+    }
+    return -1;
 }

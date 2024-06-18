@@ -430,14 +430,15 @@ export abstract class BasePetType implements IPetType {
         return { returnMsg, time };
     }
 
-    async setExperience(value: number, showMessage: boolean, userID: string) {
+    async setExperience(value: number, showMessage: boolean, userID: string, nextTarget: number) {
         let returnMsg = "";
         let time = "";
         const prev = this.experience;
+        const prevLevel = this.getLevel();
         this.experience = value;
         if (this.experience >= this.nextTarget) {
             if (this.health >= LOW_HEALTH_CUT_OFF) {
-                this.setLevel(this.level + 1);
+                this.setLevel(this.level + 1, nextTarget);
                 if (showMessage) {
                     try {
                         const { aiText, currentTime } = await getRandomCommentWhenLevelUp(this.level, userID, this.name);
@@ -464,12 +465,14 @@ export abstract class BasePetType implements IPetType {
                 }
             }
         }
-        return { returnMsg, time };
+        const newLevel = this.getLevel();
+        const levelChange = newLevel - prevLevel;
+        return { returnMsg, time, levelChange };
     }
 
-    setLevel(value: number) {
+    setLevel(value: number, nextTarget: number) {
         this.level = value;
-        this.nextTarget += 100 * this.level;
+        this.nextTarget += nextTarget;
         if (this.level > LOW_LEVEL_CUT_OFF) {
             this.currentStateEnum = States.sitIdleM;
             this.currentState = resolveState(this.currentStateEnum, this);

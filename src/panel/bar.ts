@@ -50,7 +50,7 @@ export function updateBar(name: string, level: number, experience: number, targe
         nameText.innerHTML = name;
         levelText.innerHTML = "Level " + level;
         healthText.innerHTML = health + "/100";
-        experienceText.innerHTML = experience + "/" + target;
+        experienceText.innerHTML = Math.floor(experience) + "/" + target;
         adjustExperienceBar(experience, target);
         adjustHealthBar(health);
     }

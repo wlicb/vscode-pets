@@ -18,6 +18,7 @@ import { availableColors, normalizeColor } from '../panel/pets';
 import { updateCount, getEditorText } from '../common/codeLine';
 import { updateTimer, computeTimeDifference } from '../common/healthTimer';
 import { doCompile } from '../common/compile';
+import { storeStoryLine, getExPerLine, getHealthDropTime, getHealthIncreaseTime, getNextTarget, storeLevel, getLevel } from '../common/storyLine';
 
 const EXTRA_PETS_KEY = 'vscode-pets.extra-pets';
 const EXTRA_PETS_KEY_TYPES = EXTRA_PETS_KEY + '.types';
@@ -33,7 +34,11 @@ const DEFAULT_PET_TYPE = PetType.dog;
 const DEFAULT_POSITION = ExtPosition.panel;
 const DEFAULT_THEME = Theme.none;
 
-const UPDATE_HEALTH_THRES = 45;
+let UPDATE_HEALTH_THRES: number = getHealthDropTime(getLevel());
+
+let INCREASE_HEALTH_THRES: number = getHealthIncreaseTime(getLevel());
+
+let EX_PER_LINE: number = getExPerLine(getLevel());
 
 let currentAccessCode: string;
 
@@ -150,7 +155,7 @@ export class PetSpecification {
             type = DEFAULT_PET_TYPE;
         }
 
-        return new PetSpecification(color, type, getConfiguredSize(), 0, 100, 100, 1);
+        return new PetSpecification(color, type, getConfiguredSize(), 0, 100, getNextTarget(1), 1);
     }
 
     static collectionFromMemento(
@@ -366,6 +371,12 @@ export function activate(context: vscode.ExtensionContext) {
                     void vscode.window.showInformationMessage(`Welcome to ${result}!`);
                     currentAccessCode = accessCode;
                     void vscode.commands.executeCommand('vscode-pets.get-access-code');
+                    const storyLine = await fetchStoryLine(accessCode);
+                    console.log(storyLine);
+                    storeStoryLine(JSON.stringify(storyLine));
+                    UPDATE_HEALTH_THRES = getHealthDropTime(1);
+                    INCREASE_HEALTH_THRES = getHealthIncreaseTime(1);
+                    EX_PER_LINE = getExPerLine(1);
                     // start the extension
                     if (
                         getConfigurationPosition() === ExtPosition.explorer &&
@@ -484,7 +495,7 @@ export function activate(context: vscode.ExtensionContext) {
             const diff = updateCount();
             const panel = getPetPanel();
             if (panel !== undefined) {
-                panel.updateExperience(diff);
+                panel.updateExperience(diff / EX_PER_LINE);
             }
         }),
     );
@@ -721,7 +732,7 @@ export function activate(context: vscode.ExtensionContext) {
                     petColor,
                     selectedPetType.value,
                     getConfiguredSize(),
-                    0, 100, 100, 1, name
+                    0, 100, getNextTarget(1), 1, name
                 );
                 if (!spec.type || !spec.color || !spec.size) {
                     return vscode.window.showWarningMessage(
@@ -837,7 +848,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 
     let canExecute = true;
-    const TIME_INTERVAL = 3 * 10 * 1000; // 3 minutes in milliseconds
+    const TIME_INTERVAL = INCREASE_HEALTH_THRES * 10 * 1000; // 3 minutes in milliseconds
     
     vscode.workspace.onDidChangeTextDocument(async event => {
         if (canExecute && event.contentChanges.length > 0) {
@@ -1027,7 +1038,7 @@ class PetWebviewContainer implements IPetPanel {
     }
 
     public updateHealth(difference: number): void {
-        console.log("updating health");
+        console.log("updating health with interval: ", UPDATE_HEALTH_THRES, INCREASE_HEALTH_THRES);
         void this.getWebview().postMessage({ command: 'update-health', diff: difference });
     }
 
@@ -1205,6 +1216,18 @@ function handleWebviewMessage(message: WebviewMessage) {
             return;
         case 'get-access-code':
             void vscode.commands.executeCommand('vscode-pets.get-access-code');
+        case 'post-story-line':
+            // storeStoryLine(message.text);
+            // UPDATE_HEALTH_THRES = getHealthDropTime(1);
+            // INCREASE_HEALTH_THRES = getHealthIncreaseTime(1);
+            // EX_PER_LINE = getExPerLine(1);
+            return;
+        case 'level-change':
+            storeLevel(parseInt(message.text));
+            UPDATE_HEALTH_THRES = getHealthDropTime(parseInt(message.text));
+            INCREASE_HEALTH_THRES = getHealthIncreaseTime(parseInt(message.text));
+            EX_PER_LINE = getExPerLine(parseInt(message.text));
+            return;
     }
 }
 
@@ -1488,3 +1511,30 @@ async function validateAccessCode(accessCode: string) {
     return result;
 }
 
+async function fetchStoryLine(accessCode: string) {
+    let result = [];
+    const data = {
+        accessCode: accessCode,
+    };
+    try {
+        const response = await fetch('http://localhost:3100/get-story-line', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        const resText = await response.json();
+        console.log(resText);
+        if (!response.ok) {
+            throw new Error('Failed to fetch story line: ' + resText);
+        } else {
+            result = resText.storyLine;
+        }
+    } catch (error) {
+        result = [];
+        console.error('Failed to fetch story line: ', error);
+    }
+    console.log(result);
+    return result;
+}
