@@ -12,10 +12,10 @@ type ReturnMessageWithLevelChange = {
 };
 
 export type Level = {
-    next_target: number;
-    ex_per_line: number;
-    health_drop_time: number;
-    health_increase_time: number;
+    next_target: string;
+    ex_per_line: string;
+    health_drop_time: string;
+    health_increase_time: string;
 };
 
 export interface IPetType {

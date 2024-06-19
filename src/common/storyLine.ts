@@ -18,7 +18,7 @@ export function getNextTarget(level: number) {
     } else {
         const storyLine = fs.readFileSync(filePath, 'utf8');
         const storyLineObject = JSON.parse(storyLine);
-        return storyLineObject[level-1].next_target;
+        return parseInt(storyLineObject[level-1].next_target);
     }
 }
 
@@ -28,7 +28,7 @@ export function getExPerLine(level: number) {
     } else {
         const storyLine = fs.readFileSync(filePath, 'utf8');
         const storyLineObject = JSON.parse(storyLine);
-        return storyLineObject[level-1].ex_per_line;
+        return parseInt(storyLineObject[level-1].ex_per_line);
     }
 }
 
@@ -38,7 +38,7 @@ export function getHealthDropTime(level: number) {
     } else {
         const storyLine = fs.readFileSync(filePath, 'utf8');
         const storyLineObject = JSON.parse(storyLine);
-        return storyLineObject[level-1].health_drop_time;
+        return parseInt(storyLineObject[level-1].health_drop_time);
     }
 }
 
@@ -48,7 +48,7 @@ export function getHealthIncreaseTime(level: number) {
     } else {
         const storyLine = fs.readFileSync(filePath, 'utf8');
         const storyLineObject = JSON.parse(storyLine);
-        return storyLineObject[level-1].health_increase_time;
+        return parseInt(storyLineObject[level-1].health_increase_time);
     }
 }
 
@@ -61,7 +61,7 @@ export function getLevel() {
     if (!fs.existsSync(levelFilePath)) {
         return 1;
     } else {
-        const storyLine = fs.readFileSync(levelFilePath, 'utf8');
-        return parseInt(storyLine);
+        const level = fs.readFileSync(levelFilePath, 'utf8');
+        return parseInt(level);
     }
 }

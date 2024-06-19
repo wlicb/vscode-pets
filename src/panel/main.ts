@@ -355,7 +355,7 @@ async function recoverState(
         }
         if (state.storyLine !== undefined) {
             currentStoryLine = state.storyLine;
-            UPDATE_HEALTH_THRES = currentStoryLine[0].health_drop_time;
+            UPDATE_HEALTH_THRES = parseInt(currentStoryLine[0].health_drop_time);
         }
         
     }
@@ -715,7 +715,7 @@ export function petPanelApp(
                 var pets = allPets.pets;
                 var diff = message.diff;
                 pets.forEach((pet) => {
-                    pet.pet.setExperience(pet.pet.getExperience() + diff, true, userID, getNextTarget(pet.pet.getLevel() + 1)).then(msg => {
+                    pet.pet.setExperience(pet.pet.getExperience() + diff, true, userID, getNewTarget(pet.pet.getLevel() + 1)).then(msg => {
                         if (msg.returnMsg !== "") {
                             displayMessage("", msg.returnMsg, msg.time);
                             storeMessage("", msg.returnMsg, msg.time);
@@ -766,7 +766,7 @@ export function petPanelApp(
                         console.log(err);
                     });
                     allPets.pets.forEach(pet => {
-                        pet.pet.setExperience(pet.pet.getExperience() + 5, false, userID, getNextTarget(pet.pet.getLevel() + 1)).then(msg => {
+                        pet.pet.setExperience(pet.pet.getExperience() + 5, false, userID, getNewTarget(pet.pet.getLevel() + 1)).then(msg => {
                             if (msg.returnMsg !== "") {
                                 displayMessage("", msg.returnMsg, msg.time);
                                 storeMessage("", msg.returnMsg, msg.time);
@@ -812,7 +812,7 @@ export function petPanelApp(
                     });
                     currentStoryLine = storyLine;
                     console.log(currentStoryLine);
-                    UPDATE_HEALTH_THRES = currentStoryLine[0].health_drop_time;
+                    UPDATE_HEALTH_THRES = parseInt(currentStoryLine[0].health_drop_time);
                 }).catch(err => {
                     console.log(err);
                 });
@@ -834,7 +834,7 @@ export function petPanelApp(
                 floor,
                 floor,
                 randomName(petType),
-                0, getNextTarget(1), 1, 100,
+                0, getNewTarget(1), 1, 100,
                 stateApi,
             ),
         );
@@ -917,9 +917,10 @@ async function bindUserID(userID: string, accessCode: string) {
     
 }
 
-function getNextTarget(level: number) {
+function getNewTarget(level: number): number {
+    // console.log(currentStoryLine);
     if (currentStoryLine !== undefined && currentStoryLine[level-1] !== undefined) {
-        return currentStoryLine[level-1].next_target;
+        return parseInt(currentStoryLine[level-1].next_target);
     } else {
         return -1;
     }
