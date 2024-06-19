@@ -440,6 +440,7 @@ export abstract class BasePetType implements IPetType {
             // this.experience = this.nextTarget;
             if (this.health >= LOW_HEALTH_CUT_OFF) {
                 // console.log(typeof(nextTarget));
+                this.experience = this.nextTarget;
                 this.setLevel(this.level + 1, nextTarget);
                 if (showMessage) {
                     try {
