@@ -64,7 +64,7 @@ export interface IPetType {
     setExperience(value: number, showMessage: boolean, userID: string, nextTarget: number): Promise<ReturnMessageWithLevelChange>;
     setLevel(value: number, newNextTarget: number): void;
 
-    onCompilationError(code: string, userID: string): Promise<ReturnMessage>;
+    onCompilationError(code: string, userID: string, err: string): Promise<ReturnMessage>;
     onCompilationSuccess(code: string, userID: string): Promise<ReturnMessage>;
 
 

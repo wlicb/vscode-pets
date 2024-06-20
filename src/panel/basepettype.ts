@@ -486,11 +486,11 @@ export abstract class BasePetType implements IPetType {
         }
     }
 
-    async onCompilationError(code: string, userID: string) {
+    async onCompilationError(code: string, userID: string, err: string) {
         let returnMsg = "";
         let time = "";
         try {
-            const { aiText, currentTime } = await getRandomCommentWhenCompilationError(code, userID, this.name);
+            const { aiText, currentTime } = await getRandomCommentWhenCompilationError(code, userID, err, this.name);
             this.showSpeechBubble(aiText, 2000);
             returnMsg = aiText;
             time = currentTime;

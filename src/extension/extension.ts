@@ -906,7 +906,7 @@ interface IPetPanel {
     setThrowWithMouse(newThrowWithMouse: boolean): void;
     updateExperience(difference: number): void;
     updateHealth(difference: number): void;
-    handleCompileResult(result: number, code: string): void;
+    handleCompileResult(errMsg: string, code: string): void;
     handleEditorCodeResult(code: string): void;
     updateHealthTimer(timer: Date): void;
     getAccessCode(): void;
@@ -1047,7 +1047,7 @@ class PetWebviewContainer implements IPetPanel {
 
     }
 
-    public handleCompileResult(result: number, code: string): void {
+    public handleCompileResult(result: string, code: string): void {
         void this.getWebview().postMessage({ command: 'handle-compile-result', result: result, code: code });
     }
 

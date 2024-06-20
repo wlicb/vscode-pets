@@ -8,8 +8,8 @@ export async function getRandomCommentWhenLowHealth(userID: string, name: string
     return { aiText, currentTime };
 }
 
-export async function getRandomCommentWhenCompilationError(code: string, userID: string, name: string) {
-    const { aiText, currentTime } = await getMessageFromAI("compilation-error", userID, 0, code, 0, "", name);
+export async function getRandomCommentWhenCompilationError(code: string, userID: string, err: string, name: string) {
+    const { aiText, currentTime } = await getMessageFromAI("compilation-error", userID, 0, code, 0, err, name);
     return { aiText, currentTime };
 }
 

@@ -1,23 +1,30 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
+import * as fs from 'fs';
 
 let terminal: vscode.Terminal | undefined;
 
-export function doCompile() {
+export async function doCompile() {
     const editor = vscode.window.activeTextEditor;
     if (editor) {
         const document = editor.document;
         if (document.languageId === 'cpp') {
             const filePath = document.fileName;
+            const result = await runCompilationTask(filePath);
             createTerminalAndCompile(filePath);
-            const result = runCompilationTask(filePath);
-            return result;
+            if (result !== 0) {
+                const errorMessage = readErrorMessage();
+                return errorMessage;
+            } else {
+                return "";
+            }
         } else {
             console.log("Not C++ file");
-            return null;
+            return "";
         }
     } else {
         console.log("No active editor");
-        return null;
+        return "";
     }
 }
 
@@ -42,7 +49,8 @@ async function runCompilationTask(filePath: string): Promise<number> {
             vscode.TaskScope.Workspace,
             'Compile',
             'shell',
-            new vscode.ShellExecution(`g++ -o output ${filePath}`),
+            new vscode.ShellExecution(`g++ -o output ${filePath} > compilationResult.txt 2>&1 `),
+            //  + "&& ${command:workbench.action.togglePanel}"
             ['$cpp-compile-errors']
         );
 
@@ -54,7 +62,7 @@ async function runCompilationTask(filePath: string): Promise<number> {
             focus: false,
             panel: vscode.TaskPanelKind.Dedicated,
             showReuseMessage: false,
-            clear: true
+            clear: true,
         };
 
         const disposable = vscode.tasks.onDidEndTaskProcess((e) => {
@@ -70,4 +78,24 @@ async function runCompilationTask(filePath: string): Promise<number> {
 
         vscode.tasks.executeTask(task).then(undefined, reject);
     });
+}
+
+export function readErrorMessage() {
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+        if (workspaceFolders) {
+            const dirPath = workspaceFolders[0].uri.fsPath;
+            const filePath = path.join(dirPath, 'compilationResult.txt');
+
+            try {
+                const data = fs.readFileSync(filePath, 'utf8');
+                console.log(`File content: ${data}`);
+                return data;
+            } catch (error) {
+                console.error(`Error reading file: ${error}`);
+                return "";
+            }
+        } else {
+            console.log('No folder or workspace opened');
+            return "";
+        }
 }

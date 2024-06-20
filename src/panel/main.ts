@@ -756,7 +756,7 @@ export function petPanelApp(
                 const code = message.code;
                 const randomPet = pets[Math.floor(Math.random() * pets.length)];
                 
-                if (result === 0) {
+                if (result === "") {
                     randomPet.pet.onCompilationSuccess(code, userID).then(msg => {
                         if (msg.returnMsg !== "") {
                             displayMessage("", msg.returnMsg, msg.time);
@@ -776,7 +776,7 @@ export function petPanelApp(
                         });;
                     });
                 } else {
-                    randomPet.pet.onCompilationError(code, userID).then(msg => {
+                    randomPet.pet.onCompilationError(code, userID, result).then(msg => {
                         if (msg.returnMsg !== "") {
                             displayMessage("", msg.returnMsg, msg.time);
                             storeMessage("", msg.returnMsg, msg.time);
