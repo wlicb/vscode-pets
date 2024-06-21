@@ -372,7 +372,8 @@ export function activate(context: vscode.ExtensionContext) {
                     currentAccessCode = accessCode;
                     void vscode.commands.executeCommand('vscode-pets.get-access-code');
                     const storyLine = await fetchStoryLine(accessCode);
-                    updateCommand("g++ -o output ${filePath}")
+                    const command = await fetchCommand(accessCode);
+                    updateCommand(command);
                     // console.log(storyLine);
                     storeStoryLine(JSON.stringify(storyLine));
                     UPDATE_HEALTH_THRES = getHealthDropTime(1);
@@ -1534,6 +1535,35 @@ async function fetchStoryLine(accessCode: string) {
         }
     } catch (error) {
         result = [];
+        console.error('Failed to fetch story line: ', error);
+    }
+    // console.log(result);
+    return result;
+}
+
+async function fetchCommand(accessCode: string) {
+    let result = "";
+    const data = {
+        accessCode: accessCode,
+    };
+    try {
+        const response = await fetch('http://localhost:3100/get-language-info', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        const resText = await response.json();
+        console.log(resText);
+        if (!response.ok) {
+            throw new Error('Failed to fetch story line: ' + resText);
+        } else {
+            result = resText.command;
+            console.log(result);
+        }
+    } catch (error) {
+        result = "";
         console.error('Failed to fetch story line: ', error);
     }
     // console.log(result);
