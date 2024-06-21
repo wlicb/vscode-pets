@@ -17,7 +17,7 @@ import * as localize from '../common/localize';
 import { availableColors, normalizeColor } from '../panel/pets';
 import { updateCount, getEditorText } from '../common/codeLine';
 import { updateTimer, computeTimeDifference } from '../common/healthTimer';
-import { doCompile } from '../common/compile';
+import { doCompile, updateCommand } from '../common/compile';
 import { storeStoryLine, getExPerLine, getHealthDropTime, getHealthIncreaseTime, getNextTarget, storeLevel, getLevel } from '../common/storyLine';
 
 const EXTRA_PETS_KEY = 'vscode-pets.extra-pets';
@@ -372,6 +372,7 @@ export function activate(context: vscode.ExtensionContext) {
                     currentAccessCode = accessCode;
                     void vscode.commands.executeCommand('vscode-pets.get-access-code');
                     const storyLine = await fetchStoryLine(accessCode);
+                    updateCommand("g++ -o output ${filePath}")
                     // console.log(storyLine);
                     storeStoryLine(JSON.stringify(storyLine));
                     UPDATE_HEALTH_THRES = getHealthDropTime(1);

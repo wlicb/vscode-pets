@@ -4,6 +4,7 @@ import * as path from 'path';
 const filePath = path.resolve(__dirname, 'timer.json');
 
 export function updateTimer() {
+    createTimer();
     const now = new Date();
     const dateTimeString = now.toISOString();
 
@@ -28,8 +29,7 @@ export function computeTimeDifference() {
     return differenceInMinutes;
 }
 
-export function createTimer() {
-
+function createTimer() {
     // Only create a new file if it does not exist.
     if (!fs.existsSync(filePath)) {
         const now = new Date();

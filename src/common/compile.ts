@@ -4,6 +4,17 @@ import * as fs from 'fs';
 
 let terminal: vscode.Terminal | undefined;
 
+const commandFilePath = path.resolve(__dirname, 'compilationCommand.json');
+
+let currentCommand: string;
+
+if (fs.existsSync(commandFilePath)) {
+    currentCommand = fs.readFileSync(commandFilePath, 'utf8');
+} else {
+    currentCommand = "";
+}
+
+
 export async function doCompile() {
     const editor = vscode.window.activeTextEditor;
     if (editor) {
@@ -30,14 +41,23 @@ export async function doCompile() {
 
 
 function createTerminalAndCompile(filePath: string) {
+    const parsedCommand = parseCommand(currentCommand, filePath);
+    // console.log(parsedCommand);
     if (!terminal || terminal.exitStatus) {
         terminal = vscode.window.createTerminal('Compilation Terminal');
     }
     terminal.show();
-    terminal.sendText(`g++ -o output ${filePath}`);
+    terminal.sendText(parsedCommand);
 }
 
 async function runCompilationTask(filePath: string): Promise<number> {
+    // console.log(currentCommand);
+    const parsedCommand = parseCommand(currentCommand, filePath);
+    // console.log(parsedCommand);
+    let realCommand = parsedCommand;
+    if (parsedCommand !== "") {
+        realCommand += " > compilationResult.txt 2>&1 ";
+    }
     return new Promise((resolve, reject) => {
         const task = new vscode.Task(
             { type: 'shell',
@@ -49,7 +69,7 @@ async function runCompilationTask(filePath: string): Promise<number> {
             vscode.TaskScope.Workspace,
             'Compile',
             'shell',
-            new vscode.ShellExecution(`g++ -o output ${filePath} > compilationResult.txt 2>&1 `),
+            new vscode.ShellExecution(realCommand),
             //  + "&& ${command:workbench.action.togglePanel}"
             ['$cpp-compile-errors']
         );
@@ -98,4 +118,16 @@ export function readErrorMessage() {
             console.log('No folder or workspace opened');
             return "";
         }
+}
+
+export function updateCommand(command: string) {
+    currentCommand = command;
+    fs.writeFileSync(commandFilePath, currentCommand);
+}
+
+function parseCommand(command: string, filePath: string) {
+    const pattern = /\$\{filePath\}/;
+
+    // Split the string by the pattern
+    return command.split(pattern).join(filePath);
 }
