@@ -44,7 +44,7 @@ async function getMessageFromAI(type: string, userID: string, level: number, cod
     let aiText = "";
     let currentTime = "";
     try {
-        const response = await fetch('http://localhost:3000/post-chat', {
+        const response = await fetch('http://localhost:3200/post-chat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

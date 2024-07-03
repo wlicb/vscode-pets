@@ -34,7 +34,6 @@ declare global {
 }
 
 let UPDATE_HEALTH_THRES: number;
-
 export var allPets: IPetCollection = new PetCollection();
 var petCounter: number;
 var currentTimer: Date;
@@ -160,6 +159,8 @@ function startAnimations(
             // const chatbox = document.getElementById("chatbox");
             const sendButton = document.getElementById("send-button");
             const closeChatButton = document.getElementById('close-chatbox-button');
+            const addCodeButton = document.getElementById('add-code-button');
+            const removeCodeButton = document.getElementById('remove-code-button');
             if (compileButton && chatButton) {
                 // console.log(e.target);
                 if (e.target === compileButton) {
@@ -167,14 +168,23 @@ function startAnimations(
                         text: "",
                         command: 'run-compile',
                     });
+                } else if (e.target === addCodeButton) {
+                    stateApi?.postMessage({
+                        text: "",
+                        command: 'add-code',
+                    });
+                } else if (e.target === removeCodeButton) {
+                    stateApi?.postMessage({
+                        text: "",
+                        command: 'remove-code',
+                    });
                 } else if (e.target === sendButton) {
                     stateApi?.postMessage({
                         text: "",
                         command: 'get-code-text',
                     });
                     sendMsg(userID);
-                } 
-                else if (e.target === closeChatButton) {
+                } else if (e.target === closeChatButton) {
                         hideChatbox();
                 } else if (e.target === chatButton) {
                     const nameEm = document.getElementById("name");
@@ -342,6 +352,9 @@ async function recoverState(
         }
         if (state.userID !== undefined) {
             userID = state.userID;
+            if (userID.length !== 8) {
+                userID = await fetchUserID();
+            }
         } else {
             userID = await fetchUserID();
         }
@@ -369,10 +382,10 @@ async function recoverState(
         const differenceInMilliseconds = now.getTime() - currentTimer.getTime();
         const diff = Math.floor(differenceInMilliseconds / (1000 * 60));
         const healthUpdateValue = -Math.floor(diff / UPDATE_HEALTH_THRES);
-        // console.log(healthUpdateValue);
+        console.log(healthUpdateValue);
         // console.log(currentStoryLine);
         // console.log(state?.storyLine);
-        // console.log(UPDATE_HEALTH_THRES);
+        console.log(UPDATE_HEALTH_THRES);
         try {
             var newPet = addPetToPanel(
                 p.petType ?? PetType.dog,
@@ -870,7 +883,7 @@ export async function getCodeFromEditor() {
 async function fetchUserID() {
     let userID = "";
     try {
-        const response = await fetch('http://localhost:3000/create-user', {
+        const response = await fetch('http://localhost:3200/create-user', {
             method: 'GET'
         });
         const resText = await response.text();

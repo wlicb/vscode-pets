@@ -19,6 +19,7 @@ import { updateCount, getEditorText } from '../common/codeLine';
 import { updateTimer, computeTimeDifference } from '../common/healthTimer';
 import { doCompile, updateCommand } from '../common/compile';
 import { storeStoryLine, getExPerLine, getHealthDropTime, getHealthIncreaseTime, getNextTarget, storeLevel, getLevel } from '../common/storyLine';
+import { setCodeLineColor, formulateCodeString, clearSelection } from '../common/lineBackground';
 
 const EXTRA_PETS_KEY = 'vscode-pets.extra-pets';
 const EXTRA_PETS_KEY_TYPES = EXTRA_PETS_KEY + '.types';
@@ -41,6 +42,8 @@ let INCREASE_HEALTH_THRES: number = getHealthIncreaseTime(getLevel());
 let EX_PER_LINE: number = getExPerLine(getLevel());
 
 let currentAccessCode: string;
+
+
 
 class PetQuickPickItem implements vscode.QuickPickItem {
     constructor(
@@ -545,8 +548,26 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-pets.add-code', async () => {
+            setCodeLineColor(false);
+            // console.log("add code");
+            formulateCodeString();
+        }
+    ),);
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-pets.remove-code', async () => {
+            setCodeLineColor(true);
+            // console.log("remove code");
+            formulateCodeString();
+        }
+    ),);
+
+    context.subscriptions.push(
         vscode.commands.registerCommand('vscode-pets.get-editor-code', async () => {
-            const code = getEditorText();
+            // const code = getEditorText();
+            const code = formulateCodeString();
+            clearSelection();
             const panel = getPetPanel();
             let codeText = "";
             if (code !== undefined) {
@@ -1155,6 +1176,8 @@ class PetWebviewContainer implements IPetPanel {
                 <div id="petsContainer"></div>
                 <div id="foreground">                
                     <div id="control-container">
+                        <button id="add-code-button">➕</button>
+                        <button id="remove-code-button">➖</button>
                         <button id="compile-button">Compile!</button>
                         <div id="chat-button-container">
                             <button id="chat-button">💬</button>
@@ -1212,6 +1235,12 @@ function handleWebviewMessage(message: WebviewMessage) {
             return;
         case 'run-compile':
             void vscode.commands.executeCommand('vscode-pets.compile');
+            return;
+        case 'add-code':
+            void vscode.commands.executeCommand('vscode-pets.add-code');
+            return;
+        case 'remove-code':
+            void vscode.commands.executeCommand('vscode-pets.remove-code');
             return;
         case 'get-code-text':
             void vscode.commands.executeCommand('vscode-pets.get-editor-code');
@@ -1569,3 +1598,4 @@ async function fetchCommand(accessCode: string) {
     // console.log(result);
     return result;
 }
+

@@ -104,7 +104,7 @@ async function fetchResponse(time: string, userID: string, level: number, code: 
     };
     
     try {
-        const response = await fetch('http://localhost:3000/post-chat', {
+        const response = await fetch('http://localhost:3200/post-chat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -209,7 +209,7 @@ async function getChatHistory(userID: string) {
         userID: userID,
     };
     try {
-        const response = await fetch('http://localhost:3000/get-chat-history', {
+        const response = await fetch('http://localhost:3200/get-chat-history', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

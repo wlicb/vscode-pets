@@ -435,29 +435,18 @@ export abstract class BasePetType implements IPetType {
         let time = "";
         const prev = this.experience;
         const prevLevel = this.getLevel();
-        this.experience = value;
-        if (this.experience >= this.nextTarget) {
-            // this.experience = this.nextTarget;
-            if (this.health >= LOW_HEALTH_CUT_OFF) {
-                // console.log(typeof(nextTarget));
-                this.experience = this.nextTarget;
-                this.setLevel(this.level + 1, nextTarget);
-                if (showMessage) {
-                    try {
-                        const { aiText, currentTime } = await getRandomCommentWhenLevelUp(this.level, userID, this.name);
-                        this.showSpeechBubble(aiText, 2000);
-                        returnMsg = aiText;
-                        time = currentTime;
-                    } catch (err) {
-                        console.log("Failed to show speech bubble. ", err);
-                    }
-                }
-            } else {
-                this.experience = this.nextTarget;
-                if (prev < this.nextTarget) {
+        // this.experience = value;
+        // console.log(value);
+        if (nextTarget > this.nextTarget) {
+            if (this.experience >= this.nextTarget) {
+                // this.experience = this.nextTarget;
+                if (this.health >= LOW_HEALTH_CUT_OFF) {
+                    // console.log(typeof(nextTarget));
+                    this.experience = this.nextTarget;
+                    this.setLevel(this.level + 1, nextTarget);
                     if (showMessage) {
                         try {
-                            const { aiText, currentTime } = await getRandomCommentWhenLowHealth(userID, this.name);
+                            const { aiText, currentTime } = await getRandomCommentWhenLevelUp(this.level, userID, this.name);
                             this.showSpeechBubble(aiText, 2000);
                             returnMsg = aiText;
                             time = currentTime;
@@ -465,8 +454,24 @@ export abstract class BasePetType implements IPetType {
                             console.log("Failed to show speech bubble. ", err);
                         }
                     }
+                } else {
+                    this.experience = this.nextTarget;
+                    if (prev < this.nextTarget) {
+                        if (showMessage) {
+                            try {
+                                const { aiText, currentTime } = await getRandomCommentWhenLowHealth(userID, this.name);
+                                this.showSpeechBubble(aiText, 2000);
+                                returnMsg = aiText;
+                                time = currentTime;
+                            } catch (err) {
+                                console.log("Failed to show speech bubble. ", err);
+                            }
+                        }
+                    }
                 }
             }
+        } else {
+            this.experience = this.nextTarget;
         }
         const newLevel = this.getLevel();
         const levelChange = newLevel - prevLevel;
