@@ -431,11 +431,12 @@ export abstract class BasePetType implements IPetType {
     }
 
     async setExperience(value: number, showMessage: boolean, userID: string, nextTarget: number) {
+        // console.log("setting experience with diff ", value);
         let returnMsg = "";
         let time = "";
         const prev = this.experience;
         const prevLevel = this.getLevel();
-        // this.experience = value;
+        this.experience = value;
         // console.log(value);
         if (nextTarget > this.nextTarget) {
             if (this.experience >= this.nextTarget) {
@@ -471,7 +472,9 @@ export abstract class BasePetType implements IPetType {
                 }
             }
         } else {
-            this.experience = this.nextTarget;
+            if (this.experience >= this.nextTarget) {
+                this.experience = this.nextTarget;
+            }
         }
         const newLevel = this.getLevel();
         const levelChange = newLevel - prevLevel;

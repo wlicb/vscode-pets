@@ -34,6 +34,9 @@ const DEFAULT_COLOR = PetColor.akita;
 const DEFAULT_PET_TYPE = PetType.dog;
 const DEFAULT_POSITION = ExtPosition.panel;
 const DEFAULT_THEME = Theme.none;
+const EX_FOR_ONE_COIN = 5;
+
+let coinCounter = 0;
 
 let UPDATE_HEALTH_THRES: number = getHealthDropTime(getLevel());
 
@@ -1057,7 +1060,13 @@ class PetWebviewContainer implements IPetPanel {
     }
 
     public updateExperience(difference: number) {
-        void this.getWebview().postMessage({ command: 'update-experience', diff: difference });
+        let coin = 0;
+        coinCounter += difference;
+        if (coinCounter >= EX_FOR_ONE_COIN) {
+            coin = 1;
+            coinCounter = 0;
+        }
+        void this.getWebview().postMessage({ command: 'update-experience', diff: difference, coin: coin });
     }
 
     public updateHealth(difference: number): void {
@@ -1176,11 +1185,14 @@ class PetWebviewContainer implements IPetPanel {
                 <div id="petsContainer"></div>
                 <div id="foreground">                
                     <div id="control-container">
-                        <button id="add-code-button">➕</button>
-                        <button id="remove-code-button">➖</button>
+                        <div id="coin-container">💰</div>
+                        <div id="coin-counter">0</div>
+                        <button id="store-button" class="small-button">🏬</button>
+                        <button id="add-code-button" class="small-button">➕</button>
+                        <button id="remove-code-button" class="small-button">➖</button>
                         <button id="compile-button">Compile!</button>
                         <div id="chat-button-container">
-                            <button id="chat-button">💬</button>
+                            <button id="chat-button" class="small-button">💬</button>
                             <span id="notification-badge">0</span>
                         </div>
                     </div>

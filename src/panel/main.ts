@@ -21,6 +21,7 @@ import { BallState, PetElementState, PetPanelState } from './states';
 import { showBar, hideBar, updateBar } from './bar';
 import { hideChatbox, showChatbox, displayMessage, storeMessage, setBadge, sendMsg } from './chat';
 import { Level } from './states';
+import { purchase } from './store';
 // import { computeTimeDifference } from '../common/healthTimer';
 
 /* This is how the VS Code API can be invoked from the panel */
@@ -33,6 +34,7 @@ declare global {
     function acquireVsCodeApi(): VscodeStateApi;
 }
 
+
 let UPDATE_HEALTH_THRES: number;
 export var allPets: IPetCollection = new PetCollection();
 var petCounter: number;
@@ -40,6 +42,7 @@ var currentTimer: Date;
 var userID: string;
 var currentAccessCode: string;
 var currentStoryLine: Array<Level>;
+var coin: number;
 
 function calculateBallRadius(size: PetSize): number {
     if (size === PetSize.nano) {
@@ -324,6 +327,7 @@ export function saveState(stateApi?: VscodeStateApi) {
     state.userID = userID;
     state.accessCode = currentAccessCode;
     state.storyLine = currentStoryLine;
+    state.coin = coin;
     stateApi?.setState(state);
 }
 
@@ -339,11 +343,14 @@ async function recoverState(
     var state = stateApi?.getState();
     if (!state) {
         petCounter = 1;
+        coin = 0;
     } else {
         if (state.petCounter === undefined || isNaN(state.petCounter)) {
             petCounter = 1;
+            coin = 0;
         } else {
             petCounter = state.petCounter ?? 1;
+            coin = state.coin ?? 0;
         }
         if (state.healthTimer !== undefined) {
             currentTimer = new Date(state.healthTimer);
@@ -372,6 +379,7 @@ async function recoverState(
         }
         
     }
+    showCoinCounter();
     var recoveryMap: Map<IPetType, PetElementState> = new Map();
     state?.petStates?.forEach((p) => {
         // Fixes a bug related to duck animations
@@ -727,6 +735,8 @@ export function petPanelApp(
             case 'update-experience':
                 var pets = allPets.pets;
                 var diff = message.diff;
+                var coinUpdate = message.coin;
+                updateCoin(coinUpdate);
                 pets.forEach((pet) => {
                     pet.pet.setExperience(pet.pet.getExperience() + diff, true, userID, getNewTarget(pet.pet.getLevel() + 1)).then(msg => {
                         if (msg.returnMsg !== "") {
@@ -937,4 +947,26 @@ function getNewTarget(level: number): number {
     } else {
         return -1;
     }
+}
+
+export function updateCoin(amount: number): void {
+    if (coin !== undefined) {
+        coin += amount;
+    }
+    showCoinCounter();
+}
+
+function showCoinCounter(): void {
+    const coinCounter = document.getElementById('coin-counter');
+    if (coinCounter) {
+        coinCounter.innerHTML = coin.toString();
+    }
+}
+
+export function getUserID() {
+    return userID;
+}
+
+export function getCoin() {
+    return coin;
 }

@@ -46,7 +46,7 @@ button {
     transition: background-color 0.3s, border-color 0.3s;
 }
 
-#chat-button, #add-code-button, #remove-code-button {
+.small-button {
   width: 30px;
   height: 30px;
   
