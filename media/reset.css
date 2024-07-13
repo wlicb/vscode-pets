@@ -232,7 +232,7 @@ button[disabled] {
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
   height: 100%;
-  overflow-y: auto;
+  overflow: auto;
   max-height: 200px;
   padding: 5px;
 }

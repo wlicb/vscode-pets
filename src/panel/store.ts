@@ -1,4 +1,4 @@
-import { updateCoin, allPets, getCoin, getUserID, updateExRate } from "./main";
+import { updateCoin, allPets, getCoin, getUserID, updateExRate, getNewTarget } from "./main";
 
 type Activity = {
     index: number,
@@ -31,6 +31,7 @@ activityList.push({
     callback: boost
 });
 
+// const timers = [];
 
 
 function pet() {
@@ -46,7 +47,9 @@ function feed() {
 }
 
 function play() {
-
+    allPets.pets.forEach((petEm) => {
+        void petEm.pet.setExperience(petEm.pet.getExperience() + 10, false, getUserID(), getNewTarget(petEm.pet.getLevel() + 1));
+    });
 }
 
 function boost() {
@@ -57,21 +60,33 @@ function boost() {
     // }, 10000);
 }
 
-function purchase(index: number): number {
+export function purchase(index: number): number {
+    let found = false;
+    let bought = false;
     activityList.forEach(activity => {
         if (index === activity.index) {
+            found = true;
             if (getCoin() >= activity.price) {
+                bought = true;
                 updateCoin(-activity.price);
                 activity.callback();
                 showMessage(0);
-                return 0;
+                // console.log(showMessage);
+                // return 0;
             } else {
                 showMessage(1);
-                return 1;
+                // return 1;
             }
         }
     });
-    return -1;
+    if (!found) {
+        return -1;
+    } else if (!bought) {
+        return 1;
+    } else {
+        return 0;
+    }
+
 }
 
 export function showStore() {
@@ -104,17 +119,35 @@ function showMessage(status: number) {
 
 }
 
-// Add event listeners to the buttons
-document.querySelectorAll('.store-buttons').forEach(button => {
-    button.addEventListener('click', () => {
-        const index = (button as HTMLElement).dataset.index;
-        if (index !== undefined) {
-            purchase(Number(index));
-            (button as HTMLButtonElement).disabled = true;
-            setTimeout(() => {
-                (button as HTMLButtonElement).disabled = false;
-            // }, 3600000);
-            }, 5000);
+
+
+export function computeTargetTime() {
+    const now = new Date();
+    const targetTime = new Date(now.getTime() + 60 * 1000);
+    return targetTime;
+}
+
+
+export function updateTimer(targetTime: Date, index: number, button: HTMLButtonElement) {
+    const now = new Date();
+    const remainingTime = targetTime.getTime() - now.getTime();
+
+    const timer = document.getElementsByClassName('store-element-timer')[index] as HTMLElement;
+    if (timer) {
+        if (remainingTime <= 0) {
+            timer.innerText = "Available!";
+            // clearInterval(timerInterval);
+            button.disabled = false;
+            return;
         }
-    });
-});
+        const hours = Math.floor((remainingTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
+
+        const paddedMinutes = minutes.toString().padStart(2, '0');
+        const paddedSeconds = seconds.toString().padStart(2, '0');
+    
+        timer.innerText = `⏱️${hours}:${paddedMinutes}:${paddedSeconds}`;
+    }
+
+}

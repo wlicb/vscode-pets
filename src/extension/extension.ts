@@ -1238,7 +1238,8 @@ class PetWebviewContainer implements IPetPanel {
                                 <div class="store-element-title"><b>Pet🥰</b></div>
                                 <div class="store-element-description">Pet your dog. The health value will increase by 10.</div>
                                 <div class="store-element-price-button">
-                                    <div class="store-element-price">💰 2</div>
+                                    <div class="store-element-price">💰2</div>
+                                    <div class="store-element-timer">Available!</div>
                                     <button data-index="0" class="store-buttons">🛍️</button>
                                 </div>
                             </div>
@@ -1246,15 +1247,17 @@ class PetWebviewContainer implements IPetPanel {
                                 <div class="store-element-title"><b>Feed🥣</b></div>
                                 <div class="store-element-description">Feed your dog. The health value will increase by 25.</div>
                                 <div class="store-element-price-button">
-                                    <div class="store-element-price">💰 5</div>
+                                    <div class="store-element-price">💰5</div>
+                                    <div class="store-element-timer">Available!</div>
                                     <button data-index="1" class="store-buttons">🛍️</button>
                                 </div>
                             </div>
                             <div class="store-element">
                                 <div class="store-element-title"><b>Play✨</b></div>
-                                <div class="store-element-description">Play with your dog.</div>
+                                <div class="store-element-description">Play with your dog and gain 10 experience points</div>
                                 <div class="store-element-price-button">
-                                    <div class="store-element-price">💰 5</div>
+                                    <div class="store-element-price">💰5</div>
+                                    <div class="store-element-timer">Available!</div>
                                     <button data-index="2" class="store-buttons">🛍️</button>
                                 </div>
                             </div>
@@ -1262,7 +1265,8 @@ class PetWebviewContainer implements IPetPanel {
                                 <div class="store-element-title"><b>Boost🚀</b></div>
                                 <div class="store-element-description">Speed up your experience accumulation by 5x for 30 mins.</div>
                                 <div class="store-element-price-button">
-                                    <div class="store-element-price">💰 5</div>
+                                    <div class="store-element-price">💰5</div>
+                                    <div class="store-element-timer">Available!</div>
                                     <button data-index="3" class="store-buttons">🛍️</button>
                                 </div>
                             </div>

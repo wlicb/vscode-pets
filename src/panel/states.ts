@@ -97,6 +97,7 @@ export class PetPanelState {
     accessCode: string | undefined;
     storyLine: Array<Level> | undefined;
     coin: number | undefined;
+    targetTimes: Date[] | undefined;
 }
 
 export enum HorizontalDirection {
