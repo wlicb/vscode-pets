@@ -21,7 +21,7 @@ import { BallState, PetElementState, PetPanelState } from './states';
 import { showBar, hideBar, updateBar } from './bar';
 import { hideChatbox, showChatbox, displayMessage, storeMessage, setBadge, sendMsg } from './chat';
 import { Level } from './states';
-import { showStore, hideStore } from './store';
+import { showStore, hideStore, purchase, updateTimer, computeTargetTime } from './store';
 // import { purchase } from './store';
 // import { computeTimeDifference } from '../common/healthTimer';
 
@@ -38,6 +38,7 @@ declare global {
 
 let UPDATE_HEALTH_THRES: number;
 let UPDATE_EX_RATE = 1;
+const NUM_OF_ELEMENTS = 4;
 export var allPets: IPetCollection = new PetCollection();
 var petCounter: number;
 var currentTimer: Date;
@@ -45,6 +46,8 @@ var userID: string;
 var currentAccessCode: string;
 var currentStoryLine: Array<Level>;
 var coin: number;
+
+const targetTimes: Date[] = [];
 
 function calculateBallRadius(size: PetSize): number {
     if (size === PetSize.nano) {
@@ -336,6 +339,7 @@ export function saveState(stateApi?: VscodeStateApi) {
     state.accessCode = currentAccessCode;
     state.storyLine = currentStoryLine;
     state.coin = coin;
+    state.targetTimes = targetTimes;
     stateApi?.setState(state);
 }
 
@@ -385,6 +389,15 @@ async function recoverState(
             currentStoryLine = state.storyLine;
             UPDATE_HEALTH_THRES = parseInt(currentStoryLine[0].health_drop_time);
         }
+        if (state.targetTimes !== undefined) {
+            for (var i = 0; i < NUM_OF_ELEMENTS; i++) {
+                if (state.targetTimes[i] !== undefined) {
+                    targetTimes.push(state.targetTimes[i]);
+                } else {
+                    targetTimes.push(new Date());
+                }
+            }
+        }
         
     }
     showCoinCounter();
@@ -424,6 +437,10 @@ async function recoverState(
                 console.log(err);
             });;
             allPets.push(newPet);
+            const currentPet = allPets.pets[0];
+            showBar(currentPet.pet.name, currentPet.pet.getLevel(), currentPet.pet.getExperience(), currentPet.pet.getNextTarget(), currentPet.pet.getHealth());
+        
+            // console.log(allPets.pets[0]);
             recoveryMap.set(newPet.pet, p);
         } catch (InvalidPetException) {
             console.log(
@@ -446,6 +463,7 @@ async function recoverState(
             }
         }
     });
+    // console.log(allPets.pets[0]);
 }
 
 function randomStartPosition(): number {
@@ -873,13 +891,11 @@ export function petPanelApp(
     } else {
         console.log('Recovering state - ', state);
         void recoverState(basePetUri, petSize, floor, stateApi);
-        const currentPet = allPets.pets[0];
-        console.log(allPets);
-        showBar(currentPet.pet.name, currentPet.pet.getLevel(), currentPet.pet.getExperience(), currentPet.pet.getNextTarget(), currentPet.pet.getHealth());
-
     }
 
+    
     initCanvas();
+
 
     if (throwBallWithMouse) {
         dynamicThrowOn();
@@ -948,6 +964,7 @@ async function bindUserID(userID: string, accessCode: string) {
     
 }
 
+export 
 function getNewTarget(level: number): number {
     // console.log(currentStoryLine);
     if (currentStoryLine !== undefined && currentStoryLine[level-1] !== undefined) {
@@ -982,3 +999,27 @@ export function getCoin() {
 export function updateExRate(value: number) {
     UPDATE_EX_RATE = value;
 }
+
+function setTargetTime(index: number, time: Date) {
+    targetTimes[index] = time;
+}
+
+// Add event listeners to the buttons
+document.querySelectorAll('.store-buttons').forEach(button => {
+    const index = (button as HTMLElement).dataset.index;
+    // targetTimes[Number(index)] = getTargetTime(Number(index));
+    button.addEventListener('click', () => {
+        if (index !== undefined) {
+            const result = purchase(Number(index));
+            console.log(result);
+            if (result === 0) {
+                (button as HTMLButtonElement).disabled = true;
+                setTargetTime(Number(index), computeTargetTime());
+                setInterval(() => {
+                    updateTimer(targetTimes[Number(index)], Number(index), button as HTMLButtonElement);
+                }, 500);
+                updateTimer(targetTimes[Number(index)], Number(index), button as HTMLButtonElement);
+            }
+        }
+    });
+});

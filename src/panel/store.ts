@@ -151,3 +151,4 @@ export function updateTimer(targetTime: Date, index: number, button: HTMLButtonE
     }
 
 }
+
