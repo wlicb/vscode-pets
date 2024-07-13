@@ -208,7 +208,7 @@ function startAnimations(
                 //         hideChatbox();
                 //     }
                 } else if (e.target === storeButton) {
-                    showStore();
+                    showStore(targetTimes);
                 } else if (e.target === closeStoreButton) {
                     hideStore();
                 }
@@ -398,7 +398,7 @@ async function recoverState(
                 }
             }
         }
-        
+
     }
     showCoinCounter();
     var recoveryMap: Map<IPetType, PetElementState> = new Map();
@@ -1007,7 +1007,7 @@ function setTargetTime(index: number, time: Date) {
 // Add event listeners to the buttons
 document.querySelectorAll('.store-buttons').forEach(button => {
     const index = (button as HTMLElement).dataset.index;
-    // targetTimes[Number(index)] = getTargetTime(Number(index));
+
     button.addEventListener('click', () => {
         if (index !== undefined) {
             const result = purchase(Number(index));

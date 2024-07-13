@@ -1231,7 +1231,7 @@ class PetWebviewContainer implements IPetPanel {
                     <div id="store">
                         <div id="store-header">
                             <div id="store-title">Find some tools!</div>
-                            <button id="close-store-button" class="store-buttons">❌</button>
+                            <button id="close-store-button">❌</button>
                         </div>
                         <div id="store-contents">
                             <div class="store-element">

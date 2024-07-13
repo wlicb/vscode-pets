@@ -89,9 +89,26 @@ export function purchase(index: number): number {
 
 }
 
-export function showStore() {
+export function showStore(targetTimes: Date[]) {
     const store = document.getElementById("store");
     if (store) {
+        const buttons = document.getElementsByClassName('store-buttons');
+        for (var i = 0; i < buttons.length; i++) {
+            const button = buttons[i];
+            console.log(button);
+            const index = (button as HTMLElement).dataset.index;
+            console.log(index);
+            const now = new Date();
+            if (new Date(targetTimes[Number(index)]).getTime() >= now.getTime()) {
+                (button as HTMLButtonElement).disabled = true;
+                setInterval(() => {
+                    updateTimer(targetTimes[Number(index)], Number(index), button as HTMLButtonElement);
+                }, 500);
+                updateTimer(targetTimes[Number(index)], Number(index), button as HTMLButtonElement);
+            }
+            
+        }
+            
         store.style.display = "block";
     }
 }
@@ -130,7 +147,7 @@ export function computeTargetTime() {
 
 export function updateTimer(targetTime: Date, index: number, button: HTMLButtonElement) {
     const now = new Date();
-    const remainingTime = targetTime.getTime() - now.getTime();
+    const remainingTime = new Date(targetTime).getTime() - now.getTime();
 
     const timer = document.getElementsByClassName('store-element-timer')[index] as HTMLElement;
     if (timer) {
