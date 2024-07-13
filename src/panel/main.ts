@@ -21,7 +21,8 @@ import { BallState, PetElementState, PetPanelState } from './states';
 import { showBar, hideBar, updateBar } from './bar';
 import { hideChatbox, showChatbox, displayMessage, storeMessage, setBadge, sendMsg } from './chat';
 import { Level } from './states';
-import { purchase } from './store';
+import { showStore, hideStore } from './store';
+// import { purchase } from './store';
 // import { computeTimeDifference } from '../common/healthTimer';
 
 /* This is how the VS Code API can be invoked from the panel */
@@ -36,6 +37,7 @@ declare global {
 
 
 let UPDATE_HEALTH_THRES: number;
+let UPDATE_EX_RATE = 1;
 export var allPets: IPetCollection = new PetCollection();
 var petCounter: number;
 var currentTimer: Date;
@@ -164,7 +166,9 @@ function startAnimations(
             const closeChatButton = document.getElementById('close-chatbox-button');
             const addCodeButton = document.getElementById('add-code-button');
             const removeCodeButton = document.getElementById('remove-code-button');
-            if (compileButton && chatButton) {
+            const storeButton = document.getElementById('store-button');
+            const closeStoreButton = document.getElementById('close-store-button');
+            if (compileButton && chatButton && storeButton) {
                 // console.log(e.target);
                 if (e.target === compileButton) {
                     stateApi?.postMessage({
@@ -200,6 +204,10 @@ function startAnimations(
                 //     if (chatbox === null || !chatbox.contains(target)) {
                 //         hideChatbox();
                 //     }
+                } else if (e.target === storeButton) {
+                    showStore();
+                } else if (e.target === closeStoreButton) {
+                    hideStore();
                 }
             } else {
                 console.log("cannot find button");
@@ -738,7 +746,7 @@ export function petPanelApp(
                 var coinUpdate = message.coin;
                 updateCoin(coinUpdate);
                 pets.forEach((pet) => {
-                    pet.pet.setExperience(pet.pet.getExperience() + diff, true, userID, getNewTarget(pet.pet.getLevel() + 1)).then(msg => {
+                    pet.pet.setExperience(pet.pet.getExperience() + diff * UPDATE_EX_RATE, true, userID, getNewTarget(pet.pet.getLevel() + 1)).then(msg => {
                         if (msg.returnMsg !== "") {
                             displayMessage("", msg.returnMsg, msg.time);
                             storeMessage("", msg.returnMsg, msg.time);
@@ -969,4 +977,8 @@ export function getUserID() {
 
 export function getCoin() {
     return coin;
+}
+
+export function updateExRate(value: number) {
+    UPDATE_EX_RATE = value;
 }

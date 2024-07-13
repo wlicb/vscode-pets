@@ -171,3 +171,124 @@ button[disabled] {
   padding-left: 8%;
   padding-bottom: 3%;
 }
+
+#store {
+  display: none;
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  width: 90%;
+  height: 60%;
+  background-color: #2e2e2e;
+  border: 1px solid #555;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  color: #fff;
+  overflow: hidden;
+}
+
+.store-buttons {
+  width: 30px;
+  height: 30px;
+  margin-left: 10px;
+  padding: 5px 5px;
+  border: none;
+  border-radius: 5px;
+  background-color: #4e4e4e;
+  color: #fff;
+  cursor: pointer;
+}
+
+
+.store-buttons:hover {
+  background-color: #5e5e5e;
+}
+
+#purchase-message {
+  display: none;
+}
+
+#close-store-button {
+  position: absolute;
+  right: 10px;
+}
+
+#store-header {
+  background-color: #3e3e3e;
+  border-bottom: 1px solid #555;
+  border-radius: 10px 10px 0 0;
+  text-align: center;
+  font-size: 16px;
+  width: 100%;
+  padding: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+#store-contents {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  height: 100%;
+  overflow-y: auto;
+  max-height: 200px;
+  padding: 5px;
+}
+
+.store-element {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #ccc;
+  margin: 10px;
+  box-sizing: border-box;
+  border-radius: 8px;
+}
+
+.store-element-title,
+.store-element-description,
+.store-element-price-button {
+    width: 100%;
+    margin: 5px 0;
+}
+
+.store-element-price-button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#store-contents .store-element:nth-child(1) {
+  grid-area: 1 / 1 / 2 / 2;
+}
+
+#store-contents .store-element:nth-child(2) {
+  grid-area: 1 / 2 / 2 / 3;
+}
+
+#store-contents .store-element:nth-child(3) {
+  grid-area: 2 / 1 / 3 / 2;
+}
+
+#store-contents .store-element:nth-child(4) {
+  grid-area: 2 / 2 / 3 / 3;
+}
+
+#purchase-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50%;
+  height: 30%;
+  background: rgba(255, 255, 255, 0.8);
+  z-index: 1000;
+  font-size: 16px;
+  text-align: center;
+  border-radius: 10px;
+  color: black;
+}
