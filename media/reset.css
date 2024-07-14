@@ -175,10 +175,9 @@ button[disabled] {
 #store {
   display: none;
   position: fixed;
-  bottom: 10px;
+  top: 30%;
   right: 10px;
   width: 90%;
-  height: 60%;
   background-color: #2e2e2e;
   border: 1px solid #555;
   border-radius: 10px;
@@ -202,10 +201,6 @@ button[disabled] {
 
 .store-buttons:hover {
   background-color: #5e5e5e;
-}
-
-#purchase-message {
-  display: none;
 }
 
 #close-store-button {
@@ -234,7 +229,7 @@ button[disabled] {
   height: 100%;
   overflow: auto;
   max-height: 200px;
-  padding: 5px;
+  padding: 1px;
 }
 
 .store-element {
@@ -279,16 +274,23 @@ button[disabled] {
 }
 
 #purchase-message {
+  display: none;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 50%;
-  height: 30%;
+  height: 25%;
   background: rgba(255, 255, 255, 0.8);
   z-index: 1000;
   font-size: 16px;
   text-align: center;
   border-radius: 10px;
   color: black;
+  /* padding: 5%; */
+}
+
+#boost-message {
+  display: none;
+  padding: 20px;
 }

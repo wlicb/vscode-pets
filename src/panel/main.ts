@@ -1011,7 +1011,7 @@ document.querySelectorAll('.store-buttons').forEach(button => {
     button.addEventListener('click', () => {
         if (index !== undefined) {
             const result = purchase(Number(index));
-            console.log(result);
+            // console.log(result);
             if (result === 0) {
                 (button as HTMLButtonElement).disabled = true;
                 setTargetTime(Number(index), computeTargetTime());

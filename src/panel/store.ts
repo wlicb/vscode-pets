@@ -1,4 +1,5 @@
 import { updateCoin, allPets, getCoin, getUserID, updateExRate, getNewTarget } from "./main";
+import { updateBoostTimer, getRemainingBoostTime, showBoostMessage, hideBoostMessage } from "./boost";
 
 type Activity = {
     index: number,
@@ -54,7 +55,19 @@ function play() {
 
 function boost() {
     updateExRate(5);
+    updateBoostTimer();
+    const interval = setInterval(() => {
+        const timerText = getRemainingBoostTime();
+        if (timerText === "") {
+            hideBoostMessage();
+        } else {
+            showBoostMessage(timerText);
+        }
+    });
+    showBoostMessage(getRemainingBoostTime());
     setTimeout(() => {
+        clearInterval(interval);
+        hideBoostMessage();
         updateExRate(1);
     }, 1800000);
     // }, 10000);
@@ -95,9 +108,9 @@ export function showStore(targetTimes: Date[]) {
         const buttons = document.getElementsByClassName('store-buttons');
         for (var i = 0; i < buttons.length; i++) {
             const button = buttons[i];
-            console.log(button);
+            // console.log(button);
             const index = (button as HTMLElement).dataset.index;
-            console.log(index);
+            // console.log(index);
             const now = new Date();
             if (new Date(targetTimes[Number(index)]).getTime() >= now.getTime()) {
                 (button as HTMLButtonElement).disabled = true;
@@ -125,8 +138,10 @@ function showMessage(status: number) {
     if (purchaseMessage) {
         if (status === 0) {
             purchaseMessage.innerHTML = "Purchased! 🎉";
+            purchaseMessage.style.padding = "8%";
         } else {
             purchaseMessage.innerHTML = "❗ Opps, You do not have enough coins. Code to earn coins! 💪";
+            purchaseMessage.style.padding = "5%";
         }
         purchaseMessage.style.display = "block";
         setTimeout(() => {

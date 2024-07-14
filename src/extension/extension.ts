@@ -1216,6 +1216,7 @@ class PetWebviewContainer implements IPetPanel {
                             <div id="experience-value" class="status-text">100/100</div>
                         </div>
                     </div>
+                    <div id="boost-message">🚀Boosting your level up... Time remaining: 0:00:00</div>
                     <div id="chatbox">
                         <div id="chatbox-header">
                             <div id="chatbox-title">Chat with none!</div>
@@ -1263,7 +1264,7 @@ class PetWebviewContainer implements IPetPanel {
                             </div>
                             <div class="store-element">
                                 <div class="store-element-title"><b>Boost🚀</b></div>
-                                <div class="store-element-description">Speed up your experience accumulation by 5x for 30 mins.</div>
+                                <div class="store-element-description">Speed up your experience accumulation by 5x for 15 mins.</div>
                                 <div class="store-element-price-button">
                                     <div class="store-element-price">💰5</div>
                                     <div class="store-element-timer">Available!</div>
