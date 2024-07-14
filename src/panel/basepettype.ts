@@ -16,6 +16,7 @@ import { getRandomCommentWhenLevelUp, getRandomCommentWhenLowHealth,
     getRandomCommentWhenHealthDecrease, getRandomCommentWhenSessionStarted } from '../common/comments';
 
 
+
 export class InvalidStateError extends Error {
     fromState: States;
     petType: string;
@@ -438,7 +439,7 @@ export abstract class BasePetType implements IPetType {
         const prevLevel = this.getLevel();
         this.experience = value;
         // console.log(value);
-        if (nextTarget > this.nextTarget) {
+        if (nextTarget > 0) {
             if (this.experience >= this.nextTarget) {
                 // this.experience = this.nextTarget;
                 if (this.health >= LOW_HEALTH_CUT_OFF) {

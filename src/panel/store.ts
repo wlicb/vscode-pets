@@ -4,34 +4,40 @@ import { updateBoostTimer, getRemainingBoostTime, showBoostMessage, hideBoostMes
 type Activity = {
     index: number,
     price: number,
-    callback: Function
+    callback: Function,
+    level: number
 };
 
 const activityList: Activity[] = [];
 activityList.push({
     index: 0,
     price: 2,
-    callback: pet
+    callback: pet,
+    level: 1
 });
 
 activityList.push({
     index: 1,
     price: 5,
-    callback: feed
+    callback: feed,
+    level: 2
 });
 
 activityList.push({
     index: 2,
     price: 5,
-    callback: play
+    callback: play,
+    level: 3
 });
 
 activityList.push({
     index: 3,
     price: 5,
-    callback: boost
+    callback: boost,
+    level: 1
 });
 
+const NUM_OF_ELEMENTS = activityList.length;
 // const timers = [];
 
 
@@ -49,7 +55,7 @@ function feed() {
 
 function play() {
     allPets.pets.forEach((petEm) => {
-        void petEm.pet.setExperience(petEm.pet.getExperience() + 10, false, getUserID(), getNewTarget(petEm.pet.getLevel() + 1));
+        void petEm.pet.setExperience(petEm.pet.getExperience() + 10, false, getUserID(), petEm.pet.getNextTarget() + getNewTarget(petEm.pet.getLevel() + 1));
     });
 }
 
@@ -71,6 +77,27 @@ function boost() {
         updateExRate(1);
     }, 1800000);
     // }, 10000);
+}
+
+
+function lock(targetLevel: number, currentLevel: number, button: HTMLButtonElement, text: HTMLElement) {
+    if (currentLevel >= targetLevel) {
+        button.disabled = false;
+        text.innerHTML = "Available!";
+    } else {
+        button.disabled = true;
+        text.innerHTML = "Available at level " + targetLevel;
+    }
+}
+
+export function lockAll(currentLevel: number) {
+    for (var i = 0; i < NUM_OF_ELEMENTS; i++) {
+        const button = document.getElementsByClassName('store-buttons')[i];
+        const text = document.getElementsByClassName('store-element-timer')[i];
+        if (button && text) {
+            lock(activityList[i].level, currentLevel, button as HTMLButtonElement, text as HTMLElement);
+        }
+    }
 }
 
 export function purchase(index: number): number {

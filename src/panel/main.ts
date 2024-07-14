@@ -21,7 +21,7 @@ import { BallState, PetElementState, PetPanelState } from './states';
 import { showBar, hideBar, updateBar } from './bar';
 import { hideChatbox, showChatbox, displayMessage, storeMessage, setBadge, sendMsg } from './chat';
 import { Level } from './states';
-import { showStore, hideStore, purchase, updateTimer, computeTargetTime } from './store';
+import { showStore, hideStore, purchase, updateTimer, computeTargetTime, lockAll } from './store';
 // import { purchase } from './store';
 // import { computeTimeDifference } from '../common/healthTimer';
 
@@ -439,7 +439,7 @@ async function recoverState(
             allPets.push(newPet);
             const currentPet = allPets.pets[0];
             showBar(currentPet.pet.name, currentPet.pet.getLevel(), currentPet.pet.getExperience(), currentPet.pet.getNextTarget(), currentPet.pet.getHealth());
-        
+            // lockAll(currentPet.pet.getLevel());
             // console.log(allPets.pets[0]);
             recoveryMap.set(newPet.pet, p);
         } catch (InvalidPetException) {
@@ -780,6 +780,7 @@ export function petPanelApp(
                     });
                     updateBar(pet.pet.name, pet.pet.getLevel(), pet.pet.getExperience(), pet.pet.getNextTarget(), pet.pet.getHealth());
                 });
+                // lockAll(pets[0].pet.getLevel());
                 saveState(stateApi);
                 break;
             case 'update-health':
