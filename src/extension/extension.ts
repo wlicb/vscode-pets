@@ -1217,6 +1217,7 @@ class PetWebviewContainer implements IPetPanel {
                         </div>
                     </div>
                     <div id="boost-message">🚀Boosting your level up... Time remaining: 0:00:00</div>
+                    <div id="pet-number-message">⛔ You are only allowed to have one pet!</div>
                     <div id="chatbox">
                         <div id="chatbox-header">
                             <div id="chatbox-title">Chat with none!</div>

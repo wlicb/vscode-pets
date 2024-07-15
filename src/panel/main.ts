@@ -684,29 +684,40 @@ export function petPanelApp(
                 throwBall();
                 break;
             case 'spawn-pet':
-                const newPet = addPetToPanel(
-                    message.type,
-                    basePetUri,
-                    message.color,
-                    petSize,
-                    randomStartPosition(),
-                    floor,
-                    floor,
-                    message.name ?? randomName(message.type),
-                    message.experience,
-                    message.nextTarget,
-                    message.level,
-                    message.health,
-                    stateApi,
-                );
-                console.log(JSON.stringify(message));
-                showBar(newPet.pet.name, newPet.pet.getLevel(), newPet.pet.getExperience(), newPet.pet.getNextTarget(), newPet.pet.getHealth());
-                allPets.push(
-                    newPet
-                );
-                lockAll(newPet.pet.getLevel());
-                saveState(stateApi);
-                break;
+                if (allPets.pets.length > 0) {
+                    const messageElement = document.getElementById("pet-number-message");
+                    if (messageElement) {
+                        messageElement.style.display = "block";
+                        setTimeout(() => {
+                            messageElement.style.display = "none";
+                        }, 2000);
+                    }
+                    break;
+                } else {
+                    const newPet = addPetToPanel(
+                        message.type,
+                        basePetUri,
+                        message.color,
+                        petSize,
+                        randomStartPosition(),
+                        floor,
+                        floor,
+                        message.name ?? randomName(message.type),
+                        message.experience,
+                        message.nextTarget,
+                        message.level,
+                        message.health,
+                        stateApi,
+                    );
+                    console.log(JSON.stringify(message));
+                    showBar(newPet.pet.name, newPet.pet.getLevel(), newPet.pet.getExperience(), newPet.pet.getNextTarget(), newPet.pet.getHealth());
+                    allPets.push(
+                        newPet
+                    );
+                    lockAll(newPet.pet.getLevel());
+                    saveState(stateApi);
+                    break;
+                }
 
             case 'list-pets':
                 var pets = allPets.pets;
