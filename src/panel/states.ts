@@ -19,6 +19,7 @@ export type Level = {
 };
 
 export interface IPetType {
+    allowSwipe: boolean;
     nextFrame(): void;
 
     // Special methods for actions
@@ -69,6 +70,12 @@ export interface IPetType {
 
 
     showSpeechBubble(message: string, duration: number): void;
+
+    eat(): void;
+
+    pet(): void;
+
+    play(): void;
 }
 
 export class PetInstanceState {
@@ -140,6 +147,10 @@ export const enum States {
     swipeL = 'swipe-low-level',
     swipeM = 'swipe-mid-level',
     swipeH = 'swipe-high-level',
+
+    eatL = "eat_low_level",
+    eatM = "eat-mid-level",
+    eatH = "eat-high-level",
     
 }
 
@@ -235,6 +246,13 @@ export function resolveState(state: string, pet: IPetType): IState {
             return new SwipeStateM(pet);
         case States.swipeH:
             return new SwipeStateH(pet);
+
+        case States.eatL:
+            return new EatL(pet);
+        case States.eatM:
+            return new EatM(pet);
+        case States.eatH:
+            return new EatH(pet);
 
     }
     return new SitIdleStateL(pet);
@@ -357,6 +375,30 @@ export class LieStateH extends AbstractStaticState {
     horizontalDirection = HorizontalDirection.right;
     holdTime = 50;
 }
+
+export class EatL extends AbstractStaticState {
+    label = States.eatL;
+    spriteLabel = 'eat_low_level';
+    horizontalDirection = HorizontalDirection.natural;
+    holdTime = 60;
+}
+
+export class EatM extends AbstractStaticState {
+    label = States.eatM;
+    spriteLabel = 'eat_mid_level';
+    horizontalDirection = HorizontalDirection.natural;
+    holdTime = 60;
+}
+
+export class EatH extends AbstractStaticState {
+    label = States.eatH;
+    spriteLabel = 'eat_high_level';
+    horizontalDirection = HorizontalDirection.natural;
+    holdTime = 60;
+}
+
+
+
 
 export class SwipeStateL extends AbstractStaticState {
     label = States.swipeL;

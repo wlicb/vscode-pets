@@ -33,6 +33,7 @@ const MID_LEVEL_CUT_OFF = 7;
 const LOW_HEALTH_CUT_OFF = 10;
 
 export abstract class BasePetType implements IPetType {
+    allowSwipe = false;
     label: string = 'base';
     static count: number = 0;
     sequence: ISequenceTree = {
@@ -212,7 +213,7 @@ export abstract class BasePetType implements IPetType {
     }
 
     get canSwipe() {
-        return !isStateAboveGround(this.currentStateEnum);
+        return !isStateAboveGround(this.currentStateEnum) && this.allowSwipe;
     }
 
     get canChase() {
@@ -244,7 +245,7 @@ export abstract class BasePetType implements IPetType {
             this.holdStateEnum = this.currentStateEnum;
             this.currentStateEnum = States.swipeL;
             this.currentState = resolveState(this.currentStateEnum, this);
-            this.showSpeechBubble('👋');
+            this.showSpeechBubble('🥰');
         } else if (this.level <= MID_LEVEL_CUT_OFF) {
             if (this.currentStateEnum === States.swipeM) {
                 return;
@@ -253,7 +254,7 @@ export abstract class BasePetType implements IPetType {
             this.holdStateEnum = this.currentStateEnum;
             this.currentStateEnum = States.swipeM;
             this.currentState = resolveState(this.currentStateEnum, this);
-            this.showSpeechBubble('👋');
+            this.showSpeechBubble('🥰');
         } else {
             if (this.currentStateEnum === States.swipeH) {
                 return;
@@ -262,7 +263,7 @@ export abstract class BasePetType implements IPetType {
             this.holdStateEnum = this.currentStateEnum;
             this.currentStateEnum = States.swipeH;
             this.currentState = resolveState(this.currentStateEnum, this);
-            this.showSpeechBubble('👋');
+            this.showSpeechBubble('🥰');
         }
     }
 
@@ -494,6 +495,28 @@ export abstract class BasePetType implements IPetType {
             this.currentState = resolveState(this.currentStateEnum, this);
         }
     }
+
+    eat() {
+        if (this.level > LOW_LEVEL_CUT_OFF) {
+            this.currentStateEnum = States.eatM;
+            this.currentState = resolveState(this.currentStateEnum, this);
+        } else if (this.level > MID_LEVEL_CUT_OFF) {
+            this.currentStateEnum = States.eatH;
+            this.currentState = resolveState(this.currentStateEnum, this);
+        } else {
+            this.currentStateEnum = States.eatL;
+            this.currentState = resolveState(this.currentStateEnum, this);
+        }
+    }
+
+    pet() {
+        this.allowSwipe = true;
+        setTimeout(() => {
+            this.allowSwipe = false;
+        }, 20 * 1000);
+    }
+
+    play() {}
 
     async onCompilationError(code: string, userID: string, err: string) {
         let returnMsg = "";

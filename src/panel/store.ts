@@ -44,18 +44,21 @@ const NUM_OF_ELEMENTS = activityList.length;
 function pet() {
     allPets.pets.forEach((petEm) => {
         void petEm.pet.setHealth(petEm.pet.getHealth() + 10, false, getUserID());
+        petEm.pet.pet();
     });
 }
 
 function feed() {
     allPets.pets.forEach((petEm) => {
         void petEm.pet.setHealth(petEm.pet.getHealth() + 25, false, getUserID());
+        petEm.pet.eat();
     });
 }
 
 function play() {
     allPets.pets.forEach((petEm) => {
         void petEm.pet.setExperience(petEm.pet.getExperience() + 10, false, getUserID(), petEm.pet.getNextTarget() + getNewTarget(petEm.pet.getLevel() + 1));
+        petEm.pet.play();
     });
 }
 
