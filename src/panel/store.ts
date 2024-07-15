@@ -81,12 +81,14 @@ function boost() {
 
 
 function lock(targetLevel: number, currentLevel: number, button: HTMLButtonElement, text: HTMLElement) {
-    if (currentLevel >= targetLevel) {
-        button.disabled = false;
-        text.innerHTML = "Available!";
-    } else {
-        button.disabled = true;
-        text.innerHTML = "Available at level " + targetLevel;
+    if (!text.innerHTML.startsWith("⏱️")) {
+        if (currentLevel >= targetLevel) {
+            button.disabled = false;
+            text.innerHTML = "Available!";
+        } else {
+            button.disabled = true;
+            text.innerHTML = "Available at level " + targetLevel;
+        }
     }
 }
 

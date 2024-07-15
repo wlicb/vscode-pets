@@ -439,7 +439,7 @@ async function recoverState(
             allPets.push(newPet);
             const currentPet = allPets.pets[0];
             showBar(currentPet.pet.name, currentPet.pet.getLevel(), currentPet.pet.getExperience(), currentPet.pet.getNextTarget(), currentPet.pet.getHealth());
-            // lockAll(currentPet.pet.getLevel());
+            lockAll(currentPet.pet.getLevel());
             // console.log(allPets.pets[0]);
             recoveryMap.set(newPet.pet, p);
         } catch (InvalidPetException) {
@@ -704,6 +704,7 @@ export function petPanelApp(
                 allPets.push(
                     newPet
                 );
+                lockAll(newPet.pet.getLevel());
                 saveState(stateApi);
                 break;
 
@@ -763,6 +764,7 @@ export function petPanelApp(
                 var diff = message.diff;
                 var coinUpdate = message.coin;
                 updateCoin(coinUpdate);
+                const prevLevelEx = pets[0].pet.getLevel();
                 pets.forEach((pet) => {
                     pet.pet.setExperience(pet.pet.getExperience() + diff * UPDATE_EX_RATE, true, userID, getNewTarget(pet.pet.getLevel() + 1)).then(msg => {
                         if (msg.returnMsg !== "") {
@@ -779,6 +781,10 @@ export function petPanelApp(
                         console.log(err);
                     });
                     updateBar(pet.pet.name, pet.pet.getLevel(), pet.pet.getExperience(), pet.pet.getNextTarget(), pet.pet.getHealth());
+                    const currentLevel = pet.pet.getLevel();
+                    if (currentLevel > prevLevelEx) {
+                        lockAll(pets[0].pet.getLevel());
+                    }
                 });
                 // lockAll(pets[0].pet.getLevel());
                 saveState(stateApi);
@@ -786,6 +792,7 @@ export function petPanelApp(
             case 'update-health':
                 var pets = allPets.pets;
                 var diff = message.diff;
+                const prevLevelHealth = pets[0].pet.getLevel();
                 pets.forEach((pet) => {
                     pet.pet.setHealth(pet.pet.getHealth() + diff, false, userID).then(msg => {
                         if (msg.returnMsg !== "") {
@@ -796,6 +803,10 @@ export function petPanelApp(
                         console.log(err);
                     });;
                     updateBar(pet.pet.name, pet.pet.getLevel(), pet.pet.getExperience(), pet.pet.getNextTarget(), pet.pet.getHealth());
+                    const currentLevel = pet.pet.getLevel();
+                    if (currentLevel > prevLevelHealth) {
+                        lockAll(pets[0].pet.getLevel());
+                    }
                 });
                 saveState(stateApi);
                 //console.log("Updating health");
