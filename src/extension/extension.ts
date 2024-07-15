@@ -1273,7 +1273,7 @@ class PetWebviewContainer implements IPetPanel {
                             </div>
                         </div>
                     </div>
-
+                    <img id="cursor" src="${vscode.Uri.joinPath(basePetUri, 'food.png')}" alt="Cursor Image">
                     <div id="purchase-message">Purchased!</div>
                 </div>
 

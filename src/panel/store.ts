@@ -49,11 +49,22 @@ function pet() {
 }
 
 function feed() {
-    allPets.pets.forEach((petEm) => {
-        void petEm.pet.setHealth(petEm.pet.getHealth() + 25, false, getUserID());
-        petEm.pet.eat();
-    });
+    const cursor = document.getElementById("cursor");
+    if (cursor) {
+        cursor.style.display = "block";
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = `${e.clientX}px`;
+        });
+        document.addEventListener('mousedown', () => {
+            allPets.pets.forEach((petEm) => {
+                void petEm.pet.setHealth(petEm.pet.getHealth() + 25, false, getUserID());
+                petEm.pet.eat();
+            });
+            cursor.style.display = "none";
+        }, { once: true });
+    }
 }
+
 
 function play() {
     allPets.pets.forEach((petEm) => {
@@ -114,12 +125,22 @@ export function purchase(index: number): number {
             if (getCoin() >= activity.price) {
                 bought = true;
                 updateCoin(-activity.price);
-                activity.callback();
                 showMessage(0);
+                setTimeout(() => {
+                    hideMessage();
+                    hideStore();
+                    setTimeout(() => {
+                        activity.callback();
+                    }, 500);
+                }, 1500);
+                
                 // console.log(showMessage);
                 // return 0;
             } else {
                 showMessage(1);
+                setTimeout(() => {
+                    hideMessage();
+                }, 1500);
                 // return 1;
             }
         }
@@ -176,11 +197,14 @@ function showMessage(status: number) {
             purchaseMessage.style.padding = "5%";
         }
         purchaseMessage.style.display = "block";
-        setTimeout(() => {
-            purchaseMessage.style.display = "none";
-        }, 2000);
     }
+}
 
+function hideMessage() {
+    const purchaseMessage = document.getElementById('purchase-message');
+    if (purchaseMessage) {
+        purchaseMessage.style.display = "none";
+    }
 }
 
 
