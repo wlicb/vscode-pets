@@ -24,7 +24,7 @@ activityList.push({
     price: 5,
     callback: feed,
     level: 2,
-    purchaseInterval: 5
+    purchaseInterval: 0.5
 });
 
 activityList.push({
@@ -58,15 +58,18 @@ function feed() {
     const cursor = document.getElementById("cursor");
     if (cursor) {
         cursor.style.display = "block";
-        document.addEventListener('mousemove', (e) => {
-            cursor.style.left = `${e.clientX}px`;
-        });
-        document.addEventListener('mousedown', () => {
+        function handleMouseMove(e: MouseEvent) {
+            if (cursor) {
+                cursor.style.left = `${e.clientX}px`;
+            }
+        }
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mousedown', (e) => {
             allPets.pets.forEach((petEm) => {
-                void petEm.pet.setHealth(petEm.pet.getHealth() + 25, false, getUserID());
-                petEm.pet.eat();
+                document.removeEventListener('mousemove', handleMouseMove);
+                petEm.pet.eat(e.clientX, cursor, getUserID());
             });
-            cursor.style.display = "none";
+            // cursor.style.display = "none";
         }, { once: true });
     }
 }

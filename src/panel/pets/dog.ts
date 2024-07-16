@@ -251,6 +251,18 @@ export class Dog extends BasePetType {
                 state: States.chaseH,
                 possibleNextStates: [States.idleWithBallH],
             },
+            {
+                state: States.chaseFoodL,
+                possibleNextStates: [States.eatL],
+            },
+            {
+                state: States.chaseFoodM,
+                possibleNextStates: [States.eatM],
+            },
+            {
+                state: States.chaseFoodH,
+                possibleNextStates: [States.eatH],
+            },
             
         ],
     };

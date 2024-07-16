@@ -12,7 +12,11 @@ import {
     IPetType,
     ChaseH,
     ChaseL,
-    ChaseM
+    ChaseM,
+    ChaseFoodH,
+    ChaseFoodM,
+    ChaseFoodL,
+    FoodState
 } from './states';
 
 import { getRandomCommentWhenLevelUp, getRandomCommentWhenLowHealth, 
@@ -501,16 +505,19 @@ export abstract class BasePetType implements IPetType {
         }
     }
 
-    eat() {
+    eat(cx: number, canvas: HTMLElement, userID: string) {
+        console.log(cx);
+        void this.setHealth(this.getHealth() + 25, false, userID);
+        const foodState = new FoodState(cx);
         if (this.level > MID_LEVEL_CUT_OFF) {
-            this.currentStateEnum = States.eatH;
-            this.currentState = resolveState(this.currentStateEnum, this);
+            this.currentStateEnum = States.chaseFoodH;
+            this.currentState = new ChaseFoodH(this, foodState, canvas);
         } else if (this.level > LOW_LEVEL_CUT_OFF) {
-            this.currentStateEnum = States.eatM;
-            this.currentState = resolveState(this.currentStateEnum, this);
+            this.currentStateEnum = States.chaseFoodM;
+            this.currentState = new ChaseFoodM(this, foodState, canvas);
         } else {
-            this.currentStateEnum = States.eatL;
-            this.currentState = resolveState(this.currentStateEnum, this);
+            this.currentStateEnum = States.chaseFoodL;
+            this.currentState = new ChaseFoodL(this, foodState, canvas);
         }
     }
 

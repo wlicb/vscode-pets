@@ -71,7 +71,7 @@ export interface IPetType {
 
     showSpeechBubble(message: string, duration: number): void;
 
-    eat(): void;
+    eat(cx: number, canvas: HTMLElement, userID: string): void;
 
     pet(): void;
 
@@ -160,7 +160,11 @@ export const enum States {
 
     chaseL = "chase-low-level",
     chaseM = "chase-mid-level",
-    chaseH = "chase-high-level"
+    chaseH = "chase-high-level",
+
+    chaseFoodL = "chase-food-low-level",
+    chaseFoodM = "chase-food-mid-level",
+    chaseFoodH = "chase-food-high-level",
 }
 
 export enum FrameResult {
@@ -183,6 +187,14 @@ export class BallState {
         this.vx = vx;
         this.vy = vy;
         this.paused = false;
+    }
+}
+
+export class FoodState {
+    cx: number;
+
+    constructor(cx: number) {
+        this.cx = cx;
     }
 }
 
@@ -775,7 +787,7 @@ export class ChaseM implements IState {
 
 export class ChaseH implements IState {
     label = States.chaseL;
-    spriteLabel = 'run_low_level';
+    spriteLabel = 'run_high_level';
     horizontalDirection = HorizontalDirection.left;
     ballState: BallState;
     canvas: HTMLCanvasElement;
@@ -812,6 +824,124 @@ export class ChaseH implements IState {
             // hide ball
             this.canvas.style.display = 'none';
             this.ballState.paused = true;
+            return FrameResult.stateComplete;
+        }
+        return FrameResult.stateContinue;
+    }
+}
+
+
+export class ChaseFoodL implements IState {
+    label = States.chaseFoodL;
+    spriteLabel = 'run_low_level';
+    horizontalDirection = HorizontalDirection.left;
+    foodState: FoodState;
+    canvas: HTMLElement;
+    pet: IPetType;
+
+    constructor(
+        pet: IPetType,
+        foodState: FoodState,
+        canvas: HTMLElement,
+    ) {
+        this.pet = pet;
+        this.foodState = foodState;
+        this.canvas = canvas;
+    }
+
+    nextFrame(): FrameResult {
+        if (this.pet.left > this.foodState.cx) {
+            this.horizontalDirection = HorizontalDirection.left;
+            this.pet.positionLeft(this.pet.left - this.pet.speed);
+        } else {
+            this.horizontalDirection = HorizontalDirection.right;
+            this.pet.positionLeft(this.pet.left + this.pet.speed);
+        }
+
+        if (
+            this.foodState.cx < this.pet.left &&
+            this.pet.left < this.foodState.cx + 15
+        ) {
+            // hide food
+            this.canvas.style.display = 'none';
+            return FrameResult.stateComplete;
+        }
+        return FrameResult.stateContinue;
+    }
+}
+
+export class ChaseFoodM implements IState {
+    label = States.chaseFoodM;
+    spriteLabel = 'run_mid_level';
+    horizontalDirection = HorizontalDirection.left;
+    foodState: FoodState;
+    canvas: HTMLElement;
+    pet: IPetType;
+
+    constructor(
+        pet: IPetType,
+        foodState: FoodState,
+        canvas: HTMLElement,
+    ) {
+        this.pet = pet;
+        this.foodState = foodState;
+        this.canvas = canvas;
+    }
+
+    nextFrame(): FrameResult {
+        if (this.pet.left > this.foodState.cx) {
+            this.horizontalDirection = HorizontalDirection.left;
+            this.pet.positionLeft(this.pet.left - this.pet.speed);
+        } else {
+            this.horizontalDirection = HorizontalDirection.right;
+            this.pet.positionLeft(this.pet.left + this.pet.speed);
+        }
+
+        if (
+            this.foodState.cx < this.pet.left &&
+            this.pet.left < this.foodState.cx + 15
+        ) {
+            // hide food
+            this.canvas.style.display = 'none';
+            return FrameResult.stateComplete;
+        }
+        return FrameResult.stateContinue;
+    }
+}
+
+export class ChaseFoodH implements IState {
+    label = States.chaseFoodH;
+    spriteLabel = 'run_high_level';
+    horizontalDirection = HorizontalDirection.left;
+    foodState: FoodState;
+    canvas: HTMLElement;
+    pet: IPetType;
+
+    constructor(
+        pet: IPetType,
+        foodState: FoodState,
+        canvas: HTMLElement,
+    ) {
+        this.pet = pet;
+        this.foodState = foodState;
+        this.canvas = canvas;
+    }
+
+    nextFrame(): FrameResult {
+        if (this.pet.left > this.foodState.cx) {
+            this.horizontalDirection = HorizontalDirection.left;
+            this.pet.positionLeft(this.pet.left - this.pet.speed);
+        } else {
+            this.horizontalDirection = HorizontalDirection.right;
+            this.pet.positionLeft(this.pet.left + this.pet.speed);
+        }
+
+        if (
+            this.foodState.cx < this.pet.left &&
+            this.pet.left < this.foodState.cx + 15
+        ) {
+            // hide food
+            this.canvas.style.display = 'none';
             return FrameResult.stateComplete;
         }
         return FrameResult.stateContinue;
