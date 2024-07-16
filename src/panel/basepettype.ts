@@ -1,5 +1,4 @@
 import { PetColor, PetSize, PetSpeed } from '../common/types';
-import { IPetType } from './states';
 import { ISequenceTree } from './sequences';
 import {
     States,
@@ -9,6 +8,11 @@ import {
     isStateAboveGround,
     HorizontalDirection,
     FrameResult,
+    BallState,
+    IPetType,
+    ChaseH,
+    ChaseL,
+    ChaseM
 } from './states';
 
 import { getRandomCommentWhenLevelUp, getRandomCommentWhenLowHealth, 
@@ -312,6 +316,7 @@ export abstract class BasePetType implements IPetType {
         this.setAnimation(this.currentState.spriteLabel);
 
         var frameResult = this.currentState.nextFrame();
+        // console.log(this.currentStateEnum);
         if (frameResult === FrameResult.stateComplete) {
             // If recovering from swipe..
             if (this.holdState && this.holdStateEnum) {
@@ -487,21 +492,21 @@ export abstract class BasePetType implements IPetType {
         this.level = value;
         // console.log(typeof(newNextTarget));
         this.nextTarget += newNextTarget;
-        if (this.level > LOW_LEVEL_CUT_OFF) {
+        if (this.level > MID_LEVEL_CUT_OFF) {
             this.currentStateEnum = States.sitIdleM;
             this.currentState = resolveState(this.currentStateEnum, this);
-        } else if (this.level > MID_LEVEL_CUT_OFF) {
+        } else if (this.level > LOW_LEVEL_CUT_OFF) {
             this.currentStateEnum = States.sitIdleH;
             this.currentState = resolveState(this.currentStateEnum, this);
         }
     }
 
     eat() {
-        if (this.level > LOW_LEVEL_CUT_OFF) {
-            this.currentStateEnum = States.eatM;
-            this.currentState = resolveState(this.currentStateEnum, this);
-        } else if (this.level > MID_LEVEL_CUT_OFF) {
+        if (this.level > MID_LEVEL_CUT_OFF) {
             this.currentStateEnum = States.eatH;
+            this.currentState = resolveState(this.currentStateEnum, this);
+        } else if (this.level > LOW_LEVEL_CUT_OFF) {
+            this.currentStateEnum = States.eatM;
             this.currentState = resolveState(this.currentStateEnum, this);
         } else {
             this.currentStateEnum = States.eatL;
@@ -514,6 +519,24 @@ export abstract class BasePetType implements IPetType {
         setTimeout(() => {
             this.allowSwipe = false;
         }, 20 * 1000);
+    }
+
+
+    chase(ballState: BallState, canvas: HTMLCanvasElement) {
+        if (this.getLevel() > MID_LEVEL_CUT_OFF) {
+            this.currentStateEnum = States.chaseH;
+            this.currentState = new ChaseH(this, ballState, canvas);
+            // console.log(this.currentStateEnum);
+        } else if (this.getLevel() > LOW_LEVEL_CUT_OFF) {
+            this.currentStateEnum = States.chaseM;
+            this.currentState = new ChaseM(this, ballState, canvas);
+            // console.log(this.currentStateEnum);
+        } else {
+            this.currentStateEnum = States.chaseL;
+            this.currentState = new ChaseL(this, ballState, canvas);
+            // console.log(this.currentStateEnum);
+        }
+
     }
 
     play() {}

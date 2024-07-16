@@ -76,6 +76,8 @@ export interface IPetType {
     pet(): void;
 
     play(): void;
+
+    chase(ballState: BallState, canvas: HTMLCanvasElement): void;
 }
 
 export class PetInstanceState {
@@ -148,10 +150,17 @@ export const enum States {
     swipeM = 'swipe-mid-level',
     swipeH = 'swipe-high-level',
 
-    eatL = "eat_low_level",
+    eatL = "eat-low-level",
     eatM = "eat-mid-level",
     eatH = "eat-high-level",
-    
+
+    idleWithBallL = "idle-with-ball-low-level",
+    idleWithBallM = "idle-with-ball-mid-level",
+    idleWithBallH = "idle-with-ball-high-level",
+
+    chaseL = "chase-low-level",
+    chaseM = "chase-mid-level",
+    chaseH = "chase-high-level"
 }
 
 export enum FrameResult {
@@ -253,6 +262,13 @@ export function resolveState(state: string, pet: IPetType): IState {
             return new EatM(pet);
         case States.eatH:
             return new EatH(pet);
+
+        case States.idleWithBallL:
+            return new IdleWithBallL(pet);
+        case States.idleWithBallM:
+            return new IdleWithBallM(pet);
+        case States.idleWithBallH:
+            return new IdleWithBallH(pet); 
 
     }
     return new SitIdleStateL(pet);
@@ -397,6 +413,26 @@ export class EatH extends AbstractStaticState {
     holdTime = 60;
 }
 
+export class IdleWithBallL extends AbstractStaticState {
+    label = States.idleWithBallL;
+    spriteLabel = 'with_ball_low_level';
+    horizontalDirection = HorizontalDirection.left;
+    holdTime = 30;
+}
+
+export class IdleWithBallM extends AbstractStaticState {
+    label = States.idleWithBallM;
+    spriteLabel = 'with_ball_mid_level';
+    horizontalDirection = HorizontalDirection.left;
+    holdTime = 30;
+}
+
+export class IdleWithBallH extends AbstractStaticState {
+    label = States.idleWithBallH;
+    spriteLabel = 'with_ball_high_level';
+    horizontalDirection = HorizontalDirection.left;
+    holdTime = 30;
+}
 
 
 
@@ -645,4 +681,139 @@ export class RunLeftStateH extends WalkLeftStateH {
     spriteLabel = 'run_high_level';
     speedMultiplier = 1.6;
     holdTime = 130;
+}
+
+export class ChaseL implements IState {
+    label = States.chaseL;
+    spriteLabel = 'run_low_level';
+    horizontalDirection = HorizontalDirection.left;
+    ballState: BallState;
+    canvas: HTMLCanvasElement;
+    pet: IPetType;
+
+    constructor(
+        pet: IPetType,
+        ballState: BallState,
+        canvas: HTMLCanvasElement,
+    ) {
+        this.pet = pet;
+        this.ballState = ballState;
+        this.canvas = canvas;
+    }
+
+    nextFrame(): FrameResult {
+        if (this.ballState.paused) {
+            return FrameResult.stateCancel; // Ball is already caught
+        }
+        if (this.pet.left > this.ballState.cx) {
+            this.horizontalDirection = HorizontalDirection.left;
+            this.pet.positionLeft(this.pet.left - this.pet.speed);
+        } else {
+            this.horizontalDirection = HorizontalDirection.right;
+            this.pet.positionLeft(this.pet.left + this.pet.speed);
+        }
+
+        if (
+            this.canvas.height - this.ballState.cy <
+                this.pet.width + this.pet.floor &&
+            this.ballState.cx < this.pet.left &&
+            this.pet.left < this.ballState.cx + 15
+        ) {
+            // hide ball
+            this.canvas.style.display = 'none';
+            this.ballState.paused = true;
+            return FrameResult.stateComplete;
+        }
+        return FrameResult.stateContinue;
+    }
+}
+
+export class ChaseM implements IState {
+    label = States.chaseM;
+    spriteLabel = 'run_mid_level';
+    horizontalDirection = HorizontalDirection.left;
+    ballState: BallState;
+    canvas: HTMLCanvasElement;
+    pet: IPetType;
+
+    constructor(
+        pet: IPetType,
+        ballState: BallState,
+        canvas: HTMLCanvasElement,
+    ) {
+        this.pet = pet;
+        this.ballState = ballState;
+        this.canvas = canvas;
+    }
+
+    nextFrame(): FrameResult {
+        if (this.ballState.paused) {
+            return FrameResult.stateCancel; // Ball is already caught
+        }
+        if (this.pet.left > this.ballState.cx) {
+            this.horizontalDirection = HorizontalDirection.left;
+            this.pet.positionLeft(this.pet.left - this.pet.speed);
+        } else {
+            this.horizontalDirection = HorizontalDirection.right;
+            this.pet.positionLeft(this.pet.left + this.pet.speed);
+        }
+
+        if (
+            this.canvas.height - this.ballState.cy <
+                this.pet.width + this.pet.floor &&
+            this.ballState.cx < this.pet.left &&
+            this.pet.left < this.ballState.cx + 15
+        ) {
+            // hide ball
+            this.canvas.style.display = 'none';
+            this.ballState.paused = true;
+            return FrameResult.stateComplete;
+        }
+        return FrameResult.stateContinue;
+    }
+}
+
+export class ChaseH implements IState {
+    label = States.chaseL;
+    spriteLabel = 'run_low_level';
+    horizontalDirection = HorizontalDirection.left;
+    ballState: BallState;
+    canvas: HTMLCanvasElement;
+    pet: IPetType;
+
+    constructor(
+        pet: IPetType,
+        ballState: BallState,
+        canvas: HTMLCanvasElement,
+    ) {
+        this.pet = pet;
+        this.ballState = ballState;
+        this.canvas = canvas;
+    }
+
+    nextFrame(): FrameResult {
+        if (this.ballState.paused) {
+            return FrameResult.stateCancel; // Ball is already caught
+        }
+        if (this.pet.left > this.ballState.cx) {
+            this.horizontalDirection = HorizontalDirection.left;
+            this.pet.positionLeft(this.pet.left - this.pet.speed);
+        } else {
+            this.horizontalDirection = HorizontalDirection.right;
+            this.pet.positionLeft(this.pet.left + this.pet.speed);
+        }
+
+        if (
+            this.canvas.height - this.ballState.cy <
+                this.pet.width + this.pet.floor &&
+            this.ballState.cx < this.pet.left &&
+            this.pet.left < this.ballState.cx + 15
+        ) {
+            // hide ball
+            this.canvas.style.display = 'none';
+            this.ballState.paused = true;
+            return FrameResult.stateComplete;
+        }
+        return FrameResult.stateContinue;
+    }
 }

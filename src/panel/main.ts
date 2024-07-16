@@ -171,7 +171,8 @@ function startAnimations(
             const removeCodeButton = document.getElementById('remove-code-button');
             const storeButton = document.getElementById('store-button');
             const closeStoreButton = document.getElementById('close-store-button');
-            if (compileButton && chatButton && storeButton) {
+            const throwBallButton = document.getElementById('throw-ball-button');
+            if (compileButton && chatButton && storeButton && throwBallButton) {
                 // console.log(e.target);
                 if (e.target === compileButton) {
                     stateApi?.postMessage({
@@ -211,6 +212,16 @@ function startAnimations(
                     showStore(targetTimes);
                 } else if (e.target === closeStoreButton) {
                     hideStore();
+                } else if (e.target === throwBallButton) {
+                    var event = new MessageEvent('message', {
+                        data: { command: 'throw-ball' } // You can pass any data you want here
+                    });
+                    window.dispatchEvent(event);
+                    // (throwBallButton as HTMLButtonElement).disabled = true;
+                    allPets.pets.forEach((petEm) => {
+                        void petEm.pet.setExperience(petEm.pet.getExperience() + 5, false, getUserID(), getNewTarget(petEm.pet.getLevel() + 1));
+                        // petEm.pet.play();
+                    });
                 }
             } else {
                 console.log("cannot find button");
@@ -298,7 +309,7 @@ function addPetToPanel(
         throw e;
     }
 
-    const petEm =  new PetElement(
+    const petEm = new PetElement(
         petSpriteElement,
         collisionElement,
         speechBubbleElement,
@@ -682,6 +693,11 @@ export function petPanelApp(
             case 'throw-ball':
                 resetBall();
                 throwBall();
+                allPets.pets.forEach((petEl) => {
+                    if (petEl.pet.canChase) {
+                        petEl.pet.chase(ballState, canvas);
+                    }
+                });
                 break;
             case 'spawn-pet':
                 if (allPets.pets.length > 0) {
@@ -990,7 +1006,7 @@ async function bindUserID(userID: string, accessCode: string) {
 export 
 function getNewTarget(level: number): number {
     // console.log(currentStoryLine);
-    if (currentStoryLine !== undefined && currentStoryLine[level-1] !== undefined) {
+    if (currentStoryLine !== undefined && currentStoryLine[level-1] !== undefined && level <= currentStoryLine.length) {
         return parseInt(currentStoryLine[level-1].next_target);
     } else {
         return -1;
@@ -1037,12 +1053,16 @@ document.querySelectorAll('.store-buttons').forEach(button => {
             // console.log(result);
             if (result === 0) {
                 (button as HTMLButtonElement).disabled = true;
-                setTargetTime(Number(index), computeTargetTime());
-                setInterval(() => {
-                    updateTimer(targetTimes[Number(index)], Number(index), button as HTMLButtonElement);
+                setTargetTime(Number(index), computeTargetTime(Number(index)));
+                const interval = setInterval(() => {
+                    const result = updateTimer(targetTimes[Number(index)], Number(index), button as HTMLButtonElement);
+                    if (result) {
+                        clearInterval(interval);
+                    }
                 }, 500);
                 updateTimer(targetTimes[Number(index)], Number(index), button as HTMLButtonElement);
             }
         }
     });
 });
+

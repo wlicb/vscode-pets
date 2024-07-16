@@ -290,7 +290,7 @@ button[disabled] {
   padding: 5%;
 }
 
-#boost-message {
+#boost-message, #throw-ball-message {
   display: none;
   padding: 20px;
 }

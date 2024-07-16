@@ -211,7 +211,46 @@ export class Dog extends BasePetType {
                     States.lieH,
                     States.sitIdleH,
                 ]
-            }
+            },
+            {
+                state: States.idleWithBallL,
+                possibleNextStates: [
+                    States.walkRightL,
+                    States.walkLeftL,
+                    States.runLeftL,
+                    States.runRightL,
+                ],
+            },
+            {
+                state: States.idleWithBallM,
+                possibleNextStates: [
+                    States.walkRightM,
+                    States.walkLeftM,
+                    States.runLeftM,
+                    States.runRightM,
+                ],
+            },
+            {
+                state: States.idleWithBallH,
+                possibleNextStates: [
+                    States.walkRightH,
+                    States.walkLeftH,
+                    States.runLeftH,
+                    States.runRightH,
+                ],
+            },
+            {
+                state: States.chaseL,
+                possibleNextStates: [States.idleWithBallL],
+            },
+            {
+                state: States.chaseM,
+                possibleNextStates: [States.idleWithBallM],
+            },
+            {
+                state: States.chaseH,
+                possibleNextStates: [States.idleWithBallH],
+            },
             
         ],
     };

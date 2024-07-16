@@ -1,11 +1,13 @@
-import { updateCoin, allPets, getCoin, getUserID, updateExRate, getNewTarget } from "./main";
+import { updateCoin, allPets, getCoin, getUserID, updateExRate } from "./main";
 import { updateBoostTimer, getRemainingBoostTime, showBoostMessage, hideBoostMessage } from "./boost";
+import { getRemainingThrowBallTime, hideThrowBallMessage, showThrowBallMessage, updateThrowBallTimer } from "./throwBall";
 
 type Activity = {
     index: number,
     price: number,
     callback: Function,
-    level: number
+    level: number,
+    purchaseInterval: number
 };
 
 const activityList: Activity[] = [];
@@ -13,28 +15,32 @@ activityList.push({
     index: 0,
     price: 2,
     callback: pet,
-    level: 1
+    level: 1,
+    purchaseInterval: 2
 });
 
 activityList.push({
     index: 1,
     price: 5,
     callback: feed,
-    level: 2
+    level: 2,
+    purchaseInterval: 5
 });
 
 activityList.push({
     index: 2,
     price: 5,
     callback: play,
-    level: 3
+    level: 3,
+    purchaseInterval: 10
 });
 
 activityList.push({
     index: 3,
     price: 5,
     callback: boost,
-    level: 1
+    level: 1,
+    purchaseInterval: 30
 });
 
 const NUM_OF_ELEMENTS = activityList.length;
@@ -67,10 +73,22 @@ function feed() {
 
 
 function play() {
-    allPets.pets.forEach((petEm) => {
-        void petEm.pet.setExperience(petEm.pet.getExperience() + 10, false, getUserID(), petEm.pet.getNextTarget() + getNewTarget(petEm.pet.getLevel() + 1));
-        petEm.pet.play();
-    });
+    const throwBallButton = document.getElementById('throw-ball-button') as HTMLButtonElement;
+    if (throwBallButton) {
+        updateThrowBallTimer();
+        throwBallButton.disabled = false;
+        const interval = setInterval(() => {
+            const timerText = getRemainingThrowBallTime();
+            if (timerText === "") {
+                hideThrowBallMessage();
+                throwBallButton.disabled = true;
+                clearInterval(interval);
+            } else {
+                showThrowBallMessage(timerText);
+            }
+        }, 500);
+        showThrowBallMessage(getRemainingThrowBallTime());
+    }
 }
 
 function boost() {
@@ -80,17 +98,13 @@ function boost() {
         const timerText = getRemainingBoostTime();
         if (timerText === "") {
             hideBoostMessage();
+            updateExRate(1);
+            clearInterval(interval);
         } else {
             showBoostMessage(timerText);
         }
-    });
+    }, 500);
     showBoostMessage(getRemainingBoostTime());
-    setTimeout(() => {
-        clearInterval(interval);
-        hideBoostMessage();
-        updateExRate(1);
-    }, 1800000);
-    // }, 10000);
 }
 
 
@@ -209,14 +223,14 @@ function hideMessage() {
 
 
 
-export function computeTargetTime() {
+export function computeTargetTime(index: number) {
     const now = new Date();
-    const targetTime = new Date(now.getTime() + 60 * 1000);
+    const targetTime = new Date(now.getTime() + 60 * 1000 * activityList[index].purchaseInterval);
     return targetTime;
 }
 
 
-export function updateTimer(targetTime: Date, index: number, button: HTMLButtonElement) {
+export function updateTimer(targetTime: Date, index: number, button: HTMLButtonElement): boolean {
     const now = new Date();
     const remainingTime = new Date(targetTime).getTime() - now.getTime();
 
@@ -226,7 +240,7 @@ export function updateTimer(targetTime: Date, index: number, button: HTMLButtonE
             timer.innerText = "Available!";
             // clearInterval(timerInterval);
             button.disabled = false;
-            return;
+            return true;
         }
         const hours = Math.floor((remainingTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
@@ -237,6 +251,7 @@ export function updateTimer(targetTime: Date, index: number, button: HTMLButtonE
     
         timer.innerText = `⏱️${hours}:${paddedMinutes}:${paddedSeconds}`;
     }
+    return false;
 
 }
 

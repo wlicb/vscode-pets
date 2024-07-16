@@ -1188,6 +1188,7 @@ class PetWebviewContainer implements IPetPanel {
                         <div id="coin-container">💰</div>
                         <div id="coin-counter">0</div>
                         <button id="store-button" class="small-button">🏬</button>
+                        <button id="throw-ball-button" class="small-button" disabled>🎾</button>
                         <button id="add-code-button" class="small-button">➕</button>
                         <button id="remove-code-button" class="small-button">➖</button>
                         <button id="compile-button">Compile!</button>
@@ -1216,7 +1217,8 @@ class PetWebviewContainer implements IPetPanel {
                             <div id="experience-value" class="status-text">100/100</div>
                         </div>
                     </div>
-                    <div id="boost-message">🚀Boosting your level up... Time remaining: 0:00:00</div>
+                    <div id="boost-message">🚀Boosting your level up... Time remaining: 00:00</div>
+                    <div id="throw-ball-message">✨Let's have a rest and play with balls🎾! Time remaining: 00:00</div>
                     <div id="pet-number-message">⛔ You are only allowed to have one pet!</div>
                     <div id="chatbox">
                         <div id="chatbox-header">
@@ -1256,7 +1258,7 @@ class PetWebviewContainer implements IPetPanel {
                             </div>
                             <div class="store-element">
                                 <div class="store-element-title"><b>Play✨</b></div>
-                                <div class="store-element-description">Play with your dog and gain 10 experience points</div>
+                                <div class="store-element-description">Play with your dog with the ball🎾. Get 5 experience points each time your dog gets the ball!</div>
                                 <div class="store-element-price-button">
                                     <div class="store-element-price">💰5</div>
                                     <div class="store-element-timer">Available!</div>
