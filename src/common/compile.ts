@@ -120,10 +120,10 @@ export function readErrorMessage() {
         }
 }
 
-export function updateCommand(command: string) {
-    currentCommand = command;
-    fs.writeFileSync(commandFilePath, currentCommand);
-}
+// export function updateCommand(command: string) {
+//     currentCommand = command;
+//     fs.writeFileSync(commandFilePath, currentCommand);
+// }
 
 function parseCommand(command: string, filePath: string) {
     const pattern = /\$\{filePath\}/;

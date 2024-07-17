@@ -1,7 +1,5 @@
 import * as vscode from 'vscode';
 import { ColorThemeKind } from 'vscode';
-import * as fs from 'fs';
-import * as path from 'path';
 import {
     PetSize,
     PetColor,
@@ -19,7 +17,7 @@ import * as localize from '../common/localize';
 import { availableColors, normalizeColor } from '../panel/pets';
 import { updateCount, getEditorText } from '../common/codeLine';
 import { updateTimer, computeTimeDifference } from '../common/healthTimer';
-import { doCompile, updateCommand } from '../common/compile';
+import { doCompile } from '../common/compile';
 import { storeStoryLine, getExPerLine, getHealthDropTime, getHealthIncreaseTime, getNextTarget, storeLevel, getLevel, getStoryLine } from '../common/storyLine';
 import { setCodeLineColor, formulateCodeString, clearSelection } from '../common/lineBackground';
 import { postChat, fetchChatHistory } from '../common/chatService';
@@ -383,8 +381,8 @@ export function activate(context: vscode.ExtensionContext) {
                     currentAccessCode = accessCode;
                     void vscode.commands.executeCommand('vscode-pets.get-access-code');
                     const storyLine = await fetchStoryLine(accessCode);
-                    const command = await fetchCommand(accessCode);
-                    updateCommand(command);
+                    // const command = await fetchCommand(accessCode);
+                    // updateCommand(command);
                     // console.log(storyLine);
                     storeStoryLine(JSON.stringify(storyLine));
                     UPDATE_HEALTH_THRES = getHealthDropTime(1);
@@ -920,23 +918,6 @@ export function activate(context: vscode.ExtensionContext) {
         await vscode.commands.executeCommand('vscode-pets.update-health');
     }, UPDATE_HEALTH_THRES * 60000);
 
-    if (!fs.existsSync(path.join(path.dirname(__dirname), "data", "level.json"))) {
-        fs.writeFileSync(path.join(path.dirname(__dirname), "data", "level.json"), "");
-    }
-    if (!fs.existsSync(path.join(path.dirname(__dirname), "data", "timer.json"))) {
-        fs.writeFileSync(path.join(path.dirname(__dirname), "data", "timer.json"), "{}");
-    }
-    if (!fs.existsSync(path.join(path.dirname(__dirname), "data", "storyLine.json"))) {
-        fs.writeFileSync(path.join(path.dirname(__dirname), "data", "storyLine.json"), "[]");
-    }
-    if (!fs.existsSync(path.join(path.dirname(__dirname), "data", "compilationCommand.json"))) {
-        fs.writeFileSync(path.join(path.dirname(__dirname), "data", "compilationCommand.json"), "");
-    }
-    if (!fs.existsSync(path.join(path.dirname(__dirname), "data", "chatHistory.json"))) {
-        fs.writeFileSync(path.join(path.dirname(__dirname), "data", "chatHistory.json"), `{
-            "chatHistories": {}
-        }`);
-    }
 
 
     let canExecute = true;
@@ -1720,33 +1701,33 @@ async function fetchStoryLine(accessCode: string) {
     return JSON.parse(getStoryLine()); // dummy: return the story line
 }
 
-async function fetchCommand(accessCode: string) {
-    console.log(accessCode);
-    // let result = "";
-    // const data = {
-    //     accessCode: accessCode,
-    // };
-    // try {
-    //     const response = await fetch('http://localhost:3100/get-language-info', {
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json'
-    //         },
-    //         body: JSON.stringify(data)
-    //     });
-    //     const resText = await response.json();
-    //     console.log(resText);
-    //     if (!response.ok) {
-    //         throw new Error('Failed to fetch story line: ' + resText);
-    //     } else {
-    //         result = resText.command;
-    //         console.log(result);
-    //     }
-    // } catch (error) {
-    //     result = "";
-    //     console.error('Failed to fetch story line: ', error);
-    // }
-    // // console.log(result);
-    // return result;
-    return "g++ ${filePath} -o ${filePath}.out"; // dummy: return command to compile the code
-}
+// async function fetchCommand(accessCode: string) {
+//     console.log(accessCode);
+//     // let result = "";
+//     // const data = {
+//     //     accessCode: accessCode,
+//     // };
+//     // try {
+//     //     const response = await fetch('http://localhost:3100/get-language-info', {
+//     //         method: 'POST',
+//     //         headers: {
+//     //             'Content-Type': 'application/json'
+//     //         },
+//     //         body: JSON.stringify(data)
+//     //     });
+//     //     const resText = await response.json();
+//     //     console.log(resText);
+//     //     if (!response.ok) {
+//     //         throw new Error('Failed to fetch story line: ' + resText);
+//     //     } else {
+//     //         result = resText.command;
+//     //         console.log(result);
+//     //     }
+//     // } catch (error) {
+//     //     result = "";
+//     //     console.error('Failed to fetch story line: ', error);
+//     // }
+//     // // console.log(result);
+//     // return result;
+//     return "g++ ${filePath} -o ${filePath}.out"; // dummy: return command to compile the code
+// }

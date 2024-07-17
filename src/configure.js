@@ -22,7 +22,8 @@ if (!fs.existsSync(path.join(dir, "timer.json"))) {
 
 if (!fs.existsSync(path.join(dir, "storyLine.json"))) {
     console.log("writing storyLine.json");
-    fs.writeFileSync(path.join(dir, "storyLine.json"), `[
+    fs.writeFileSync(path.join(dir, "storyLine.json"), `
+    [
         {
             "next_target": "100",
             "ex_per_line": "1",
@@ -38,14 +39,15 @@ if (!fs.existsSync(path.join(dir, "storyLine.json"))) {
             "ex_per_line":"1",
             "health_drop_time":"45",
             "health_increase_time":"15"
-        }]`);
+        }
+    ]`);
 } else {
     console.log("storyLine.json exists");
 }
 
 if (!fs.existsSync(path.join(dir, "compilationCommand.json"))) {
     console.log("writing compilationCommand.json");
-    fs.writeFileSync(path.join(dir, "compilationCommand.json"), "");
+    fs.writeFileSync(path.join(dir, "compilationCommand.json"), "g++ ${filePath}");
 } else {
     console.log("compilationCommand.json exists");
 }

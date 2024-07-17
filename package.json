@@ -225,7 +225,7 @@
         ]
     },
     "scripts": {
-        "vscode:prepublish": "npm run compile && node ./src/createJSONFiles.js",
+        "vscode:prepublish": "npm run compile && node ./src/configure.js",
         "compile:panel": "webpack",
         "compile:extension": "tsc -p ./tsconfig.extension.json",
         "compile:web": "webpack",
