@@ -364,10 +364,11 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-pets.start', async () => {
-            const accessCode = await vscode.window.showInputBox({
-                prompt: 'Enter the access code',
-                placeHolder: 'Access code',
-              });
+            // const accessCode = await vscode.window.showInputBox({
+            //     prompt: 'Enter the access code',
+            //     placeHolder: 'Access code',
+            //   });
+            const accessCode = "000000"; // dummy
           
             // Check if the user entered the access code
             if (accessCode !== undefined) {
@@ -1578,85 +1579,107 @@ async function createPetPlayground(context: vscode.ExtensionContext) {
 }
 
 async function validateAccessCode(accessCode: string) {
-    let result = "";
-    const data = {
-        accessCode: accessCode,
-    };
-    try {
-        const response = await fetch('http://localhost:3100/validate-access-code', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-        const resText = await response.text();
-        if (!response.ok) {
-            throw new Error('Failed to validate access code: ' + resText);
-        } else {
-            result = resText;
-        }
-    } catch (error) {
-        result = "";
-        console.error('Failed to validate access code: ', error);
-    }
-    // console.log(result);
-    return result;
+    console.log(accessCode);
+    // let result = "";
+    // const data = {
+    //     accessCode: accessCode,
+    // };
+    // try {
+    //     const response = await fetch('http://localhost:3100/validate-access-code', {
+    //         method: 'POST',
+    //         headers: {
+    //             'Content-Type': 'application/json'
+    //         },
+    //         body: JSON.stringify(data)
+    //     });
+    //     const resText = await response.text();
+    //     if (!response.ok) {
+    //         throw new Error('Failed to validate access code: ' + resText);
+    //     } else {
+    //         result = resText;
+    //     }
+    // } catch (error) {
+    //     result = "";
+    //     console.error('Failed to validate access code: ', error);
+    // }
+    // // console.log(result);
+    // return result;
+    return "Introduction to Programming"; // dummy: return course title
 }
 
 async function fetchStoryLine(accessCode: string) {
-    let result = [];
-    const data = {
-        accessCode: accessCode,
-    };
-    try {
-        const response = await fetch('http://localhost:3100/get-story-line', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-        const resText = await response.json();
-        console.log(resText);
-        if (!response.ok) {
-            throw new Error('Failed to fetch story line: ' + resText);
-        } else {
-            result = resText;
-        }
-    } catch (error) {
-        result = [];
-        console.error('Failed to fetch story line: ', error);
-    }
-    // console.log(result);
-    return result;
+    console.log(accessCode);
+    // let result = [];
+    // const data = {
+    //     accessCode: accessCode,
+    // };
+    // try {
+    //     const response = await fetch('http://localhost:3100/get-story-line', {
+    //         method: 'POST',
+    //         headers: {
+    //             'Content-Type': 'application/json'
+    //         },
+    //         body: JSON.stringify(data)
+    //     });
+    //     const resText = await response.json();
+    //     console.log(resText);
+    //     if (!response.ok) {
+    //         throw new Error('Failed to fetch story line: ' + resText);
+    //     } else {
+    //         result = resText;
+    //     }
+    // } catch (error) {
+    //     result = [];
+    //     console.error('Failed to fetch story line: ', error);
+    // }
+    // // console.log(result);
+    // return result;
+    return [
+        {
+            next_target: "100",
+            ex_per_line: "1",
+            health_drop_time: "45",
+            health_increase_time: "15"
+        },{
+            next_target: "200",
+            ex_per_line: "1",
+            health_drop_time: "45",
+            health_increase_time: "15"
+        },{
+            next_target:"300",
+            ex_per_line:"1",
+            health_drop_time:"45",
+            health_increase_time:"15"
+        }]; // dummy: return the story line
 }
 
 async function fetchCommand(accessCode: string) {
-    let result = "";
-    const data = {
-        accessCode: accessCode,
-    };
-    try {
-        const response = await fetch('http://localhost:3100/get-language-info', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-        const resText = await response.json();
-        console.log(resText);
-        if (!response.ok) {
-            throw new Error('Failed to fetch story line: ' + resText);
-        } else {
-            result = resText.command;
-            console.log(result);
-        }
-    } catch (error) {
-        result = "";
-        console.error('Failed to fetch story line: ', error);
-    }
-    // console.log(result);
-    return result;
+    console.log(accessCode);
+    // let result = "";
+    // const data = {
+    //     accessCode: accessCode,
+    // };
+    // try {
+    //     const response = await fetch('http://localhost:3100/get-language-info', {
+    //         method: 'POST',
+    //         headers: {
+    //             'Content-Type': 'application/json'
+    //         },
+    //         body: JSON.stringify(data)
+    //     });
+    //     const resText = await response.json();
+    //     console.log(resText);
+    //     if (!response.ok) {
+    //         throw new Error('Failed to fetch story line: ' + resText);
+    //     } else {
+    //         result = resText.command;
+    //         console.log(result);
+    //     }
+    // } catch (error) {
+    //     result = "";
+    //     console.error('Failed to fetch story line: ', error);
+    // }
+    // // console.log(result);
+    // return result;
+    return "g++ ${filePath} -o ${filePath}.out"; // dummy: return command to compile the code
 }

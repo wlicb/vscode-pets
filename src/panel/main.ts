@@ -954,57 +954,74 @@ export async function getCodeFromEditor() {
 }
 
 async function fetchUserID() {
-    let userID = "";
-    try {
-        const response = await fetch('http://localhost:3200/create-user', {
-            method: 'GET'
-        });
-        const resText = await response.text();
-        if (!response.ok) {
-            throw new Error('Failed to fetch user ID: ' + resText);
-        } else {
-            userID = resText;
-        }
-    } catch (error) {
-        userID = "";
-        console.error('Error fetching user ID: ', error);
-    }
-    console.log(userID);
-    return userID;
+    // let userID = "";
+    // try {
+    //     const response = await fetch('http://localhost:3200/create-user', {
+    //         method: 'GET'
+    //     });
+    //     const resText = await response.text();
+    //     if (!response.ok) {
+    //         throw new Error('Failed to fetch user ID: ' + resText);
+    //     } else {
+    //         userID = resText;
+    //     }
+    // } catch (error) {
+    //     userID = "";
+    //     console.error('Error fetching user ID: ', error);
+    // }
+    // console.log(userID);
+    // return userID;
+    return generateUserID(8);
 }
 
 async function bindUserID(userID: string, accessCode: string) {
-    let result = [];
-    const data = {
-        accessCode: accessCode,
-        userID: userID
-    };
-    try {
-        const response = await fetch('http://localhost:3100/bind-access-code', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-        const resText = await response.json();
-        if (!response.ok) {
-            throw new Error('Failed to bind access code: ' + resText);
-        } else {
-            result = resText;
-        }
-    } catch (error) {
-        result = [];
-        console.error('Failed to bind access code: ', error);
-    }
-        // console.log(result);
-    console.log(`Binding the user ID ${userID} with access code ${accessCode} with response ${result}.`);
-    return result;
+    console.log(userID, accessCode);
+    // let storyLine = [];
+    // const data = {
+    //     accessCode: accessCode,
+    //     userID: userID
+    // };
+    // try {
+    //     const response = await fetch('http://localhost:3100/bind-access-code', {
+    //         method: 'POST',
+    //         headers: {
+    //             'Content-Type': 'application/json'
+    //         },
+    //         body: JSON.stringify(data)
+    //     });
+    //     const resText = await response.json();
+    //     if (!response.ok) {
+    //         throw new Error('Failed to bind access code: ' + resText);
+    //     } else {
+    //         result = resText;
+    //     }
+    // } catch (error) {
+    //     result = [];
+    //     console.error('Failed to bind access code: ', error);
+    // }
+    //     // console.log(result);
+    // console.log(`Binding the user ID ${userID} with access code ${accessCode} with response ${result}.`);
+    return [
+        {
+            next_target: "100",
+            ex_per_line: "1",
+            health_drop_time: "45",
+            health_increase_time: "15"
+        },{
+            next_target: "200",
+            ex_per_line: "1",
+            health_drop_time: "45",
+            health_increase_time: "15"
+        },{
+            next_target:"300",
+            ex_per_line:"1",
+            health_drop_time:"45",
+            health_increase_time:"15"
+        }]; // dummy: return story line
     
 }
 
-export 
-function getNewTarget(level: number): number {
+export function getNewTarget(level: number): number {
     // console.log(currentStoryLine);
     if (currentStoryLine !== undefined && currentStoryLine[level-1] !== undefined && level <= currentStoryLine.length) {
         return parseInt(currentStoryLine[level-1].next_target);
@@ -1066,3 +1083,11 @@ document.querySelectorAll('.store-buttons').forEach(button => {
     });
 });
 
+function generateUserID(length: number) {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let result = "";
+    for (let i = 0; i < length; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
