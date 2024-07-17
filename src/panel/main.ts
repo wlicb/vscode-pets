@@ -19,7 +19,7 @@ import {
 } from './pets';
 import { BallState, PetElementState, PetPanelState } from './states';
 import { showBar, hideBar, updateBar } from './bar';
-import { hideChatbox, showChatbox, displayMessage, storeMessage, setBadge, sendMsg } from './chat';
+import { hideChatbox, showChatbox, setBadge, sendMsg, handleChatResponse, handleChatHistory } from './chat';
 import { Level } from './states';
 import { showStore, hideStore, purchase, updateTimer, computeTargetTime, lockAll } from './store';
 // import { purchase } from './store';
@@ -214,7 +214,7 @@ function startAnimations(
                     hideStore();
                 } else if (e.target === throwBallButton) {
                     var event = new MessageEvent('message', {
-                        data: { command: 'throw-ball' } // You can pass any data you want here
+                        data: { command: 'throw-ball' }
                     });
                     window.dispatchEvent(event);
                     // (throwBallButton as HTMLButtonElement).disabled = true;
@@ -439,14 +439,7 @@ async function recoverState(
                 p.petExperience, p.petNextTarget, p.petLevel, p.petHealth,
                 stateApi,
             );
-            newPet.pet.setHealth(newPet.pet.getHealth() + healthUpdateValue, true, userID).then(msg => {
-                if (msg.returnMsg !== "") {
-                    displayMessage("", msg.returnMsg, msg.time);
-                    storeMessage("", msg.returnMsg, msg.time);
-                }
-            }).catch(err => {
-                console.log(err);
-            });;
+            newPet.pet.setHealth(newPet.pet.getHealth() + healthUpdateValue, true, userID);
             allPets.push(newPet);
             const currentPet = allPets.pets[0];
             showBar(currentPet.pet.name, currentPet.pet.getLevel(), currentPet.pet.getExperience(), currentPet.pet.getNextTarget(), currentPet.pet.getHealth());
@@ -793,20 +786,13 @@ export function petPanelApp(
                 updateCoin(coinUpdate);
                 const prevLevelEx = pets[0].pet.getLevel();
                 pets.forEach((pet) => {
-                    pet.pet.setExperience(pet.pet.getExperience() + diff * UPDATE_EX_RATE, true, userID, getNewTarget(pet.pet.getLevel() + 1)).then(msg => {
-                        if (msg.returnMsg !== "") {
-                            displayMessage("", msg.returnMsg, msg.time);
-                            storeMessage("", msg.returnMsg, msg.time);
-                        }
-                        if (msg.levelChange > 0) {
-                            stateApi?.postMessage({
-                                command: 'level-change',
-                                text: pet.pet.getLevel().toString()
-                            });
-                        }
-                    }).catch(err => {
-                        console.log(err);
-                    });
+                    const levelChange = pet.pet.setExperience(pet.pet.getExperience() + diff * UPDATE_EX_RATE, true, userID, getNewTarget(pet.pet.getLevel() + 1));  
+                    if (levelChange > 0) {
+                        stateApi?.postMessage({
+                            command: 'level-change',
+                            text: pet.pet.getLevel().toString()
+                        });
+                    }
                     updateBar(pet.pet.name, pet.pet.getLevel(), pet.pet.getExperience(), pet.pet.getNextTarget(), pet.pet.getHealth());
                     const currentLevel = pet.pet.getLevel();
                     if (currentLevel > prevLevelEx) {
@@ -821,14 +807,7 @@ export function petPanelApp(
                 var diff = message.diff;
                 const prevLevelHealth = pets[0].pet.getLevel();
                 pets.forEach((pet) => {
-                    pet.pet.setHealth(pet.pet.getHealth() + diff, false, userID).then(msg => {
-                        if (msg.returnMsg !== "") {
-                            displayMessage("", msg.returnMsg, msg.time);
-                            storeMessage("", msg.returnMsg, msg.time);
-                        }
-                    }).catch(err => {
-                        console.log(err);
-                    });;
+                    pet.pet.setHealth(pet.pet.getHealth() + diff, false, userID);
                     updateBar(pet.pet.name, pet.pet.getLevel(), pet.pet.getExperience(), pet.pet.getNextTarget(), pet.pet.getHealth());
                     const currentLevel = pet.pet.getLevel();
                     if (currentLevel > prevLevelHealth) {
@@ -845,33 +824,12 @@ export function petPanelApp(
                 const randomPet = pets[Math.floor(Math.random() * pets.length)];
                 
                 if (result === "") {
-                    randomPet.pet.onCompilationSuccess(code, userID).then(msg => {
-                        if (msg.returnMsg !== "") {
-                            displayMessage("", msg.returnMsg, msg.time);
-                            storeMessage("", msg.returnMsg, msg.time);
-                        }
-                    }).catch(err => {
-                        console.log(err);
-                    });
+                    randomPet.pet.onCompilationSuccess(code, userID);
                     allPets.pets.forEach(pet => {
-                        pet.pet.setExperience(pet.pet.getExperience() + 5, false, userID, getNewTarget(pet.pet.getLevel() + 1)).then(msg => {
-                            if (msg.returnMsg !== "") {
-                                displayMessage("", msg.returnMsg, msg.time);
-                                storeMessage("", msg.returnMsg, msg.time);
-                            }
-                        }).catch(err => {
-                            console.log(err);
-                        });;
+                        pet.pet.setExperience(pet.pet.getExperience() + 5, false, userID, getNewTarget(pet.pet.getLevel() + 1));
                     });
                 } else {
-                    randomPet.pet.onCompilationError(code, userID, result).then(msg => {
-                        if (msg.returnMsg !== "") {
-                            displayMessage("", msg.returnMsg, msg.time);
-                            storeMessage("", msg.returnMsg, msg.time);
-                        }
-                    }).catch(err => {
-                        console.log(err);
-                    });
+                    randomPet.pet.onCompilationError(code, userID, result);
                 }
                 break;
             case 'handle-editor-code':
@@ -893,19 +851,31 @@ export function petPanelApp(
                 currentAccessCode = message.accessCode;
                 console.log(currentAccessCode);
                 saveState(stateApi);
-                bindUserID(userID, currentAccessCode).then(storyLine => {
-                    stateApi?.postMessage({
-                        command: 'post-story-line',
-                        text: JSON.stringify(storyLine)
-                    });
-                    currentStoryLine = storyLine;
-                    console.log(currentStoryLine);
-                    UPDATE_HEALTH_THRES = parseInt(currentStoryLine[0].health_drop_time);
-                }).catch(err => {
-                    console.log(err);
+                stateApi?.postMessage({
+                    command: "get-story-line",
+                    text: ""
                 });
                 break;
-
+            case 'story-line-response':
+                currentStoryLine = message.storyLine;
+                UPDATE_HEALTH_THRES = parseInt(currentStoryLine[0].health_drop_time);
+            case 'post-chat':
+                stateApi?.postMessage({
+                    text: message.request,
+                    command: 'post-chat',
+                });
+                break;
+            case 'chat-response':
+                handleChatResponse(message.res);
+                break;
+            case 'get-chat-history':
+                stateApi?.postMessage({
+                    text: message.userID,
+                    command: 'get-chat-history',
+                });
+                break;
+            case 'chat-history-response':
+                handleChatHistory(JSON.stringify(message.res));
         }
     });
 
@@ -974,8 +944,8 @@ async function fetchUserID() {
     return generateUserID(8);
 }
 
-async function bindUserID(userID: string, accessCode: string) {
-    console.log(userID, accessCode);
+// async function bindUserID(userID: string, accessCode: string) {
+//     console.log(userID, accessCode);
     // let storyLine = [];
     // const data = {
     //     accessCode: accessCode,
@@ -1001,25 +971,25 @@ async function bindUserID(userID: string, accessCode: string) {
     // }
     //     // console.log(result);
     // console.log(`Binding the user ID ${userID} with access code ${accessCode} with response ${result}.`);
-    return [
-        {
-            next_target: "100",
-            ex_per_line: "1",
-            health_drop_time: "45",
-            health_increase_time: "15"
-        },{
-            next_target: "200",
-            ex_per_line: "1",
-            health_drop_time: "45",
-            health_increase_time: "15"
-        },{
-            next_target:"300",
-            ex_per_line:"1",
-            health_drop_time:"45",
-            health_increase_time:"15"
-        }]; // dummy: return story line
+//     return [
+//         {
+//             next_target: "100",
+//             ex_per_line: "1",
+//             health_drop_time: "45",
+//             health_increase_time: "15"
+//         },{
+//             next_target: "200",
+//             ex_per_line: "1",
+//             health_drop_time: "45",
+//             health_increase_time: "15"
+//         },{
+//             next_target:"300",
+//             ex_per_line:"1",
+//             health_drop_time:"45",
+//             health_increase_time:"15"
+//         }]; // dummy: return story line
     
-}
+// }
 
 export function getNewTarget(level: number): number {
     // console.log(currentStoryLine);

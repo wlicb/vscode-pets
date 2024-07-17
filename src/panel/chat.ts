@@ -30,14 +30,7 @@ export async function showChatbox(name: string, userID: string) {
                 chatboxMessages.removeChild(chatboxMessages.firstChild);
             }
         }
-        chatHistory = await getChatHistory(userID);
-        chatHistory.forEach(sentence => {
-            if (sentence.role === "Student") {
-                displayMessage("You", sentence.message, sentence.time);
-            } else {
-                displayMessage(currentName, sentence.message, sentence.time);
-            }
-        });
+        getChatHistory(userID);
     }
 
 }
@@ -89,7 +82,7 @@ export function sendMsg(userID: string) {
 }
 
 
-async function fetchResponse(time: string, userID: string, level: number, code: string, diff: number, inputValue: string, name: string) {
+export function fetchResponse(time: string, userID: string, level: number, code: string, diff: number, inputValue: string, name: string) {
     const data = {
         time: time,
         type: "user-input",
@@ -102,29 +95,20 @@ async function fetchResponse(time: string, userID: string, level: number, code: 
             name: name,
         }
     };
-    
-    try {
-        const response = await fetch('http://localhost:3200/post-chat', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-        const responseData = await response.json();
-        const resText = JSON.stringify(responseData);
-        if (!response.ok) {
-            throw new Error('Failed to fetch AI response: ' + resText);
-        }
-        const aiText = responseData.message;
-        const time = responseData.time;
-        displayMessage(currentName, aiText, time);
-        storeMessage(currentName, aiText, time);
-    } catch (error) {
-        console.error('Error fetching response from Gemini: ', error);
-        // displayMessage(currentName, errText);
-        // storeMessage(currentName, errText);
-    }
+    var event = new MessageEvent('message', {
+        data: { command: 'post-chat',
+            request: data
+         }
+    });
+    window.dispatchEvent(event);
+}
+
+export function handleChatResponse(responseString: string) {
+    const responseData = JSON.parse(responseString);
+    const aiText = responseData.message;
+    const time = responseData.time;
+    displayMessage(currentName, aiText, time);
+    storeMessage(currentName, aiText, time);
 }
 
 
@@ -203,29 +187,25 @@ async function getEditorText() {
     return event;
 }
 
-async function getChatHistory(userID: string) {
-    let chatHistory = [];
-    const data = {
-        userID: userID,
-    };
-    try {
-        const response = await fetch('http://localhost:3200/get-chat-history', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-        const responseData = await response.json();
-        const resText = JSON.stringify(responseData);
-        if (!response.ok) {
-            throw new Error('Failed to fetch Chat History: ' + resText);
+function getChatHistory(userID: string) {
+    var event = new MessageEvent('message', {
+        data: { command: 'get-chat-history',
+            userID: userID
+         }
+    });
+    window.dispatchEvent(event);
+
+}
+
+export function handleChatHistory(responseString: string) {
+    chatHistory = JSON.parse(responseString);
+    chatHistory.forEach(sentence => {
+        if (sentence.role === "Student") {
+            displayMessage("You", sentence.message, sentence.time);
+        } else {
+            displayMessage(currentName, sentence.message, sentence.time);
         }
-        chatHistory = responseData;
-    } catch (error) {
-        console.error('Error fetching chat history: ', error);
-    }
-    return chatHistory;
+    });
 }
 
 function getCurrentTime() {

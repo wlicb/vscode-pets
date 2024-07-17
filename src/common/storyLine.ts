@@ -2,9 +2,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 
-const filePath = path.resolve(__dirname, 'storyLine.json');
+const filePath = path.resolve(path.dirname(__dirname), "data", 'storyLine.json');
 
-const levelFilePath = path.resolve(__dirname, 'level.json');
+const levelFilePath = path.resolve(path.dirname(__dirname), "data", 'level.json');
 
 export function storeStoryLine(jsonFile: string) {
     fs.writeFileSync(filePath, jsonFile);
@@ -63,5 +63,15 @@ export function getLevel() {
     } else {
         const level = fs.readFileSync(levelFilePath, 'utf8');
         return parseInt(level);
+    }
+}
+
+export function getStoryLine() {
+    if (!fs.existsSync(filePath)) {
+        return "";
+    } else {
+        const storyLine = fs.readFileSync(filePath, 'utf8');
+        console.log(storyLine);
+        return storyLine;
     }
 }

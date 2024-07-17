@@ -4,7 +4,7 @@ import * as fs from 'fs';
 
 let terminal: vscode.Terminal | undefined;
 
-const commandFilePath = path.resolve(__dirname, 'compilationCommand.json');
+const commandFilePath = path.resolve(path.dirname(__dirname), "data", 'compilationCommand.json');
 
 let currentCommand: string;
 

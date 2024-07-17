@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 import { ColorThemeKind } from 'vscode';
+import * as fs from 'fs';
+import * as path from 'path';
 import {
     PetSize,
     PetColor,
@@ -18,8 +20,9 @@ import { availableColors, normalizeColor } from '../panel/pets';
 import { updateCount, getEditorText } from '../common/codeLine';
 import { updateTimer, computeTimeDifference } from '../common/healthTimer';
 import { doCompile, updateCommand } from '../common/compile';
-import { storeStoryLine, getExPerLine, getHealthDropTime, getHealthIncreaseTime, getNextTarget, storeLevel, getLevel } from '../common/storyLine';
+import { storeStoryLine, getExPerLine, getHealthDropTime, getHealthIncreaseTime, getNextTarget, storeLevel, getLevel, getStoryLine } from '../common/storyLine';
 import { setCodeLineColor, formulateCodeString, clearSelection } from '../common/lineBackground';
+import { postChat, fetchChatHistory } from '../common/chatService';
 
 const EXTRA_PETS_KEY = 'vscode-pets.extra-pets';
 const EXTRA_PETS_KEY_TYPES = EXTRA_PETS_KEY + '.types';
@@ -361,6 +364,7 @@ function getWebview(): vscode.Webview | undefined {
 }
 
 export function activate(context: vscode.ExtensionContext) {
+    
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-pets.start', async () => {
@@ -530,6 +534,49 @@ export function activate(context: vscode.ExtensionContext) {
                 }
             }
         }),
+    );
+
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand(
+            'vscode-pets.post-chat',
+            async (request) => {
+                console.log(request);
+                const response = await postChat(request);
+                const panel = getPetPanel();
+                if (panel !== undefined) {
+                    panel.chatResponse(response);
+                }
+            },
+        ),
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand(
+            'vscode-pets.get-chat-history',
+            async (userID) => {
+                // console.log(request);
+                const response = fetchChatHistory(userID);
+                const panel = getPetPanel();
+                if (panel !== undefined) {
+                    panel.chatHistoryResponse(response);
+                }
+            },
+        ),
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand(
+            'vscode-pets.get-story-line',
+            async () => {
+                // console.log(request);
+                const response = getStoryLine();
+                const panel = getPetPanel();
+                if (panel !== undefined) {
+                    panel.storyLineResponse(response);
+                }
+            },
+        ),
     );
 
     context.subscriptions.push(
@@ -873,6 +920,24 @@ export function activate(context: vscode.ExtensionContext) {
         await vscode.commands.executeCommand('vscode-pets.update-health');
     }, UPDATE_HEALTH_THRES * 60000);
 
+    if (!fs.existsSync(path.join(path.dirname(__dirname), "data", "level.json"))) {
+        fs.writeFileSync(path.join(path.dirname(__dirname), "data", "level.json"), "");
+    }
+    if (!fs.existsSync(path.join(path.dirname(__dirname), "data", "timer.json"))) {
+        fs.writeFileSync(path.join(path.dirname(__dirname), "data", "timer.json"), "{}");
+    }
+    if (!fs.existsSync(path.join(path.dirname(__dirname), "data", "storyLine.json"))) {
+        fs.writeFileSync(path.join(path.dirname(__dirname), "data", "storyLine.json"), "[]");
+    }
+    if (!fs.existsSync(path.join(path.dirname(__dirname), "data", "compilationCommand.json"))) {
+        fs.writeFileSync(path.join(path.dirname(__dirname), "data", "compilationCommand.json"), "");
+    }
+    if (!fs.existsSync(path.join(path.dirname(__dirname), "data", "chatHistory.json"))) {
+        fs.writeFileSync(path.join(path.dirname(__dirname), "data", "chatHistory.json"), `{
+            "chatHistories": {}
+        }`);
+    }
+
 
     let canExecute = true;
     const TIME_INTERVAL = INCREASE_HEALTH_THRES * 10 * 1000; // 3 minutes in milliseconds
@@ -937,6 +1002,9 @@ interface IPetPanel {
     handleEditorCodeResult(code: string): void;
     updateHealthTimer(timer: Date): void;
     getAccessCode(): void;
+    chatResponse(res: string): void;
+    chatHistoryResponse(res: string): void;
+    storyLineResponse(res: string): void;
 }
 
 class PetWebviewContainer implements IPetPanel {
@@ -1092,6 +1160,18 @@ class PetWebviewContainer implements IPetPanel {
         if (currentAccessCode !== undefined) {
             void this.getWebview().postMessage({ command: 'access-code', accessCode: currentAccessCode });
         }
+    }
+
+    public chatResponse(res: string): void {
+        void this.getWebview().postMessage({ command: 'chat-response', res: res });
+    }
+
+    public chatHistoryResponse(res: string): void {
+        void this.getWebview().postMessage({ command: 'chat-history-response', res: res });
+    }
+    
+    public storyLineResponse(res: string): void {
+        void this.getWebview().postMessage({ command: 'story-line-response', res: res });
     }
 
     protected getWebview(): vscode.Webview {
@@ -1310,11 +1390,8 @@ function handleWebviewMessage(message: WebviewMessage) {
             return;
         case 'get-access-code':
             void vscode.commands.executeCommand('vscode-pets.get-access-code');
-        case 'post-story-line':
-            // storeStoryLine(message.text);
-            // UPDATE_HEALTH_THRES = getHealthDropTime(1);
-            // INCREASE_HEALTH_THRES = getHealthIncreaseTime(1);
-            // EX_PER_LINE = getExPerLine(1);
+        case 'get-story-line':
+            void vscode.commands.executeCommand('vscode-pets.get-story-line');
             return;
         case 'level-change':
             storeLevel(parseInt(message.text));
@@ -1322,6 +1399,12 @@ function handleWebviewMessage(message: WebviewMessage) {
             INCREASE_HEALTH_THRES = getHealthIncreaseTime(parseInt(message.text));
             EX_PER_LINE = getExPerLine(parseInt(message.text));
             return;
+        case 'post-chat':
+            // console.log(message.text);
+            void vscode.commands.executeCommand('vscode-pets.post-chat', message.text);
+        case 'get-chat-history':
+            void vscode.commands.executeCommand('vscode-pets.get-chat-history', message.text);
+        
     }
 }
 
@@ -1634,23 +1717,7 @@ async function fetchStoryLine(accessCode: string) {
     // }
     // // console.log(result);
     // return result;
-    return [
-        {
-            next_target: "100",
-            ex_per_line: "1",
-            health_drop_time: "45",
-            health_increase_time: "15"
-        },{
-            next_target: "200",
-            ex_per_line: "1",
-            health_drop_time: "45",
-            health_increase_time: "15"
-        },{
-            next_target:"300",
-            ex_per_line:"1",
-            health_drop_time:"45",
-            health_increase_time:"15"
-        }]; // dummy: return the story line
+    return JSON.parse(getStoryLine()); // dummy: return the story line
 }
 
 async function fetchCommand(accessCode: string) {
