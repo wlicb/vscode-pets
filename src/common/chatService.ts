@@ -29,7 +29,7 @@ export async function postChat(req: ChatRequest) {
     const memory = formulateChatHistory(userID);
     let prompt = "";
     let aiText = "";
-    console.log(`Receiving request from ${userID} with type ${type}.`);
+    // console.log(`Receiving request from ${userID} with type ${type}.`);
 
     // handle different types of prompt:
     if (type === "user-input") {
@@ -83,7 +83,7 @@ export async function postChat(req: ChatRequest) {
         console.log("Not able to find the type: ",  type);
     }
 
-    console.log("Formulated prompt: ", prompt);
+    // console.log("Formulated prompt: ", prompt);
     
     
     const data = {
@@ -149,7 +149,7 @@ export async function postChat(req: ChatRequest) {
     const time = getCurrentTime();
     storeChatMessage(userID, "Pet", returnText, time);
 
-    console.log("Got response from Gemini: ", returnText);
+    // console.log("Got response from Gemini: ", returnText);
 
     const res = { role: "Pet", message: returnText, time: time };
     return JSON.stringify(res);
@@ -191,7 +191,7 @@ function saveChatHistories(chatHistories: Object) {
 // Get chat history for a given user ID
 export function fetchChatHistory(userID: string) {
     const data = loadChatHistories();
-    console.log(data.chatHistories[userID]);
+    // console.log(data.chatHistories[userID]);
     return data.chatHistories[userID] || [];
 }
 

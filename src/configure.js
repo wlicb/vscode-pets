@@ -32,12 +32,12 @@ if (!fs.existsSync(path.join(dir, "storyLine.json"))) {
         },{
             "next_target": "200",
             "ex_per_line": "1",
-            "health_drop_time": "45",
+            "health_drop_time": "55",
             "health_increase_time": "15"
         },{
             "next_target":"300",
             "ex_per_line":"1",
-            "health_drop_time":"45",
+            "health_drop_time":"65",
             "health_increase_time":"15"
         }
     ]`);

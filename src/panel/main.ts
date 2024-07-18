@@ -44,8 +44,8 @@ var petCounter: number;
 var currentTimer: Date;
 var userID: string;
 var currentAccessCode: string;
-var currentStoryLine: Array<Level>;
-var coin: number;
+var currentStoryLine: Array<Level> = getStoryLine();
+var coin: number = 0;
 
 const targetTimes: Date[] = [];
 
@@ -135,99 +135,6 @@ function startAnimations(
 
     collision.addEventListener('mouseover', handleMouseOver);
     collision.addEventListener('mouseleave', handleMouseLeave);
-
-    document.addEventListener('keydown', (event: KeyboardEvent) => {
-        if (event.key === 'Enter') {
-            const chatbox = document.getElementById("chatbox");
-            if (chatbox) {
-                stateApi?.postMessage({
-                    text: "",
-                    command: 'get-code-text',
-                });
-                sendMsg(userID);
-            }
-            event.preventDefault();
-        }
-      });
-      
-
-    document.addEventListener('click', function(e) {
-        // Check if the click is outside the pets' elements
-        let clickedOutside = true;
-    
-        allPets.pets.forEach((element) => {
-            if (element.collision === e.target) {
-                clickedOutside = false;
-            }
-        });
-    
-        if (clickedOutside) {
-            const compileButton = document.getElementById("compile-button");
-            const chatButton = document.getElementById("chat-button");
-            // const chatbox = document.getElementById("chatbox");
-            const sendButton = document.getElementById("send-button");
-            const closeChatButton = document.getElementById('close-chatbox-button');
-            const addCodeButton = document.getElementById('add-code-button');
-            const removeCodeButton = document.getElementById('remove-code-button');
-            const storeButton = document.getElementById('store-button');
-            const closeStoreButton = document.getElementById('close-store-button');
-            const throwBallButton = document.getElementById('throw-ball-button');
-            if (compileButton && chatButton && storeButton && throwBallButton) {
-                // console.log(e.target);
-                if (e.target === compileButton) {
-                    stateApi?.postMessage({
-                        text: "",
-                        command: 'run-compile',
-                    });
-                } else if (e.target === addCodeButton) {
-                    stateApi?.postMessage({
-                        text: "",
-                        command: 'add-code',
-                    });
-                } else if (e.target === removeCodeButton) {
-                    stateApi?.postMessage({
-                        text: "",
-                        command: 'remove-code',
-                    });
-                } else if (e.target === sendButton) {
-                    stateApi?.postMessage({
-                        text: "",
-                        command: 'get-code-text',
-                    });
-                    sendMsg(userID);
-                } else if (e.target === closeChatButton) {
-                        hideChatbox();
-                } else if (e.target === chatButton) {
-                    const nameEm = document.getElementById("name");
-                    if (nameEm) {
-                        void showChatbox(nameEm.innerHTML, userID);
-                        setBadge(-1);
-                    }
-                // } else {
-                //     const target = e.target as Node;
-                //     if (chatbox === null || !chatbox.contains(target)) {
-                //         hideChatbox();
-                //     }
-                } else if (e.target === storeButton) {
-                    showStore(targetTimes);
-                } else if (e.target === closeStoreButton) {
-                    hideStore();
-                } else if (e.target === throwBallButton) {
-                    var event = new MessageEvent('message', {
-                        data: { command: 'throw-ball' }
-                    });
-                    window.dispatchEvent(event);
-                    // (throwBallButton as HTMLButtonElement).disabled = true;
-                    allPets.pets.forEach((petEm) => {
-                        void petEm.pet.setExperience(petEm.pet.getExperience() + 5, false, getUserID(), getNewTarget(petEm.pet.getLevel() + 1));
-                        // petEm.pet.play();
-                    });
-                }
-            } else {
-                console.log("cannot find button");
-            }
-        }
-    });
 
     setInterval(() => {
         var updates = allPets.seekNewFriends();
@@ -364,6 +271,102 @@ async function recoverState(
         stateApi = acquireVsCodeApi();
     }
     var state = stateApi?.getState();
+
+    // set up the event listeners
+    document.addEventListener('keydown', (event: KeyboardEvent) => {
+        if (event.key === 'Enter') {
+            const chatbox = document.getElementById("chatbox");
+            if (chatbox) {
+                stateApi?.postMessage({
+                    text: "",
+                    command: 'get-code-text',
+                });
+                sendMsg(userID);
+            }
+            event.preventDefault();
+        }
+      });
+      
+
+    document.addEventListener('click', function(e) {
+        // Check if the click is outside the pets' elements
+        let clickedOutside = true;
+    
+        allPets.pets.forEach((element) => {
+            if (element.collision === e.target) {
+                clickedOutside = false;
+            }
+        });
+    
+        if (clickedOutside) {
+            const compileButton = document.getElementById("compile-button");
+            const chatButton = document.getElementById("chat-button");
+            // const chatbox = document.getElementById("chatbox");
+            const sendButton = document.getElementById("send-button");
+            const closeChatButton = document.getElementById('close-chatbox-button');
+            const addCodeButton = document.getElementById('add-code-button');
+            const removeCodeButton = document.getElementById('remove-code-button');
+            const storeButton = document.getElementById('store-button');
+            const closeStoreButton = document.getElementById('close-store-button');
+            const throwBallButton = document.getElementById('throw-ball-button');
+            if (compileButton && chatButton && storeButton && throwBallButton) {
+                // console.log(e.target);
+                if (e.target === compileButton) {
+                    // console.log("run compile");
+                    stateApi?.postMessage({
+                        text: "",
+                        command: 'run-compile',
+                    });
+                } else if (e.target === addCodeButton) {
+                    stateApi?.postMessage({
+                        text: "",
+                        command: 'add-code',
+                    });
+                } else if (e.target === removeCodeButton) {
+                    stateApi?.postMessage({
+                        text: "",
+                        command: 'remove-code',
+                    });
+                } else if (e.target === sendButton) {
+                    stateApi?.postMessage({
+                        text: "",
+                        command: 'get-code-text',
+                    });
+                    sendMsg(userID);
+                } else if (e.target === closeChatButton) {
+                        hideChatbox();
+                } else if (e.target === chatButton) {
+                    const nameEm = document.getElementById("name");
+                    if (nameEm) {
+                        void showChatbox(nameEm.innerHTML, userID);
+                        setBadge(-1);
+                    }
+                // } else {
+                //     const target = e.target as Node;
+                //     if (chatbox === null || !chatbox.contains(target)) {
+                //         hideChatbox();
+                //     }
+                } else if (e.target === storeButton) {
+                    showStore(targetTimes);
+                } else if (e.target === closeStoreButton) {
+                    hideStore();
+                } else if (e.target === throwBallButton) {
+                    var event = new MessageEvent('message', {
+                        data: { command: 'throw-ball' }
+                    });
+                    window.dispatchEvent(event);
+                    // (throwBallButton as HTMLButtonElement).disabled = true;
+                    allPets.pets.forEach((petEm) => {
+                        void petEm.pet.setExperience(petEm.pet.getExperience() + 5, false, getUserID(), getNewTarget(petEm.pet.getLevel() + 1));
+                        // petEm.pet.play();
+                    });
+                }
+            } else {
+                console.log("cannot find button");
+            }
+        }
+    });
+
     if (!state) {
         petCounter = 1;
         coin = 0;
@@ -373,7 +376,11 @@ async function recoverState(
             coin = 0;
         } else {
             petCounter = state.petCounter ?? 1;
-            coin = state.coin ?? 0;
+            if (state.coin) {
+                coin = state.coin;
+            } else {
+                coin = 0;
+            }
         }
         if (state.healthTimer !== undefined) {
             currentTimer = new Date(state.healthTimer);
@@ -396,10 +403,12 @@ async function recoverState(
                 command: 'get-access-code',
             });
         }
-        if (state.storyLine !== undefined) {
-            currentStoryLine = state.storyLine;
-            UPDATE_HEALTH_THRES = parseInt(currentStoryLine[0].health_drop_time);
-        }
+        // if (state.storyLine !== undefined) {
+        //     currentStoryLine = state.storyLine;
+        //     // UPDATE_HEALTH_THRES = parseInt(currentStoryLine[0].health_drop_time);
+        // } else {
+        //     currentStoryLine = getStoryLine();
+        // }
         if (state.targetTimes !== undefined) {
             for (var i = 0; i < NUM_OF_ELEMENTS; i++) {
                 if (state.targetTimes[i] !== undefined) {
@@ -421,11 +430,6 @@ async function recoverState(
         const now = new Date();
         const differenceInMilliseconds = now.getTime() - currentTimer.getTime();
         const diff = Math.floor(differenceInMilliseconds / (1000 * 60));
-        const healthUpdateValue = -Math.floor(diff / UPDATE_HEALTH_THRES);
-        console.log(healthUpdateValue);
-        // console.log(currentStoryLine);
-        // console.log(state?.storyLine);
-        console.log(UPDATE_HEALTH_THRES);
         try {
             var newPet = addPetToPanel(
                 p.petType ?? PetType.dog,
@@ -439,6 +443,12 @@ async function recoverState(
                 p.petExperience, p.petNextTarget, p.petLevel, p.petHealth,
                 stateApi,
             );
+            UPDATE_HEALTH_THRES = parseInt(currentStoryLine[p.petLevel-1].health_drop_time);
+            const healthUpdateValue = -Math.floor(diff / UPDATE_HEALTH_THRES);
+            console.log(diff);
+            console.log(healthUpdateValue);
+            console.log(UPDATE_HEALTH_THRES);
+            console.log(currentStoryLine);
             newPet.pet.setHealth(newPet.pet.getHealth() + healthUpdateValue, true, userID);
             allPets.push(newPet);
             const currentPet = allPets.pets[0];
@@ -751,7 +761,9 @@ export function petPanelApp(
                     });
                 });
             case 'delete-pet':
+                console.log('delete pet');
                 var pet = allPets.locate(message.name);
+                // console.log(pet);
                 if (pet) {
                     allPets.remove(message.name);
                     saveState(stateApi);
@@ -768,6 +780,7 @@ export function petPanelApp(
                         text: `Could not find pet ${message.name}`,
                     });
                 }
+                console.log(allPets);
                 hideBar();
                 break;
             case 'reset-pet':
@@ -783,36 +796,33 @@ export function petPanelApp(
                 var pets = allPets.pets;
                 var diff = message.diff;
                 var coinUpdate = message.coin;
-                updateCoin(coinUpdate);
-                const prevLevelEx = pets[0].pet.getLevel();
-                pets.forEach((pet) => {
-                    const levelChange = pet.pet.setExperience(pet.pet.getExperience() + diff * UPDATE_EX_RATE, true, userID, getNewTarget(pet.pet.getLevel() + 1));  
-                    if (levelChange > 0) {
-                        stateApi?.postMessage({
-                            command: 'level-change',
-                            text: pet.pet.getLevel().toString()
-                        });
-                    }
-                    updateBar(pet.pet.name, pet.pet.getLevel(), pet.pet.getExperience(), pet.pet.getNextTarget(), pet.pet.getHealth());
-                    const currentLevel = pet.pet.getLevel();
-                    if (currentLevel > prevLevelEx) {
-                        lockAll(pets[0].pet.getLevel());
-                    }
-                });
-                // lockAll(pets[0].pet.getLevel());
-                saveState(stateApi);
+                if (pets.length > 0) {
+                    updateCoin(coinUpdate);
+                    const prevLevelEx = pets[0].pet.getLevel();
+                    pets.forEach((pet) => {
+                        const levelChange = pet.pet.setExperience(pet.pet.getExperience() + diff * UPDATE_EX_RATE, true, userID, getNewTarget(pet.pet.getLevel() + 1));  
+                        if (levelChange > 0) {
+                            stateApi?.postMessage({
+                                command: 'level-change',
+                                text: pet.pet.getLevel().toString()
+                            });
+                        }
+                        updateBar(pet.pet.name, pet.pet.getLevel(), pet.pet.getExperience(), pet.pet.getNextTarget(), pet.pet.getHealth());
+                        const currentLevel = pet.pet.getLevel();
+                        if (currentLevel > prevLevelEx) {
+                            lockAll(pets[0].pet.getLevel());
+                        }
+                    });
+                    // lockAll(pets[0].pet.getLevel());
+                    saveState(stateApi);
+                }
                 break;
             case 'update-health':
                 var pets = allPets.pets;
                 var diff = message.diff;
-                const prevLevelHealth = pets[0].pet.getLevel();
                 pets.forEach((pet) => {
                     pet.pet.setHealth(pet.pet.getHealth() + diff, false, userID);
                     updateBar(pet.pet.name, pet.pet.getLevel(), pet.pet.getExperience(), pet.pet.getNextTarget(), pet.pet.getHealth());
-                    const currentLevel = pet.pet.getLevel();
-                    if (currentLevel > prevLevelHealth) {
-                        lockAll(pets[0].pet.getLevel());
-                    }
                 });
                 saveState(stateApi);
                 //console.log("Updating health");
@@ -821,15 +831,20 @@ export function petPanelApp(
                 var pets = allPets.pets;
                 const result = message.result;
                 const code = message.code;
-                const randomPet = pets[Math.floor(Math.random() * pets.length)];
-                
+                console.log(pets);
                 if (result === "") {
-                    randomPet.pet.onCompilationSuccess(code, userID);
                     allPets.pets.forEach(pet => {
+                        // console.log(allPets.pets);
+                        // console.log(allPets.pets.length);
+                        // console.log(allPets.pets);
+                        // console.log(allPets);
+                        pet.pet.onCompilationSuccess(code, userID);
                         pet.pet.setExperience(pet.pet.getExperience() + 5, false, userID, getNewTarget(pet.pet.getLevel() + 1));
                     });
                 } else {
-                    randomPet.pet.onCompilationError(code, userID, result);
+                    allPets.pets.forEach(pet => {
+                        pet.pet.onCompilationError(code, userID, result);
+                    });
                 }
                 break;
             case 'handle-editor-code':
@@ -857,8 +872,12 @@ export function petPanelApp(
                 });
                 break;
             case 'story-line-response':
-                currentStoryLine = message.storyLine;
-                UPDATE_HEALTH_THRES = parseInt(currentStoryLine[0].health_drop_time);
+                currentStoryLine = message.res;
+                const level = message.level;
+                console.log("res: ", message.res);
+                console.log("level: ",message.level);
+                UPDATE_HEALTH_THRES = parseInt(currentStoryLine[level-1].health_drop_time);
+                break;
             case 'post-chat':
                 stateApi?.postMessage({
                     text: message.request,
@@ -876,6 +895,7 @@ export function petPanelApp(
                 break;
             case 'chat-history-response':
                 handleChatHistory(JSON.stringify(message.res));
+                break;
         }
     });
 
@@ -991,6 +1011,27 @@ async function fetchUserID() {
     
 // }
 
+function getStoryLine() {
+        return [
+        {
+            next_target: "100",
+            ex_per_line: "1",
+            health_drop_time: "45",
+            health_increase_time: "15"
+        },{
+            next_target: "200",
+            ex_per_line: "1",
+            health_drop_time: "55",
+            health_increase_time: "15"
+        },{
+            next_target:"300",
+            ex_per_line:"1",
+            health_drop_time:"65",
+            health_increase_time:"15"
+        }]; // dummy: return story line
+    
+}
+
 export function getNewTarget(level: number): number {
     // console.log(currentStoryLine);
     if (currentStoryLine !== undefined && currentStoryLine[level-1] !== undefined && level <= currentStoryLine.length) {
@@ -1061,3 +1102,4 @@ function generateUserID(length: number) {
     }
     return result;
 }
+

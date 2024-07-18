@@ -66,7 +66,7 @@ export class PetCollection implements IPetCollection {
         this._pets.forEach((pet) => {
             pet.remove();
         });
-        this._pets = [];
+        this._pets = new Array(0);
     }
 
     locate(name: string): PetElement | undefined {
@@ -81,9 +81,7 @@ export class PetCollection implements IPetCollection {
                 pet.remove();
             }
         });
-        this._pets = this._pets.filter((pet) => {
-            return pet.pet.name !== name;
-        });
+        this._pets = [];
     }
 
     seekNewFriends(): string[] {

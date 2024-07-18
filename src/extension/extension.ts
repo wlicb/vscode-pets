@@ -395,28 +395,28 @@ export function activate(context: vscode.ExtensionContext) {
                     ) {
                         await vscode.commands.executeCommand('petsView.focus');
                     } else {
-                        const spec = PetSpecification.fromConfiguration();
-                        PetPanel.createOrShow(
-                            context.extensionUri,
-                            spec.color,
-                            spec.type,
-                            spec.size,
-                            getConfiguredTheme(),
-                            getConfiguredThemeKind(),
-                            getThrowWithMouseConfiguration(),
-                        );
+                        // const spec = PetSpecification.fromConfiguration();
+                        // PetPanel.createOrShow(
+                        //     context.extensionUri,
+                        //     spec.color,
+                        //     spec.type,
+                        //     spec.size,
+                        //     getConfiguredTheme(),
+                        //     getConfiguredThemeKind(),
+                        //     getThrowWithMouseConfiguration(),
+                        // );
 
-                        if (PetPanel.currentPanel) {
-                            var collection = PetSpecification.collectionFromMemento(
-                                context,
-                                getConfiguredSize(),
-                            );
-                            collection.forEach((item) => {
-                                PetPanel.currentPanel?.spawnPet(item);
-                            });
-                            // Store the collection in the memento, incase any of the null values (e.g. name) have been set
-                            await storeCollectionAsMemento(context, collection);
-                        }
+                        // if (PetPanel.currentPanel) {
+                        //     var collection = PetSpecification.collectionFromMemento(
+                        //         context,
+                        //         getConfiguredSize(),
+                        //     );
+                        //     collection.forEach((item) => {
+                        //         PetPanel.currentPanel?.spawnPet(item);
+                        //     });
+                        //     // Store the collection in the memento, incase any of the null values (e.g. name) have been set
+                        //     await storeCollectionAsMemento(context, collection);
+                        // }
                     }
 
                 } else {
@@ -495,6 +495,10 @@ export function activate(context: vscode.ExtensionContext) {
                     handleRemovePetMessage,
                     context,
                 );
+                storeLevel(1);
+                UPDATE_HEALTH_THRES = getHealthDropTime(1);
+                INCREASE_HEALTH_THRES = getHealthIncreaseTime(1);
+                EX_PER_LINE = getExPerLine(1);
             } else {
                 await createPetPlayground(context);
             }
@@ -539,7 +543,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand(
             'vscode-pets.post-chat',
             async (request) => {
-                console.log(request);
+                // console.log(request);
                 const response = await postChat(request);
                 const panel = getPetPanel();
                 if (panel !== undefined) {
@@ -569,9 +573,12 @@ export function activate(context: vscode.ExtensionContext) {
             async () => {
                 // console.log(request);
                 const response = getStoryLine();
+                const level = getLevel();
+                // console.log(response);
                 const panel = getPetPanel();
                 if (panel !== undefined) {
-                    panel.storyLineResponse(response);
+                    console.log("res: ", response, " level: ", level);
+                    panel.storyLineResponse(response, level);
                 }
             },
         ),
@@ -579,6 +586,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-pets.compile', async () => {
+            // console.log("compiling");
             doCompile()?.then(compileResult => {
                 const code = getEditorText();
                 let codeText = "";
@@ -910,13 +918,17 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
 
-    setInterval(async () => {
-        await vscode.commands.executeCommand('vscode-pets.update-experience');
-    }, 500);
+    setTimeout(() => {
+        setInterval(async () => {
+            await vscode.commands.executeCommand('vscode-pets.update-experience');
+        }, 500);
+    }, 1000);
     
-    setInterval(async () => {
-        await vscode.commands.executeCommand('vscode-pets.update-health');
-    }, UPDATE_HEALTH_THRES * 60000);
+    setTimeout(() => {
+        setInterval(async () => {
+            await vscode.commands.executeCommand('vscode-pets.update-health');
+        }, UPDATE_HEALTH_THRES * 60000);
+    }, 1000);
 
 
 
@@ -985,7 +997,7 @@ interface IPetPanel {
     getAccessCode(): void;
     chatResponse(res: string): void;
     chatHistoryResponse(res: string): void;
-    storyLineResponse(res: string): void;
+    storyLineResponse(res: string, level: number): void;
 }
 
 class PetWebviewContainer implements IPetPanel {
@@ -1151,8 +1163,9 @@ class PetWebviewContainer implements IPetPanel {
         void this.getWebview().postMessage({ command: 'chat-history-response', res: res });
     }
     
-    public storyLineResponse(res: string): void {
-        void this.getWebview().postMessage({ command: 'story-line-response', res: res });
+    public storyLineResponse(res: string, level: number): void {
+        // console.log(res);
+        void this.getWebview().postMessage({ command: 'story-line-response', res: res, level: level });
     }
 
     protected getWebview(): vscode.Webview {
