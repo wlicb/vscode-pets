@@ -1,6 +1,7 @@
 export const enum PetColor {
     akita = 'akita',
     null = 'null',
+    husky = 'husky',
 }
 
 export const enum PetType {
