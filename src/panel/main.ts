@@ -453,7 +453,7 @@ async function recoverState(
             allPets.push(newPet);
             const currentPet = allPets.pets[0];
             showBar(currentPet.pet.name, currentPet.pet.getLevel(), currentPet.pet.getExperience(), currentPet.pet.getNextTarget(), currentPet.pet.getHealth());
-            lockAll(currentPet.pet.getLevel());
+            lockAll(currentPet.pet.getLevel(), currentPet.pet.getHealth());
             // console.log(allPets.pets[0]);
             recoveryMap.set(newPet.pet, p);
         } catch (InvalidPetException) {
@@ -733,7 +733,7 @@ export function petPanelApp(
                     allPets.push(
                         newPet
                     );
-                    lockAll(newPet.pet.getLevel());
+                    lockAll(newPet.pet.getLevel(), newPet.pet.getHealth());
                     saveState(stateApi);
                     break;
                 }
@@ -810,7 +810,7 @@ export function petPanelApp(
                         updateBar(pet.pet.name, pet.pet.getLevel(), pet.pet.getExperience(), pet.pet.getNextTarget(), pet.pet.getHealth());
                         const currentLevel = pet.pet.getLevel();
                         if (currentLevel > prevLevelEx) {
-                            lockAll(pets[0].pet.getLevel());
+                            lockAll(pets[0].pet.getLevel(), pets[0].pet.getHealth());
                         }
                     });
                     // lockAll(pets[0].pet.getLevel());
@@ -822,6 +822,7 @@ export function petPanelApp(
                 var diff = message.diff;
                 pets.forEach((pet) => {
                     pet.pet.setHealth(pet.pet.getHealth() + diff, false, userID);
+                    lockAll(pet.pet.getLevel(), pet.pet.getHealth());
                     updateBar(pet.pet.name, pet.pet.getLevel(), pet.pet.getExperience(), pet.pet.getNextTarget(), pet.pet.getHealth());
                 });
                 saveState(stateApi);

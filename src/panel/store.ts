@@ -7,7 +7,8 @@ type Activity = {
     price: number,
     callback: Function,
     level: number,
-    purchaseInterval: number
+    purchaseInterval: number,
+    lockLowHealth: boolean
 };
 
 const activityList: Activity[] = [];
@@ -16,7 +17,8 @@ activityList.push({
     price: 2,
     callback: pet,
     level: 1,
-    purchaseInterval: 2
+    purchaseInterval: 2,
+    lockLowHealth: false
 });
 
 activityList.push({
@@ -24,7 +26,8 @@ activityList.push({
     price: 5,
     callback: feed,
     level: 2,
-    purchaseInterval: 0.5
+    purchaseInterval: 0.5,
+    lockLowHealth: true
 });
 
 activityList.push({
@@ -32,7 +35,8 @@ activityList.push({
     price: 5,
     callback: play,
     level: 3,
-    purchaseInterval: 10
+    purchaseInterval: 10,
+    lockLowHealth: true
 });
 
 activityList.push({
@@ -40,7 +44,8 @@ activityList.push({
     price: 5,
     callback: boost,
     level: 1,
-    purchaseInterval: 30
+    purchaseInterval: 30,
+    lockLowHealth: false
 });
 
 const NUM_OF_ELEMENTS = activityList.length;
@@ -111,11 +116,16 @@ function boost() {
 }
 
 
-function lock(targetLevel: number, currentLevel: number, button: HTMLButtonElement, text: HTMLElement) {
+function lock(targetLevel: number, currentLevel: number, health: number, locKLowHealth: boolean, button: HTMLButtonElement, text: HTMLElement) {
     if (!text.innerHTML.startsWith("⏱️")) {
         if (currentLevel >= targetLevel) {
-            button.disabled = false;
-            text.innerHTML = "Available!";
+            if (health < 10 && locKLowHealth) {
+                button.disabled = true;
+                text.innerHTML = "Health too low!";
+            } else {
+                button.disabled = false;
+                text.innerHTML = "Available!";
+            }
         } else {
             button.disabled = true;
             text.innerHTML = "Available at level " + targetLevel;
@@ -123,12 +133,12 @@ function lock(targetLevel: number, currentLevel: number, button: HTMLButtonEleme
     }
 }
 
-export function lockAll(currentLevel: number) {
+export function lockAll(currentLevel: number, health: number) {
     for (var i = 0; i < NUM_OF_ELEMENTS; i++) {
         const button = document.getElementsByClassName('store-buttons')[i];
         const text = document.getElementsByClassName('store-element-timer')[i];
         if (button && text) {
-            lock(activityList[i].level, currentLevel, button as HTMLButtonElement, text as HTMLElement);
+            lock(activityList[i].level, currentLevel, health, activityList[i].lockLowHealth, button as HTMLButtonElement, text as HTMLElement);
         }
     }
 }
