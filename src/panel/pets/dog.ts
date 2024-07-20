@@ -21,17 +21,17 @@ export class Dog extends BasePetType {
             {
                 state: States.sitIdleM,
                 possibleNextStates: [
-                    States.walkRightL,
-                    States.runRightL,
-                    States.lieL,
+                    States.walkRightM,
+                    States.runRightM,
+                    States.lieM,
                 ],
             },
             {
                 state: States.sitIdleH,
                 possibleNextStates: [
-                    States.walkRightL,
-                    States.runRightL,
-                    States.lieL,
+                    States.walkRightH,
+                    States.runRightH,
+                    States.lieLH,
                 ],
             },
 

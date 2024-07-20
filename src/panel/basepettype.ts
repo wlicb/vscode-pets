@@ -36,8 +36,8 @@ export class InvalidStateError extends Error {
     }
 }
 
-const LOW_LEVEL_CUT_OFF = 3;
-const MID_LEVEL_CUT_OFF = 7;
+const LOW_LEVEL_CUT_OFF = 1;
+const MID_LEVEL_CUT_OFF = 2;
 const LOW_HEALTH_CUT_OFF = 10;
 
 export abstract class BasePetType implements IPetType {
@@ -192,10 +192,11 @@ export abstract class BasePetType implements IPetType {
     }
 
     randomizeSpeed(speed: number): number {
-        const min = speed * 0.7;
-        const max = speed * 1.3;
-        const newSpeed = Math.random() * (max - min) + min;
-        return newSpeed;
+        // const min = speed * 0.9;
+        // const max = speed * 1.1;
+        // const newSpeed = Math.random() * (max - min) + min;
+        // return newSpeed;
+        return speed;
     }
 
     get isMoving(): boolean {
@@ -242,10 +243,7 @@ export abstract class BasePetType implements IPetType {
     }
 
     swipe() {
-        if (this.health <= LOW_HEALTH_CUT_OFF) {
-            return;
-        }
-        if (this.level <= LOW_HEALTH_CUT_OFF) {
+        if (this.level <= LOW_LEVEL_CUT_OFF) {
             if (this.currentStateEnum === States.swipeL) {
                 return;
             }
@@ -464,11 +462,17 @@ export abstract class BasePetType implements IPetType {
         // console.log(typeof(newNextTarget));
         this.nextTarget += newNextTarget;
         if (this.level > MID_LEVEL_CUT_OFF) {
-            this.currentStateEnum = States.sitIdleM;
-            this.currentState = resolveState(this.currentStateEnum, this);
-        } else if (this.level > LOW_LEVEL_CUT_OFF) {
             this.currentStateEnum = States.sitIdleH;
             this.currentState = resolveState(this.currentStateEnum, this);
+            console.log(this.currentState);
+        } else if (this.level > LOW_LEVEL_CUT_OFF) {
+            this.currentStateEnum = States.sitIdleM;
+            this.currentState = resolveState(this.currentStateEnum, this);
+            console.log(this.currentState);
+        } else {
+            this.currentStateEnum = States.sitIdleL;
+            this.currentState = resolveState(this.currentStateEnum, this);
+            console.log(this.currentState);
         }
     }
 

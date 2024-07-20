@@ -454,6 +454,7 @@ async function recoverState(
             const currentPet = allPets.pets[0];
             showBar(currentPet.pet.name, currentPet.pet.getLevel(), currentPet.pet.getExperience(), currentPet.pet.getNextTarget(), currentPet.pet.getHealth());
             lockAll(currentPet.pet.getLevel(), currentPet.pet.getHealth());
+            console.log(currentPet.pet.speed);
             // console.log(allPets.pets[0]);
             recoveryMap.set(newPet.pet, p);
         } catch (InvalidPetException) {
