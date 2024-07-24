@@ -1370,26 +1370,39 @@ class PetWebviewContainer implements IPetPanel {
                         </div>
                         <div id="badge-contents">
                             <div class="badge-element">
-                                <div class="badge-element-title"><b>First blood</b></div>
-                                <img class="badge-image" src="${vscode.Uri.joinPath(basePetUri, 'food.png')}">
-                                <div class="badge-element-description">Successfully compile the code for the first time!</div>
+                                <img class="badge-mask" src="${vscode.Uri.joinPath(basePetUri, 'q_mark.png')}">
+                                <div class="badge-background">
+                                    <div class="badge-element-title"><b>First blood</b></div>
+                                    <img class="badge-image" src="${vscode.Uri.joinPath(basePetUri, 'food.png')}">
+                                    <div class="badge-element-description">Successfully compile the code for the first time!</div>
+                                </div>
                             </div>
                             <div class="badge-element">
-                                <div class="badge-element-title"><b>1 Hour</b></div>
-                                <img class="badge-image" src="${vscode.Uri.joinPath(basePetUri, 'food.png')}">
-                                <div class="badge-element-description">Coding for one hour!</div>
+                                <img class="badge-mask" src="${vscode.Uri.joinPath(basePetUri, 'q_mark.png')}">
+                                <div class="badge-background">
+                                    <div class="badge-element-title"><b>1 Hour</b></div>
+                                    <img class="badge-image" src="${vscode.Uri.joinPath(basePetUri, 'food.png')}">
+                                    <div class="badge-element-description">Coding for one hour!</div>
+                                </div>
                             </div>
                             <div class="badge-element">
-                                <div class="badge-element-title"><b>100 Lines of Code</b></div>
-                                <img class="badge-image" src="${vscode.Uri.joinPath(basePetUri, 'food.png')}">
-                                <div class="badge-element-description">Made 100 lines of code!</div>
+                                <img class="badge-mask" src="${vscode.Uri.joinPath(basePetUri, 'q_mark.png')}">
+                                <div class="badge-background">
+                                    <div class="badge-element-title"><b>100 Lines of Code</b></div>
+                                    <img class="badge-image" src="${vscode.Uri.joinPath(basePetUri, 'food.png')}">
+                                    <div class="badge-element-description">Made 100 lines of code!</div>
+                                </div>
                             </div>
                             <div class="badge-element">
-                                <div class="badge-element-title"><b>5 Days</b></div>
-                                <img class="badge-image" src="${vscode.Uri.joinPath(basePetUri, 'food.png')}">
-                                <div class="badge-element-description">Practice programming for 5 days!</div>
+                                <img class="badge-mask" src="${vscode.Uri.joinPath(basePetUri, 'q_mark.png')}">
+                                <div class="badge-background">
+                                    <div class="badge-element-title"><b>5 Days</b></div>
+                                    <img class="badge-image" src="${vscode.Uri.joinPath(basePetUri, 'food.png')}">
+                                    <div class="badge-element-description">Practice programming for 5 days!</div>
+                                </div>
                             </div>
                         </div>
+
                     </div>
                     <img id="cursor" src="${vscode.Uri.joinPath(basePetUri, 'food.png')}" alt="Cursor Image">
                     <div id="purchase-message">Purchased!</div>

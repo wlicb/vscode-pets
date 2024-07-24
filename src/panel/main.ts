@@ -22,7 +22,7 @@ import { showBar, hideBar, updateBar } from './bar';
 import { hideChatbox, showChatbox, setBadge, sendMsg, handleChatResponse, handleChatHistory } from './chat';
 import { Level } from './states';
 import { showStore, hideStore, purchase, updateTimer, computeTargetTime, lockAll } from './store';
-import { hideBadge, showBadge } from './badge';
+import { hideBadge, showBadge, unlock } from './badge';
 // import { purchase } from './store';
 // import { computeTimeDifference } from '../common/healthTimer';
 
@@ -323,6 +323,7 @@ async function recoverState(
                         text: "",
                         command: 'run-compile',
                     });
+                    unlock(2);
                 } else if (e.target === addCodeButton) {
                     stateApi?.postMessage({
                         text: "",
