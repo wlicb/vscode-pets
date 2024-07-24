@@ -1,8 +1,8 @@
 {
-    "name": "vscode-pets",
-    "displayName": "vscode-pets",
-    "description": "Pets for your VS Code",
-    "version": "2.0.1",
+    "name": "vscode-pets-for-courses-demo",
+    "displayName": "vscode-pets-for-courses-demo",
+    "description": "Create a pet to accompany you as you learn programming",
+    "version": "2.1.0",
     "engines": {
         "vscode": "^1.89.1"
     },
@@ -13,7 +13,7 @@
     },
     "homepage": "https://tonybaloney.github.io/vscode-pets",
     "bugs": "https://github.com/tonybaloney/vscode-pets/issues",
-    "publisher": "tonybaloney",
+    "publisher": "wli273088",
     "categories": [
         "Other"
     ],

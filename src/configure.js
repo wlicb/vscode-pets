@@ -6,19 +6,23 @@ if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
 }
 
-if (!fs.existsSync(path.join(dir, "level.json"))) {
-    console.log("writing level.json");
-    fs.writeFileSync(path.join(dir, "level.json"), "1");
-} else {
-    console.log("level.json exists");
-}
+// if (!fs.existsSync(path.join(dir, "level.json"))) {
+//     console.log("writing level.json");
+//     fs.writeFileSync(path.join(dir, "level.json"), "1");
+// } else {
+//     console.log("level.json exists");
+// }
+console.log("writing level.json");
+fs.writeFileSync(path.join(dir, "level.json"), "1");
 
-if (!fs.existsSync(path.join(dir, "timer.json"))) {
-    console.log("writing timer.json");
-    fs.writeFileSync(path.join(dir, "timer.json"), "{}");
-} else {
-    console.log("timer.json exists");
-}
+// if (!fs.existsSync(path.join(dir, "timer.json"))) {
+//     console.log("writing timer.json");
+//     fs.writeFileSync(path.join(dir, "timer.json"), "{}");
+// } else {
+//     console.log("timer.json exists");
+// }
+console.log("writing timer.json");
+fs.writeFileSync(path.join(dir, "timer.json"), "{}");
 
 if (!fs.existsSync(path.join(dir, "storyLine.json"))) {
     console.log("writing storyLine.json");
@@ -52,11 +56,16 @@ if (!fs.existsSync(path.join(dir, "compilationCommand.json"))) {
     console.log("compilationCommand.json exists");
 }
 
-if (!fs.existsSync(path.join(dir, "chatHistory.json"))) {
-    console.log("writing chatHistory.json");
-    fs.writeFileSync(path.join(dir, "chatHistory.json"), `{
-        "chatHistories": {}
-    }`);
-} else {
-    console.log("chatHistory.json exists");
-}
+// if (!fs.existsSync(path.join(dir, "chatHistory.json"))) {
+//     console.log("writing chatHistory.json");
+//     fs.writeFileSync(path.join(dir, "chatHistory.json"), `{
+//         "chatHistories": {}
+//     }`);
+// } else {
+//     console.log("chatHistory.json exists");
+// }
+
+console.log("writing chatHistory.json");
+fs.writeFileSync(path.join(dir, "chatHistory.json"), `{
+    "chatHistories": {}
+}`);

@@ -918,6 +918,8 @@ export function petPanelApp(
                 stateApi,
             ),
         );
+        const pet = allPets.pets[0];
+        showBar(pet.pet.name, pet.pet.getLevel(), pet.pet.getExperience(), pet.pet.getNextTarget(), pet.pet.getHealth());
         saveState(stateApi);
     } else {
         console.log('Recovering state - ', state);

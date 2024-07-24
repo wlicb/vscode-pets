@@ -342,8 +342,10 @@ function getPetPanel(): IPetPanel | undefined {
         getConfigurationPosition() === ExtPosition.explorer &&
         webviewViewProvider
     ) {
+        // console.log("case 1");
         return webviewViewProvider;
     } else if (PetPanel.currentPanel) {
+        // console.log("case 2");
         return PetPanel.currentPanel;
     } else {
         return undefined;
@@ -508,10 +510,13 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-pets.update-experience', async () => {
             const diff = updateCount();
+            // console.log('clear to update experience');
             const panel = getPetPanel();
             if (panel !== undefined) {
+                // console.log("updating experience");
                 panel.updateExperience(diff / EX_PER_LINE);
             }
+            
         }),
     );
 
@@ -917,18 +922,24 @@ export function activate(context: vscode.ExtensionContext) {
         });
     }
 
-
-    setTimeout(() => {
+    // setTimeout(() => {
         setInterval(async () => {
-            await vscode.commands.executeCommand('vscode-pets.update-experience');
+            try {
+                await vscode.commands.executeCommand('vscode-pets.update-experience');
+            } catch(err) {
+                // console.log(err);
+            }
         }, 500);
-    }, 1000);
+    // }, 1000 * 30);
     
-    setTimeout(() => {
-        setInterval(async () => {
+
+    setInterval(async () => {
+        try {
             await vscode.commands.executeCommand('vscode-pets.update-health');
-        }, UPDATE_HEALTH_THRES * 60000);
-    }, 1000);
+        } catch(err) {
+            // console.log(err);
+        }
+    }, UPDATE_HEALTH_THRES * 60000);
 
 
 
@@ -1128,12 +1139,12 @@ class PetWebviewContainer implements IPetPanel {
             coin = 1;
             coinCounter = 0;
         }
-        void this.getWebview().postMessage({ command: 'update-experience', diff: difference, coin: coin });
+        void this.getWebview()?.postMessage({ command: 'update-experience', diff: difference, coin: coin });
     }
 
     public updateHealth(difference: number): void {
         console.log("updating health with interval: ", UPDATE_HEALTH_THRES, INCREASE_HEALTH_THRES);
-        void this.getWebview().postMessage({ command: 'update-health', diff: difference });
+        void this.getWebview()?.postMessage({ command: 'update-health', diff: difference });
     }
 
     public updateHealthTimer(timer: Date): void {
