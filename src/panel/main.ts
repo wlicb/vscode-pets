@@ -40,6 +40,7 @@ declare global {
 let UPDATE_HEALTH_THRES: number;
 let UPDATE_EX_RATE = 1;
 const NUM_OF_ELEMENTS = 4;
+const NUM_OF_BADGES = 4;
 export var allPets: IPetCollection = new PetCollection();
 var petCounter: number;
 var currentTimer: Date;
@@ -49,6 +50,7 @@ var currentStoryLine: Array<Level> = getStoryLine();
 var coin: number = 0;
 
 const targetTimes: Date[] = [];
+const badges: boolean[] = [];
 
 function calculateBallRadius(size: PetSize): number {
     if (size === PetSize.nano) {
@@ -259,6 +261,7 @@ export function saveState(stateApi?: VscodeStateApi) {
     state.storyLine = currentStoryLine;
     state.coin = coin;
     state.targetTimes = targetTimes;
+    state.badges = badges;
     stateApi?.setState(state);
 }
 
@@ -364,7 +367,7 @@ async function recoverState(
                         // petEm.pet.play();
                     });
                 } else if (e.target === badgeButton) {
-                    showBadge();
+                    showBadge(badges);
                 } else if (e.target === closeBadgeButton) {
                     hideBadge();
                 }
@@ -422,6 +425,15 @@ async function recoverState(
                     targetTimes.push(state.targetTimes[i]);
                 } else {
                     targetTimes.push(new Date());
+                }
+            }
+        }
+        if (state.badges !== undefined) {
+            for (var i = 0; i < NUM_OF_BADGES; i++) {
+                if (state.badges[i] !== undefined) {
+                    badges.push(state.badges[i]);
+                } else {
+                    badges.push(false);
                 }
             }
         }
@@ -1114,3 +1126,6 @@ function generateUserID(length: number) {
     return result;
 }
 
+export function unlockBadge(idx: number) {
+    badges[idx] = true;
+}
