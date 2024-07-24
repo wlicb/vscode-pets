@@ -22,6 +22,7 @@ import { showBar, hideBar, updateBar } from './bar';
 import { hideChatbox, showChatbox, setBadge, sendMsg, handleChatResponse, handleChatHistory } from './chat';
 import { Level } from './states';
 import { showStore, hideStore, purchase, updateTimer, computeTargetTime, lockAll } from './store';
+import { hideBadge, showBadge } from './badge';
 // import { purchase } from './store';
 // import { computeTimeDifference } from '../common/healthTimer';
 
@@ -309,7 +310,9 @@ async function recoverState(
             const storeButton = document.getElementById('store-button');
             const closeStoreButton = document.getElementById('close-store-button');
             const throwBallButton = document.getElementById('throw-ball-button');
-            if (compileButton && chatButton && storeButton && throwBallButton) {
+            const badgeButton = document.getElementById('badge-button');
+            const closeBadgeButton = document.getElementById('close-badge-button');
+            if (compileButton && chatButton && storeButton && throwBallButton && badgeButton && closeBadgeButton) {
                 // console.log(e.target);
                 if (e.target === compileButton) {
                     // console.log("run compile");
@@ -360,6 +363,10 @@ async function recoverState(
                         void petEm.pet.setExperience(petEm.pet.getExperience() + 5, false, getUserID(), getNewTarget(petEm.pet.getLevel() + 1));
                         // petEm.pet.play();
                     });
+                } else if (e.target === badgeButton) {
+                    showBadge();
+                } else if (e.target === closeBadgeButton) {
+                    hideBadge();
                 }
             } else {
                 console.log("cannot find button");

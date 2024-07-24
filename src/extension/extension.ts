@@ -1274,6 +1274,7 @@ class PetWebviewContainer implements IPetPanel {
                         <div id="coin-container">💰</div>
                         <div id="coin-counter">0</div>
                         <button id="store-button" class="small-button">🏬</button>
+                        <button id="badge-button" class="small-button">🏆</button>
                         <button id="throw-ball-button" class="small-button" disabled>🎾</button>
                         <button id="add-code-button" class="small-button">➕</button>
                         <button id="remove-code-button" class="small-button">➖</button>
@@ -1320,7 +1321,7 @@ class PetWebviewContainer implements IPetPanel {
                     </div>	
                     <div id="store">
                         <div id="store-header">
-                            <div id="store-title">Find some tools!</div>
+                            <div id="store-title">Store</div>
                             <button id="close-store-button">❌</button>
                         </div>
                         <div id="store-contents">
@@ -1359,6 +1360,34 @@ class PetWebviewContainer implements IPetPanel {
                                     <div class="store-element-timer">Available!</div>
                                     <button data-index="3" class="store-buttons">🛍️</button>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="badge">
+                        <div id="badge-header">
+                            <div id="badge-title">Badges</div>
+                            <button id="close-badge-button">❌</button>
+                        </div>
+                        <div id="badge-contents">
+                            <div class="badge-element">
+                                <div class="badge-element-title"><b>First blood</b></div>
+                                <img class="badge-image" src="${vscode.Uri.joinPath(basePetUri, 'food.png')}">
+                                <div class="badge-element-description">Successfully compile the code for the first time!</div>
+                            </div>
+                            <div class="badge-element">
+                                <div class="badge-element-title"><b>1 Hour</b></div>
+                                <img class="badge-image" src="${vscode.Uri.joinPath(basePetUri, 'food.png')}">
+                                <div class="badge-element-description">Coding for one hour!</div>
+                            </div>
+                            <div class="badge-element">
+                                <div class="badge-element-title"><b>100 Lines of Code</b></div>
+                                <img class="badge-image" src="${vscode.Uri.joinPath(basePetUri, 'food.png')}">
+                                <div class="badge-element-description">Made 100 lines of code!</div>
+                            </div>
+                            <div class="badge-element">
+                                <div class="badge-element-title"><b>5 Days</b></div>
+                                <img class="badge-image" src="${vscode.Uri.joinPath(basePetUri, 'food.png')}">
+                                <div class="badge-element-description">Practice programming for 5 days!</div>
                             </div>
                         </div>
                     </div>
