@@ -108,6 +108,8 @@ export class PetPanelState {
     coin: number | undefined;
     targetTimes: Date[] | undefined;
     badges: boolean[] | undefined;
+    numberOfSuccessCompilation: number | undefined;
+    numberOfLinesOfCode: number | undefined;
 }
 
 export enum HorizontalDirection {

@@ -514,7 +514,7 @@ export function activate(context: vscode.ExtensionContext) {
             const panel = getPetPanel();
             if (panel !== undefined) {
                 // console.log("updating experience");
-                panel.updateExperience(diff / EX_PER_LINE);
+                panel.updateExperience(diff);
             }
             
         }),
@@ -1132,14 +1132,15 @@ class PetWebviewContainer implements IPetPanel {
         });
     }
 
-    public updateExperience(difference: number) {
+    public updateExperience(numCode: number) {
+        const difference = numCode / EX_PER_LINE;
         let coin = 0;
         coinCounter += difference;
         if (coinCounter >= EX_FOR_ONE_COIN) {
             coin = 1;
             coinCounter = 0;
         }
-        void this.getWebview()?.postMessage({ command: 'update-experience', diff: difference, coin: coin });
+        void this.getWebview()?.postMessage({ command: 'update-experience', diff: difference, coin: coin, numCode: numCode });
     }
 
     public updateHealth(difference: number): void {
@@ -1274,7 +1275,10 @@ class PetWebviewContainer implements IPetPanel {
                         <div id="coin-container">💰</div>
                         <div id="coin-counter">0</div>
                         <button id="store-button" class="small-button">🏬</button>
-                        <button id="badge-button" class="small-button">🏆</button>
+                        <div id="badge-button-container">
+                            <button id="badge-button" class="small-button">🏆</button>
+                            <span id="achievement-badge">0</span>
+                        </div>
                         <button id="throw-ball-button" class="small-button" disabled>🎾</button>
                         <button id="add-code-button" class="small-button">➕</button>
                         <button id="remove-code-button" class="small-button">➖</button>

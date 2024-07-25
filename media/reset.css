@@ -24,6 +24,10 @@ ul {
 	font-weight: normal;
 }
 
+body {
+  min-width: 2000px;
+}
+
 img {
 	max-width: 100%;
 	height: auto;
@@ -48,8 +52,8 @@ button {
 
 .small-button {
   width: 30px;
-  height: 30px;
-  
+  height: 30px; 
+  position: relative;
 }
 
 #compile-button {
@@ -71,10 +75,10 @@ button[disabled] {
     pointer-events: none;
 }
 
-#notification-badge {
-  position: absolute;
-  top: -5px;
-  right: -5px;
+#notification-badge, #achievement-badge {
+  position: relative;
+  top: -35px;
+  right: -20px;
   background: red;
   color: white;
   border-radius: 50%;
@@ -82,7 +86,7 @@ button[disabled] {
   font-size: 12px;
   width: 20px;
   height: 20px;
-  display: none; /* flex */
+  display: none;
   justify-content: center;
   align-items: center;
 }

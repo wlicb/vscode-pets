@@ -48,6 +48,8 @@ var userID: string;
 var currentAccessCode: string;
 var currentStoryLine: Array<Level> = getStoryLine();
 var coin: number = 0;
+var numberOfLinesOfCode = 0;
+var numberOfSuccessCompilation = 0;
 
 const targetTimes: Date[] = [];
 const badges: boolean[] = [];
@@ -262,6 +264,8 @@ export function saveState(stateApi?: VscodeStateApi) {
     state.coin = coin;
     state.targetTimes = targetTimes;
     state.badges = badges;
+    state.numberOfLinesOfCode = numberOfLinesOfCode;
+    state.numberOfSuccessCompilation = numberOfSuccessCompilation;
     stateApi?.setState(state);
 }
 
@@ -323,7 +327,6 @@ async function recoverState(
                         text: "",
                         command: 'run-compile',
                     });
-                    unlock(2);
                 } else if (e.target === addCodeButton) {
                     stateApi?.postMessage({
                         text: "",
@@ -433,12 +436,18 @@ async function recoverState(
             for (var i = 0; i < NUM_OF_BADGES; i++) {
                 if (state.badges[i] !== undefined) {
                     badges.push(state.badges[i]);
+                    // badges.push(false); // just for debug
                 } else {
                     badges.push(false);
                 }
             }
         }
-
+        if (state.numberOfSuccessCompilation !== undefined) {
+            numberOfSuccessCompilation = state.numberOfSuccessCompilation;
+        }
+        if (state.numberOfLinesOfCode !== undefined) {
+            numberOfLinesOfCode = state.numberOfLinesOfCode;
+        }
     }
     showCoinCounter();
     var recoveryMap: Map<IPetType, PetElementState> = new Map();
@@ -817,6 +826,11 @@ export function petPanelApp(
                 var pets = allPets.pets;
                 var diff = message.diff;
                 var coinUpdate = message.coin;
+                var numCode = message.numCode;
+                numberOfLinesOfCode += numCode;
+                if (numberOfLinesOfCode >= 100) {
+                    unlock(2);
+                }
                 if (pets.length > 0) {
                     updateCoin(coinUpdate);
                     const prevLevelEx = pets[0].pet.getLevel();
@@ -861,6 +875,10 @@ export function petPanelApp(
                         // console.log(allPets.pets);
                         // console.log(allPets);
                         pet.pet.onCompilationSuccess(code, userID);
+                        numberOfSuccessCompilation += 1;
+                        if (numberOfSuccessCompilation >= 1) {
+                            unlock(0);
+                        }
                         pet.pet.setExperience(pet.pet.getExperience() + 5, false, userID, getNewTarget(pet.pet.getLevel() + 1));
                     });
                 } else {
@@ -940,6 +958,106 @@ export function petPanelApp(
         );
         const pet = allPets.pets[0];
         showBar(pet.pet.name, pet.pet.getLevel(), pet.pet.getExperience(), pet.pet.getNextTarget(), pet.pet.getHealth());
+            // set up the event listeners
+    document.addEventListener('keydown', (event: KeyboardEvent) => {
+        if (event.key === 'Enter') {
+            const chatbox = document.getElementById("chatbox");
+            if (chatbox) {
+                stateApi?.postMessage({
+                    text: "",
+                    command: 'get-code-text',
+                });
+                sendMsg(userID);
+            }
+            event.preventDefault();
+        }
+      });
+      
+
+    document.addEventListener('click', function(e) {
+        // Check if the click is outside the pets' elements
+        let clickedOutside = true;
+    
+        allPets.pets.forEach((element) => {
+            if (element.collision === e.target) {
+                clickedOutside = false;
+            }
+        });
+    
+        if (clickedOutside) {
+            const compileButton = document.getElementById("compile-button");
+            const chatButton = document.getElementById("chat-button");
+            // const chatbox = document.getElementById("chatbox");
+            const sendButton = document.getElementById("send-button");
+            const closeChatButton = document.getElementById('close-chatbox-button');
+            const addCodeButton = document.getElementById('add-code-button');
+            const removeCodeButton = document.getElementById('remove-code-button');
+            const storeButton = document.getElementById('store-button');
+            const closeStoreButton = document.getElementById('close-store-button');
+            const throwBallButton = document.getElementById('throw-ball-button');
+            const badgeButton = document.getElementById('badge-button');
+            const closeBadgeButton = document.getElementById('close-badge-button');
+            if (compileButton && chatButton && storeButton && throwBallButton && badgeButton && closeBadgeButton) {
+                // console.log(e.target);
+                if (e.target === compileButton) {
+                    // console.log("run compile");
+                    stateApi?.postMessage({
+                        text: "",
+                        command: 'run-compile',
+                    });
+                } else if (e.target === addCodeButton) {
+                    stateApi?.postMessage({
+                        text: "",
+                        command: 'add-code',
+                    });
+                } else if (e.target === removeCodeButton) {
+                    stateApi?.postMessage({
+                        text: "",
+                        command: 'remove-code',
+                    });
+                } else if (e.target === sendButton) {
+                    stateApi?.postMessage({
+                        text: "",
+                        command: 'get-code-text',
+                    });
+                    sendMsg(userID);
+                } else if (e.target === closeChatButton) {
+                        hideChatbox();
+                } else if (e.target === chatButton) {
+                    const nameEm = document.getElementById("name");
+                    if (nameEm) {
+                        void showChatbox(nameEm.innerHTML, userID);
+                        setBadge(-1);
+                    }
+                // } else {
+                //     const target = e.target as Node;
+                //     if (chatbox === null || !chatbox.contains(target)) {
+                //         hideChatbox();
+                //     }
+                } else if (e.target === storeButton) {
+                    showStore(targetTimes);
+                } else if (e.target === closeStoreButton) {
+                    hideStore();
+                } else if (e.target === throwBallButton) {
+                    var event = new MessageEvent('message', {
+                        data: { command: 'throw-ball' }
+                    });
+                    window.dispatchEvent(event);
+                    // (throwBallButton as HTMLButtonElement).disabled = true;
+                    allPets.pets.forEach((petEm) => {
+                        void petEm.pet.setExperience(petEm.pet.getExperience() + 5, false, getUserID(), getNewTarget(petEm.pet.getLevel() + 1));
+                        // petEm.pet.play();
+                    });
+                } else if (e.target === badgeButton) {
+                    showBadge(badges);
+                } else if (e.target === closeBadgeButton) {
+                    hideBadge();
+                }
+            } else {
+                console.log("cannot find button");
+            }
+        }
+    });
         saveState(stateApi);
     } else {
         console.log('Recovering state - ', state);
@@ -1129,4 +1247,8 @@ function generateUserID(length: number) {
 
 export function unlockBadge(idx: number) {
     badges[idx] = true;
+}
+
+export function getBadgeStatus(idx: number) {
+    return badges[idx];
 }
