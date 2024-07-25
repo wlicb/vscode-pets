@@ -53,6 +53,7 @@ var numberOfSuccessCompilation = 0;
 
 const targetTimes: Date[] = [];
 const badges: boolean[] = [];
+const activeDays: string[] = [];
 
 function calculateBallRadius(size: PetSize): number {
     if (size === PetSize.nano) {
@@ -266,6 +267,7 @@ export function saveState(stateApi?: VscodeStateApi) {
     state.badges = badges;
     state.numberOfLinesOfCode = numberOfLinesOfCode;
     state.numberOfSuccessCompilation = numberOfSuccessCompilation;
+    state.activeDays = activeDays;
     stateApi?.setState(state);
 }
 
@@ -442,6 +444,13 @@ async function recoverState(
                 }
             }
         }
+
+        if (state.activeDays !== undefined) {
+            state.activeDays.forEach(element => {
+                activeDays.push(element);
+            });
+        }
+
         if (state.numberOfSuccessCompilation !== undefined) {
             numberOfSuccessCompilation = state.numberOfSuccessCompilation;
         }
@@ -1063,6 +1072,18 @@ export function petPanelApp(
         console.log('Recovering state - ', state);
         void recoverState(basePetUri, petSize, floor, stateApi);
     }
+
+    setTimeout(() => {
+        unlock(2);
+    }, 60 * 60 * 1000);
+    const now = new Date();
+    if (!activeDays.includes(now.toDateString())) {
+        activeDays.push(now.toDateString());
+        if (activeDays.length >= 3) {
+            unlock(3);
+        }
+    }
+    console.log(activeDays);
 
     
     initCanvas();

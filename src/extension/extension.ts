@@ -1400,9 +1400,9 @@ class PetWebviewContainer implements IPetPanel {
                             <div class="badge-element">
                                 <img class="badge-mask" src="${vscode.Uri.joinPath(basePetUri, 'q_mark.png')}">
                                 <div class="badge-background">
-                                    <div class="badge-element-title"><b>5 Days</b></div>
+                                    <div class="badge-element-title"><b>3 Days</b></div>
                                     <img class="badge-image" src="${vscode.Uri.joinPath(basePetUri, 'food.png')}">
-                                    <div class="badge-element-description">Practice programming for 5 days!</div>
+                                    <div class="badge-element-description">Practice programming for 3 days!</div>
                                 </div>
                             </div>
                         </div>

@@ -110,6 +110,7 @@ export class PetPanelState {
     badges: boolean[] | undefined;
     numberOfSuccessCompilation: number | undefined;
     numberOfLinesOfCode: number | undefined;
+    activeDays: string[] | undefined;
 }
 
 export enum HorizontalDirection {
