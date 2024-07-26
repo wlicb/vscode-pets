@@ -1074,7 +1074,8 @@ export function petPanelApp(
     }
 
     setTimeout(() => {
-        unlock(2);
+        unlock(1);
+        console.log("one hour unlocked");
     }, 60 * 60 * 1000);
     const now = new Date();
     if (!activeDays.includes(now.toDateString())) {
