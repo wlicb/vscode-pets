@@ -1378,7 +1378,7 @@ class PetWebviewContainer implements IPetPanel {
                                 <img class="badge-mask" src="${vscode.Uri.joinPath(basePetUri, 'q_mark.png')}">
                                 <div class="badge-background">
                                     <div class="badge-element-title"><b>First blood</b></div>
-                                    <img class="badge-image" src="${vscode.Uri.joinPath(basePetUri, 'food.png')}">
+                                    <img class="badge-image" src="${vscode.Uri.joinPath(basePetUri, 'badge1.png')}">
                                     <div class="badge-element-description">Successfully compile the code for the first time!</div>
                                 </div>
                             </div>
@@ -1386,7 +1386,7 @@ class PetWebviewContainer implements IPetPanel {
                                 <img class="badge-mask" src="${vscode.Uri.joinPath(basePetUri, 'q_mark.png')}">
                                 <div class="badge-background">
                                     <div class="badge-element-title"><b>1 Hour</b></div>
-                                    <img class="badge-image" src="${vscode.Uri.joinPath(basePetUri, 'food.png')}">
+                                    <img class="badge-image" src="${vscode.Uri.joinPath(basePetUri, 'badge2.png')}">
                                     <div class="badge-element-description">Coding for one hour!</div>
                                 </div>
                             </div>
@@ -1394,7 +1394,7 @@ class PetWebviewContainer implements IPetPanel {
                                 <img class="badge-mask" src="${vscode.Uri.joinPath(basePetUri, 'q_mark.png')}">
                                 <div class="badge-background">
                                     <div class="badge-element-title"><b>100 Lines of Code</b></div>
-                                    <img class="badge-image" src="${vscode.Uri.joinPath(basePetUri, 'food.png')}">
+                                    <img class="badge-image" src="${vscode.Uri.joinPath(basePetUri, 'badge3.png')}">
                                     <div class="badge-element-description">Made 100 lines of code!</div>
                                 </div>
                             </div>
@@ -1402,7 +1402,7 @@ class PetWebviewContainer implements IPetPanel {
                                 <img class="badge-mask" src="${vscode.Uri.joinPath(basePetUri, 'q_mark.png')}">
                                 <div class="badge-background">
                                     <div class="badge-element-title"><b>3 Days</b></div>
-                                    <img class="badge-image" src="${vscode.Uri.joinPath(basePetUri, 'food.png')}">
+                                    <img class="badge-image" src="${vscode.Uri.joinPath(basePetUri, 'badge4.png')}">
                                     <div class="badge-element-description">Practice programming for 3 days!</div>
                                 </div>
                             </div>
