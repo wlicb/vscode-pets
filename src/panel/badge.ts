@@ -1,10 +1,10 @@
-import { getBadgeStatus, unlockBadge } from "./main";
+import { getBadgeStatus, getNumberOfBages, unlockBadge } from "./main";
 
 export function showBadge(badges: boolean[]) {
     console.log(badges);
     const badge = document.getElementById("badge");
     if (badge) {
-        badge.style.display = "block";
+
         setNotificationBadge(-1);
         for (var i = 0; i < badges.length; i++) {
             const foreground = document.getElementsByClassName("badge-mask")[i] as HTMLElement;
@@ -17,6 +17,11 @@ export function showBadge(badges: boolean[]) {
                 }
             }
         }
+        const countElement = document.getElementById("badge-count-message");
+        if (countElement) {
+            countElement.innerHTML = updateCountMessage();
+        }
+        badge.style.display = "block";
         // console.log(badges);
         
     }
@@ -43,7 +48,10 @@ export function unlock(idx: number) {
         }
     }
     setNotificationBadge(1);
-    
+    const countElement = document.getElementById("badge-count-message");
+    if (countElement) {
+        countElement.innerHTML = updateCountMessage();
+    }
 }
 
 function setNotificationBadge(val: number) {
@@ -71,4 +79,20 @@ function setNotificationBadge(val: number) {
             }
         }
     }
+}
+
+function countBadges(totalNumber: number) {
+    let count = 0;
+    for (var i = 0; i < totalNumber; i++) {
+        if (getBadgeStatus(i)) {
+            count += 1;
+        }
+    }
+    return count;
+}
+
+function updateCountMessage() {
+    const total = getNumberOfBages();
+    const count = countBadges(total);
+    return `Earned: ${count}/${total}`;
 }

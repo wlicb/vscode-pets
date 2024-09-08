@@ -1274,3 +1274,7 @@ export function unlockBadge(idx: number) {
 export function getBadgeStatus(idx: number) {
     return badges[idx];
 }
+
+export function getNumberOfBages() {
+    return NUM_OF_BADGES;
+}

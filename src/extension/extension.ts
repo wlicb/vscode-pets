@@ -1372,6 +1372,7 @@ class PetWebviewContainer implements IPetPanel {
                             <div id="badge-title">Badges</div>
                             <button id="close-badge-button">❌</button>
                         </div>
+                        <div id="badge-count-message">Earned: 0/0</div>
                         <div id="badge-contents">
                             <div class="badge-element">
                                 <img class="badge-mask" src="${vscode.Uri.joinPath(basePetUri, 'q_mark.png')}">
